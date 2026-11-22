@@ -133,3 +133,93 @@ git 版本机制。
 5. creb/cxc/bsaylor 去留（"修而不删"：须用户决策）
 6. 上游 graph~/spectrograph~/display 在 0.57 上能否跑（决定桩与 widget
    echo 的去留）
+
+## §7 修改意见（实施清单，2026-11-23；**待用户批准后执行**）
+
+> 依据：ROADMAP.md 逐轮表 + 本文 §2/§3 弧线。按五个工作流组织，建议
+> 分四个版本阶段落地（0.18.x 序列），每阶段一个单主题轮、走完整验收
+> （bump/aapt/dumpsys/commit）。标注 🄰=须用户先决策 的条目。
+
+### W0 地基（阶段 1：只换内核，库不动 → 产出 0.57 冒烟 APK）
+
+| # | 修改意见 | 依据 |
+|---|---|---|
+| W0.1 | clone pd-for-android，**pin 子模块链**（libpd@e3cd52fd7517 → pure-data@43a5b8922a35），本地构建 PdCore AAR；gradle 依赖从 Maven 1.2.1-rc6 切到本地产物 | §1 |
+| W0.2 | 构建 PdCore 前核对 **ABI 覆盖**（我们要 arm64-v8a/armeabi-v7a/x86/x86_64 四个；pd-for-android 可能只出部分） | §1 |
+| W0.3 | **0.57 libpd.so 反汇编核实清单**（一次做完，写进 PD_VERSIONS.md）：①canvas_getcurrent 是否仍为 "pd" 符号绑定查表；②openPatch 是否仍吞 loadbang（sys_noloadbang 语义）；③调度器懒启动时序（banner/首 tick 时刻）；④dsp 沿是否仍为唯一编译时机；⑤导出符号面（sys_noloadbang/sys_getsr/sys_getblksize/sched_tick/clock_getlogicaltime/signal_setmultiout/pdgui_vmess）；⑥dsp_add/dsp_addv 链布局（0.17.83/0.17.128 的两次教训都在这） | §3.1/§6.3 |
+| W0.4 | **Java API 差异核对**：pd-for-android 1.4.x 的 PdBase/PdAudio/PdReceiver 签名与行为（尤其 AudioWrapper.start 是否仍有 0.17.110 记录的"无条件重开 sink/线程"行为——AudioOpen 软沿依赖它） | §3.1 |
+| W0.5 | **冒烟 APK**（vanilla only）：0.51.3 与 0.57 双基线跑同一组探针补丁（0.17.34 的 33 批变参探针方法论 + 07.time timer + arp/superosc~），输出《0.57 行为差异表》——后续所有轮次的依据 | 0.17.34/0.17.45 弧线 |
+
+### W1 运行时层（PdEngine/PdTweaks，阶段 1–2）
+
+| # | 修改意见 | 依据 |
+|---|---|---|
+| W1.1 | AudioOpen 三态与门控重开**语义保留**，按时序实测结果调参（懒启动窗口/settle/re-bang 时刻大概率全变） | 0.17.45 弧线 |
+| W1.2 | PdTweaks.setLoadbangEnabled 按 W0.3-② 结果处置：符号在→保留；行为变→调整调用点（openPatch 前重设保留） | 0.17.14 弧线 |
+| W1.3 | **tracker 的 smp~/modseq 移植 ympp_findfile（open_via_path）**——0.17.70 同款修法，弧线缺口补齐（这次修在迁移轮一并做，因为要重编） | §2/§3.1 |
+| W1.4 🄰 | **timer 冻结问题是否重做看门狗**：0.57 的 m_mainloop/m_callbackscheduler 在 libpd 下可能仍不跑。若仍冻结，按 0.17.159 的设计（显式门控+墙钟追赶）重新实现；若 0.57 行为已同桌面，放弃重做 | 0.17.158–160 弧线 |
+| W1.5 🄰 | **stopAudio 是否恢复"同步关 pd dsp 开关"**（0.17.158 引入、0.17.160 回退的那半）——按 0.57 的 dsp 沿实测行为再定 | 0.17.158–160 弧线 |
+
+### W2 slibs 库矩阵（阶段 2：全量重编）
+
+| # | 修改意见 | 依据 |
+|---|---|---|
+| W2.1 | build_slibs.py `PDSRC` 切到 0.57 头（pure-data@43a5b89/src）；**elsex 的 `inc_first=else-src/pd55` 撤销**（0.57 头自带 mc API，t_signal 矛盾终裁） | §2 |
+| W2.2 | **ELSE RC15 重编 elsex**：THISGUI 颜色补丁、pdgui_vmess 等 5 垫片按 W0.3-⑤ 结果重审（0.57 若导出则撤垫片；headless 缺席则保留） | 0.17.137 弧线 |
+| W2.3 | **cyclone 0.43.4 → 0.9-5**：源码替换；patches 字典里 0.43.4 专属补丁（t_uint、Scope、sys_hostfontsize、gui_* 六件套）按新源码重写；audit_blobs 重跑 | §2/0.17.81 弧线 |
+| W2.4 | **zexy/iemlib 抓当前版**（git.iem.at 手动过反爬墙）重编；ZEXY_SETUP/supports 提取链与 lpt stub 直接复用 | 0.17.84/91 弧线 |
+| W2.5 | **fftease 2.5.2 → 3.0.1**（顺带找回 7 个 3.0-only 对象：cross~/enrich~/loopsea~/pileup~/pvwarpb~/schmear~/residency_buffer~） | §2 |
+| W2.6 | mrpeach 重编（预期漂移小）；**creb/cxc/bsaylor 逐库试编 0.57**——失败面报用户 🄰 决策（修/暂缓/缺席） | §2/§5 |
+| W2.7 | **自研库重编**（tracker/pocketpd 全部对象）+ dsp_add 3 参形态复查 + dsp_addv 布局按 W0.3-⑥ 核实 | 0.17.83/128 弧线 |
+| W2.8 | diy2 纯抽象对象引用面核对（在 0.57 上逐对象冒烟） | §2 |
+| W2.9 | **audit_blobs.py 全量重跑**（新内核导出面变化）；**Slibs.VERSION 一次性大 bump**（0.17.71/154 教训：修复必须真的到达设备） | 0.17.71/154 弧线 |
+| W2.10 | 视情况：0.51-4 头目录与 pd55 头目录归档留证（不删除） | "修而不删" |
+
+### W3 会话构建管线（buildInteractiveSession，阶段 2–3）
+
+| # | 修改意见 | 依据 |
+|---|---|---|
+| W3.1 🄰 | **[clone] 单声道直拆分支退役**：0.57 原生支持 -d/-x/-di/-do；parseCloneArgs 保留但默认直通原生。⚠️ 多实例 vs 打包声道语义不等价——退役前用用户补丁（arp/superosc~）实测对比 | 0.17.148/149 弧线 |
+| W3.2 | **[args]→initmess 转换保留**（内联仍会产生无 env 的会话根画布，0.17.145/147 是 pd 层行为）；0.57 冒烟时复验一次 [args] 原生行为 | 0.17.145/147 弧线 |
+| W3.3 | **else/ 前缀剥离保留**；若更新 ELSE 资产，**1391 处引用改写须对新文件重放**（脚本化，别手工） | 0.17.134/153 弧线 |
+| W3.4 | **relay × mc 防线**：现有"信号线不被中继改写"（0.14.15）自动保护 mc cord——补一条自动化校验（模拟会话里断言多声道 cord 端点原样），并把"端口表信号口标注"列为 mc 正确性前置（W4.2） | 0.14.15 弧线 |
+| W3.5 | **elsex mc 类端口表按 mc 语义更新**（mix~/nchs~/xfade.mc~/sum~ 等 16 类在 0.57 上原生多声道；变参注册表挂真实声道数） | 0.17.137 弧线 |
+| W3.6 🄰 | **superosc~/f2s~ 回归上游 mc 版**（0.57 上原生可跑； supersaw~ 自研保留）；**initmess mute 替换去留**取决于 W2.2 的 ELSE 版本 | 0.17.150–157 弧线 |
+| W3.7 🄰 | **graph~/spectrograph~ 桩与 display widget echo 是否回归上游**：0.57 上实测 namecanvas/array 链——可跑则提案回归（桩与 echo 是 0.51 限制的工作区），不可跑则原样保留 | 0.14.9/0.17.134 弧线 |
+| W3.8 | 深度感知扫描/check_pd_connects/lint_pd/sim_inline：按 0.57 输出格式增量（若有新语句类型） | 0.17.147/156 弧线 |
+
+### W4 知识层（PdObjectMeta/OBJECT_PORTS/帮助，阶段 3）
+
+| # | 修改意见 | 依据 |
+|---|---|---|
+| W4.1 | **vanilla 对象表增量**：从 0.57 源码枚举 class_new/class_addcreator 全清单（van055.txt 方法论更新为 van057），新增对象入 defs/knownClasses/pdClasses | 0.17.16 弧线 |
+| W4.2 | **端口表全面重审**：0.54+ 已知差异先行（threshold~ 第二出——0.17.34 当轮就注明）＋变参规则按 W0.5 探针重测（33 批方法论照用） | 0.17.34/16 弧线 |
+| W4.3 | **换版库审计重做**：cyclone 0.9-5 全量、ELSE RC15 elsex 段（0.17.142/143 的构造器级方法论与脚本直接复用） | 0.17.142/143 弧线 |
+| W4.4 | OBJECT_PORTS.md 重生成（genports.py）；帮助补丁按新源码树重抓（build_help.py；else help 更新到新版本） | 0.17.36/0.14.4 弧线 |
+| W4.5 | knownClasses/manifest 重生成（regen_manifest + 0.17.91 回填链） | 0.17.91 弧线 |
+
+### W5 验收（阶段 4）
+
+| # | 修改意见 | 依据 |
+|---|---|---|
+| W5.1 | 双设备装机验收（版本纪律：bump/aapt/dumpsys 三核对） | 版本机制 |
+| W5.2 | **回归清单**（按 ROADMAP 弧线终点逐项）：①superosc~/arp（0.17.145–157 崩溃链）；②07.time timer＋pmsg/euclid/pad/keyboard/widget 全家；③hurdy2 递归/延时线（0.17.25/26）；④vgm-player/sid-player/nes-player/opl3-player/xm toilet3（各引擎弧线终点）；⑤help 全量冒烟＋couldn't create 清零；⑥变参探针 33 批重放；⑦**新 mc 补丁**（clone -do、mix~/nchs~ 多声道） | §3 全部 |
+| W5.3 | **性能对照**：0.57 DSP 负载复测（0.17.76 六实例 Nuked 核超限教训——audio_flinger underrun 记录对比） | 0.17.76 弧线 |
+| W5.4 | PD_VERSIONS.md 终裁更新（0.55/0.57 矛盾项关闭；0.51 弧线归档标注） | §6 |
+
+### 决策点汇总（🄰，全部须用户点头后才动）
+
+1. W1.4 看门狗是否重做（取决于 0.57 时钟行为实测）
+2. W1.5 stopAudio 的 dsp 开关语义是否恢复
+3. W3.1 [clone] 直拆分支退役
+4. W3.6 superosc~/f2s~ 回归上游 mc 版 + initmess 替换去留
+5. W3.7 graph~/spectrograph~ 桩、display echo 是否回归上游
+6. W2.6 creb/cxc/bsaylor 三个失修库的去留
+
+### 建议阶段切分
+
+- **阶段 1 = W0**（0.18.0：只换内核跑 vanilla，产出行为差异表）
+- **阶段 2 = W1+W2**（0.18.1：库矩阵重编 + 运行时层适配）
+- **阶段 3 = W3+W4**（0.18.2：管线适配 + 知识层审计重做）
+- **阶段 4 = W5**（0.18.3：回归与验收；回到 0.17.161 内容等价的"0.57 版"）
+- 每阶段可独立回退（git 版本机制）；任何一阶段失败不阻塞前序成果保留
