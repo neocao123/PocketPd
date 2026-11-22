@@ -2,8 +2,9 @@
 
 基于 libpd (`io.github.libpd.android:pd-core:1.2.1-rc6`) 的 Android 可视化
 Pure Data 编辑器。本文件自 0.6.2 起专门维护版本历史;签名组织 EUfON
-(`app/eufon.keystore`,alias `eufon`)。注意:slibs 编译头用 pd-0.51-4,
-但该 libpd 运行时为 pd 0.55 系(0.17.70 反汇编实证)。
+(`app/eufon.keystore`,alias `eufon`)。注意:slibs 编译头主线用 pd-0.51-4,
+运行时 pd 内核为 **pd 0.51.3**(libpd.so banner 实证;0.17.70 的"0.55 系"
+系误判,已在 0.17.161 纠正)。版本考古详见 `PD_VERSIONS.md`。
 
 ## 0.17.161 (versionCode 303) — 2026-11-22
 

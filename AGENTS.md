@@ -164,9 +164,13 @@
      examples 自己的 patch 可见）。
 - adb 需要 `export PATH="$PATH:/c/Android/Sdk/platform-tools"`；文件路径操作
   加 `export MSYS_NO_PATHCONV=1`。
-- slibs 编译头（pd-0.51-4）≠ 运行时 libpd（pd-core 1.2.1-rc6 = pd 0.55 系，
-  0.17.70 反汇编实证）。凡调用接触 pd 内部结构的 API，先反汇编运行时
-  libpd.so 核实语义再用。externals 文件定位一律走 `open_via_path`
+- 运行时 pd 内核 = **pd 0.51.3**（libpd.so 内烧录 banner 实证；clone 无
+  mc 旗标、multichannel 字符串 0 次——0.17.146+ 定案，0.17.70 的
+  "0.55 系"是误判：canvas_getcurrent 走 "pd" 符号绑定是 libpd 自己的
+  补丁，与 pd 版本无关）。slibs 编译头主线 = pd-0.51-4（同代）；
+  elsex 特例用 ELSE 自带 pd 0.55 头（见 PD_VERSIONS.md §四的矛盾记录）。
+  凡调用接触 pd 内部结构的 API，先反汇编运行时 libpd.so 核实语义再用。
+  externals 文件定位一律走 `open_via_path`
   （字符串搜索路径，ABI 稳定），禁止 canvas_open/canvas_getcurrent——
   运行时的 canvas_getcurrent 是 "pd" 符号绑定查表，app 补丁开关 churn 下
   会交回已释放的 canvas，解引用即崩（0.17.69/0.17.70 两次事故）。
