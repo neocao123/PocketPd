@@ -223,3 +223,96 @@ git 版本机制。
 - **阶段 3 = W3+W4**（0.18.2：管线适配 + 知识层审计重做）
 - **阶段 4 = W5**（0.18.3：回归与验收；回到 0.17.161 内容等价的"0.57 版"）
 - 每阶段可独立回退（git 版本机制）；任何一阶段失败不阻塞前序成果保留
+
+## §8 测试与验证清单（依据 CHANGELOG 弧线逐项；2026-11-23）
+
+> 方法约束（AGENTS.md）：不用模拟器；测试补丁用文本构建经 run-as 写入
+> app 存储；进出走 logcat（[print]/console/session dump）与 OSC 桥；
+> 判据一律用**绝对指标**（频率/DC/削波对称/底噪/计数），不用相对比较
+> （0.17.46/60/76 教训）；不截图、不猜坐标、不碰设备文件。
+> 「基线」列：51 = 现行 0.51.3 上也该复验；57 = 仅 0.57 迁移后适用。
+
+### A. 引擎/运行时
+
+| # | 对象（弧线） | 测试点 | 方法 | 通过判据 | 基线 |
+|---|---|---|---|---|---|
+| T-A1 | 调度器懒启动 | banner/首个 DSP tick 相对 openPatch 的时刻 | logcat 时间线（openPatch → 首条 pd 输出/首个 tick 计数） | 0.17.45 五层参数与新时序匹配（boot-race 窗口/settle/re-bang 时刻有效） | 57 |
+| T-A2 | loadbang | ①根画布 loadbang 触发；②[pd] 块内 loadbang 是否仍缺；③PdAudio reinit 是否重置 sys_noloadbang | 文本补丁 loadbang→[print]，logcat 计数（根/块各一） | 根画布触发=1；块内缺口状态记录；标志在 openPatch 前后均为 0 | 51+57 |
+| T-A3 | dsp 编译周期 | dsp off→parse→on 后 coded 对象是否进链 | dsp 关开补丁（含 ym2612~）→开 dsp→console/DBG | 对象入链、0 couldn't create（0.17.45② 场景） | 57 |
+| T-A4 | AudioWrapper | 已运行时调 startAudio 是否重开 sink/泄漏线程 | javap 反汇编 1.4.x + audio_flinger 记录 | 无 sink 重开、无线程增长（0.17.110 基线行为） | 57 |
+| T-A5 | canvas_getcurrent | 是否仍 "pd" 符号绑定查表 | 反汇编 + **churn 压测**（4 秒内连开 3 补丁 ×N 轮，含 tracker smp~/modseq 补丁） | 零 SIGSEGV；0.57 行为定案写回 PD_VERSIONS.md | 51+57 |
+| T-A6 | 逻辑时钟 | dsp 关态 timer/delay/metro 是否冻结 | 07.time 例程（bng→timer→floatatom）+ dsp 关/开两态 | dsp 开：计时不为 0；dsp 关：按 0.57 实测定案（0.17.158 根因是否消失） | 51+57 |
+| T-A7 | 导出符号面 | sys_noloadbang/sys_getsr/sys_getblksize/sched_tick/clock_getlogicaltime/signal_setmultiout/pdgui_vmess/sys_gui/sys_vgui | llvm-nm -D libpd.so | 清单落 PD_VERSIONS.md；缺失项对应垫片/调用处置 | 57 |
+| T-A8 | dsp 链布局 | dsp_add 3 参段布局 / dsp_addv f-slot-per-segment | 反汇编 dsp_tick/ugen_doit；自研对象（xm~ dsp_addv）冒烟 | 与 0.17.83/128 的 0.51.3 布局结论一致或记录差异 | 57 |
+| T-A9 | Java API | pd-for-android 1.4.x PdBase/PdAudio/PdReceiver 签名与行为 | javap 对比 1.2.1-rc6 | 差异表；Kotlin 侧适配点清单 | 57 |
+| T-A10 | churn 稳定性 | 连续开关补丁/急停急开音频 | 脚本循环 openPatch/closePatch ×N + crash buffer 巡检 | 零 FATAL、零 native 崩溃 | 51+57 |
+
+### B. 会话构建管线
+
+| # | 对象（弧线） | 测试点 | 方法 | 通过判据 | 基线 |
+|---|---|---|---|---|---|
+| T-B1 | [args] | 内联会话里 [args] 原生行为（0.17.145/147 SIGSEGV 场景） | superosc~ 会话 dump + [args] 直建补丁 | initmess 转换仍覆盖全部 [args]；0.57 原生行为定案 | 51+57 |
+| T-B2 | 深度感知扫描 | superosc~（route→lists→mix-list→gain-array depth-4）会话结构 | PocketPd.Session dump + verify_scan_fix.py | #N canvas/#X restore 12/13 平衡；嵌套 restore 坐标未被改写 | 51+57 |
+| T-B3 | pmsg ordinal | 根层 msg 位于含 msg 子图块之前的触发对齐 | 双 msg（根+块内）补丁逐个点按，console `msg trigger` 序号 | 点按 N 恰触发文档序第 N 个 msg | 51+57 |
+| T-B4 | clone | ①-d/-x/-di/-do/-s 各旗标原生行为；②voice==1 直拆退役对比（多实例 vs -do）；③文件名粘逗号解析 | 同一补丁双模式 A/B + f2s~.pd 折行用例 | 旗标行为表；A/B 差异报告（🄰 决策依据）；直拆不再触发 | 57 |
+| T-B5 | 内联预算 | 大补丁树（自有模块+ELSE 副本）预算是否耗尽 | 用户量级补丁 + "inline budget exhausted" 日志检查 | 零耗尽；或耗尽时优雅降级路径明确 | 51+57 |
+| T-B6 | 前缀剥离 | ①else/knob 等编译类可创建；②[/] / [/~] 回归；③换新 ELSE 资产后 dep_check 全绿 | dep_check2 + 帮助补丁冒烟 | 0 couldn't create；红框计数 0 | 51+57 |
+| T-B7 | $ 语义 | $1 创建参数（n-1）、msg literal $N、$0 隔离、\$ 往返 | display 标签/hurdy2 四实例/msg $1( 三类补丁 + 保存重开 cat | 各弧线终点行为复现（0.17.141/145/0.15.20/26） | 51+57 |
+| T-B8 | 命名空间 | delwrite~/delread~/vd~ 内联前缀配对 | hurdy2 ×4：session 内 1001-1004-s_delay 成对 | 0 multiply defined | 51+57 |
+| T-B9 | relay 体系 | ①信号 cord 不被改写（**加 mc cord 用例**）；②控件双腿；③克隆改名；④块内绑定 | 0.14.15 用例 + 多声道新用例 + 粘贴孪生用例 | mc cord 端点原样；双腿成立；孪生独立 | 51+57 |
+| T-B10 | iemgui 细节 | "0" 槽位=未绑定；#int 标记剥离；hex 颜色/尾字段往返 | LLM 风格补丁 + 保存重开 diff | 链路通；文件往返无损 | 51+57 |
+| T-B11 | 原生类守卫 | iemlib bng.pd 不内联；DUAL_COMPILE_PROTECT 15 名；multiply defined 不复发 | 04-gui-demo + hurdy2 | bng 原样、0 multiply defined | 51+57 |
+
+### C. 对象知识层
+
+| # | 对象（弧线） | 测试点 | 方法 | 通过判据 | 基线 |
+|---|---|---|---|---|---|
+| T-C1 | 变参注册表 | 33 批探针重放（每对象 8 进 8 出） | 探针补丁 + connection failed 解码 | 与 defs/variadic 全表一致；0.57 差异表 | 51→57 |
+| T-C2 | vanilla 清单 | 0.57 新对象/变更类（threshold~ 等） | 0.57 源码枚举 + 探针 | defs/knownClasses/pdClasses 覆盖 | 57 |
+| T-C3 | 端口几何 | 大端口数间隙（xm~ 33 进） | 画布渲染 + portAt 命中 | 无重叠、端点不越界 | 51+57 |
+| T-C4 | [/] 绘制 | [/] 与 [/~] 两个 inlet | 画布 + 连线探针 | 2 进命中；绘制正确 | 51+57 |
+| T-C5 | knownClasses | 红框计数探针（0.9.5 方法） | 全对象遍历补丁 | 红框 0（pd 能建的类全部识别） | 51+57 |
+
+### D. 库矩阵（重编后逐库）
+
+| # | 对象（弧线） | 测试点 | 方法 | 通过判据 | 基线 |
+|---|---|---|---|---|---|
+| T-D1 | 全库加载 | N/N core 加载 + audit_blobs 26/26（或新计数） | 启动日志 + audit_blobs.py | 零未定义符号、零 dlopen 失败 | 51+57 |
+| T-D2 | 逐库 demo | 11 个库例程全冒烟 | 例程 + console 巡检 | 0 couldn't create/0 connection failed | 51+57 |
+| T-D3 | ELSE 全家 | superosc~/arp 端到端；midi.in/mpe.in/ptouch/knob/display/presets/scala | 各弧线终点补丁 + console/OSC | 全链路复现；0 缺类 | 51+57 |
+| T-D4 | elsex mc 类 | mix~/nchs~/xfade.mc~/sum~ 等 16 类原生 mc 行为 | mc 探针（多声道源→类→输出） | 0.57 上按 mc 语义工作；垫片撤销后零未定义符号 | 57 |
+| T-D5 | cyclone 0.9-5 | 高频对象对比（coll/zl/counter/gate/switch/svf~） | 旧行为用例 + demo | 行为差异表；0 崩溃 | 57 |
+| T-D6 | zexy/iemlib | lister/pack/mux/demux/limiter~、time/date、forpp 缺口状态 | demo + 探针 | 与新版上游一致 | 57 |
+| T-D7 | creb/cxc/bsaylor/fftease | 试编结果 + demo | 逐库 | 按 🄰 决策执行 | 57 |
+| T-D8 | 自研芯片引擎 | ym2612~（黄金 PCM 哈希 7b6057fa313d2a69、128 gm 扫描 0 静音）；vgm~（demo.vgm/vgz/goto/pause）；sn76489~（Goertzel 三点+LFSR）；sid~+sid6581~（demo.sid/Seekrank）；opl3~（funkystars、buffered 写、slide 不灭声）；nes~/nsf~（30+21 断言 harness）；xm~（toilet3 时钟降采样、手动演奏）；mpein（手喂字节序列）；smp~/modseq（**open_via_path 移植后**文件查找） | 各弧线终点 harness/探针（宿主+设备双级） | 全部复现弧线终点指标；零回归 | 51+57 |
+| T-D9 | 外设桥 | MIDI（语义/raw/sysrt/MPE）、OSC 双向、串口组帧、传感器 | 各桥用例（0.17.15/119/132/133/135 终点） | 消息零丢失（加锁纪律下多次重放稳定） | 51+57 |
+
+### E. 交互/UI（迁移回归时照跑）
+
+| # | 对象（弧线） | 测试点 | 通过判据 |
+|---|---|---|---|
+| T-E1 | 三模式/LOCK/RUN 长按静音/多选快照 | 菜单快照执行、LOCK chrome、演奏中零弹框（0.15.30-33/0.17.21-22） |
+| T-E2 | 右键 MouseBack | 完整 SOURCE_MOUSE 指纹判定；手势返回不受影响（0.17.101） |
+| T-E3 | 底栏手势 | 20° 浅斜拽/|y| 超底栏高度/横向滚动三分（0.17.103/104） |
+| T-E4 | 焦点策略 | 画布永不被 focus highlight 刷灰、console 不吃键（0.17.105-108） |
+| T-E5 | 捏合缩放 | 短距双指可缩放、抬指重起判（0.15.28） |
+| T-E6 | 文本模式 | 着色/往返/保存 flush（0.13.16/0.17.120 lint） |
+| T-E7 | Properties/变量管理器 | 参数行/ARGUMENTS 行/Rename 全引用重写（0.14.18） |
+
+### F. 性能与稳定
+
+| # | 对象（弧线） | 测试点 | 方法 | 通过判据 |
+|---|---|---|---|---|
+| T-F1 | DSP 负载 | 六通道 Nuked 曲目/多声部补丁 underrun | audio_flinger 记录对比（0.17.76 方法） | 无 underrun 恶化 |
+| T-F2 | 内存 | 1GB 环境（-qemu -m 1024）启动+满载 | 0.15.21 方法 | PSS 可比、无 LMK 杀 |
+| T-F3 | 长会话 | 高流量 print 风暴下 UI 响应 | console 节流后压力（0.17.29/31） | 120ms 节流生效、交互不卡 |
+| T-F4 | 崩溃巡检 | crash buffer/crash-last.txt 零 FATAL | 每轮验收固定项 | 0 FATAL |
+
+### 执行顺序建议
+
+1. **51 基线复验**（T-A2/A5/A6/A10、T-B 系列抽样、T-C1、T-D8、T-F）——
+   现行版本先跑一遍，把"弧线终点=现状"钉死，避免把既有偏差误判为
+   迁移回归（0.17.58 的教训：烟测只测幅度漏了频率）。
+2. **57 冒烟**（W0.5）：T-A 全组 + T-B1/B4/B6 + T-C1/C2 + T-D1。
+3. **57 全量**：随 W2–W5 阶段推进，按本表逐项打勾，任何"终点行为
+   复现失败"先查实现再查弧线（是否漏了某轮的隐藏修复）。
