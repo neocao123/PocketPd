@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Marquee tool active state: magenta fill = inverted, thin pixel brackets
+     + center square in field black. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFF54FC"
+        android:pathData="M3,3h18v18h-18z" />
+    <path android:fillColor="#FF04040C"
+        android:pathData="M5,5 H12 V7 H7 V12 H5 Z M12,5 H19 V12 H17 V7 H12 Z M5,12 H7 V17 H12 V19 H5 Z M17,12 H19 V19 H12 V17 H17 Z M11,11 H13 V13 H11 Z" />
+</vector>

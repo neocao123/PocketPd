@@ -1,0 +1,59 @@
+libxm vendored for the xm~ object, upstream master
+github.com/Artefact2/libxm
+Author: Romain "Artefact2" Dalmaso <artefact2@gmail.com>
+Contributor: Dan Spencer <dan@atomicpotato.net>
+
+libxm
+=====
+
+A small XM (Fasttracker II Extended Module) player library. Main
+features:
+
+* Small and hackable: many features can be disabled at compile-time, or are
+  optimized out by the compiler if not used. It is easy to bundle libxm in your
+  game, demo, intro, etc.
+
+* Fairly portable. Minimal dependencies (just libm). No memory allocations.
+  Big-endian compatible (tested on s390x).
+
+* Reasonable accuracy compared to Fasttracker 2. Deviations from FT2 playback,
+  that aren't obviously bugs in FT2, are also libxm bugs. If you have a module
+  that plays incorrectly, please test it in FT2/FT2clone and open an issue!
+
+* Can load most XM/MOD/S3M files, however playback accuracy of non-XM is
+  best-effort.
+
+* Timing functions for synchronising against specific instruments,
+  samples or channels.
+
+* Samples can be loaded and altered at run-time, making it possible to
+  use libxm with softs
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+
+
+PocketPd additions (all additive, no upstream behavior touched):
+  - manual playing API: xm_manual_slot() in play.c plus manual_mode /
+    manual_slots at the tail of xm_context_s (xm_internal.h). xm_tick()
+    skips its xm_row() calls while manual_mode is set - everything else
+    (tick effects, envelopes, sample stepping) is upstream code running
+    unchanged. Cleared by xm_reset_context() like the rest of the tail.
+  - 0.17.129 clock decimation lives in the wrapper (xm_tilde.c), not
+    here; libxm is untouched by it.
+  - 0.17.133 period-level glide helpers: xm_manual_get_period() /
+    xm_manual_note_period() / xm_manual_set_period() in play.c. The
+    note-period formula reuses xm_period() with the same
+    relative-note/finetune resolution as xm_tone_portamento_target();
+    the wrapper does the per-block interpolation.

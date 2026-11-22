@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PC-98 DSP glyph, off: pixel speaker + small pixel X. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    <path android:fillColor="@android:color/white"
+        android:pathData="M4,10 H7 V14 H4 Z M7,10 H9 V8 H11 V6 H13 V18 H11 V16 H9 V14 H7 Z M14,9 H16 V11 H14 Z M16,11 H18 V13 H16 Z M18,13 H20 V15 H18 Z M18,9 H20 V11 H18 Z M14,13 H16 V15 H14 Z" />
+</vector>

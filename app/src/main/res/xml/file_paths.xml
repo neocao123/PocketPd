@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Patch storage roots (PatchStore): app-internal Patches dir and the
+     app-private external dir. Anything outside these falls back to a
+     text-only share. -->
+<paths>
+    <files-path name="internal" path="." />
+    <external-files-path name="external" path="." />
+</paths>

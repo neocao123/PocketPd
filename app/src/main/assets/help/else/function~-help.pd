@@ -1,0 +1,97 @@
+#N canvas 669 111 558 438 10;
+#X obj 2 4 cnv 15 301 42 empty empty function~ 20 20 2 37 -233017 -1
+0;
+#X obj 305 5 cnv 15 250 40 empty empty empty 12 13 0 18 -128992 -233080
+0;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X coords 0 1 100 -1 302 42 1 0 0;
+#X restore 2 4 graph;
+#N canvas 382 141 749 319 (subpatch) 0;
+#X coords 0 -1 1 1 252 42 2 100 100;
+#X restore 304 4 pd;
+#X obj 344 12 cnv 10 10 10 empty empty ELSE 0 15 2 30 -128992 -233080
+0;
+#X obj 22 41 cnv 4 4 4 empty empty Function 0 28 2 18 -233017 -1 0
+;
+#X obj 93 41 cnv 4 4 4 empty empty Generator 0 28 2 18 -233017 -1 0
+;
+#X obj 457 12 cnv 10 10 10 empty empty EL 0 6 2 13 -128992 -233080
+0;
+#X obj 477 12 cnv 10 10 10 empty empty Locus 0 6 2 13 -128992 -233080
+0;
+#X obj 514 12 cnv 10 10 10 empty empty Solus' 0 6 2 13 -128992 -233080
+0;
+#X obj 463 27 cnv 10 10 10 empty empty ELSE 0 6 2 13 -128992 -233080
+0;
+#X obj 501 27 cnv 10 10 10 empty empty library 0 6 2 13 -128992 -233080
+0;
+#X obj 467 71 setdsp~ 1;
+#X obj 1 410 cnv 15 552 21 empty \$0-pddp.cnv.footer empty 20 12 0
+14 -228856 -66577 0;
+#X obj 1 279 cnv 3 550 3 empty \$0-pddp.cnv.inlets inlets 8 12 0 13
+-228856 -1 0;
+#X obj 1 340 cnv 3 550 3 empty \$0-pddp.cnv.outlets outlets 8 12 0
+13 -228856 -1 0;
+#X obj 1 381 cnv 3 550 3 empty \$0-pddp.cnv.argument arguments 8 12
+0 13 -228856 -1 0;
+#X obj 110 289 cnv 17 3 40 empty \$0-pddp.cnv.let.0 0 5 9 0 16 -228856
+-162280 0;
+#X text 188 308 list;
+#X text 140 290 float/signal;
+#X obj 110 352 cnv 17 3 17 empty \$0-pddp.cnv.let.0 0 5 9 0 16 -228856
+-162280 0;
+#X text 176 353 signal;
+#X text 226 353 - function output, f 35;
+#X text 228 290 - values from 0 to 1 reads function;
+#X text 136 389 1) list;
+#X text 198 389 - 3 or more floats set function, f 40;
+#X text 228 308 - 3 or more floats set function, f 35;
+#X obj 192 209 function~ 1 1 -1;
+#X obj 192 186 nbx 5 14 0 1 0 0 empty empty empty 0 -8 0 10 -228856
+-1 -1 0 256;
+#X obj 195 162 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -228856
+-1 -1 0 1;
+#X obj 192 239 else/display~ 8;
+#N canvas 549 146 637 614 example 0;
+#X obj 115 449 else/out~;
+#X obj 232 415 else/graph~ 441 10 1.015 -1.015;
+#X msg 189 164 -1 0.5 1 0.5 -1;
+#X msg 162 118 -1 1 1;
+#X msg 176 140 1 1 -1;
+#X obj 77 165 phasor~ 200;
+#X msg 196 192 -1 0.25 1 0.5 1 0.25 -1;
+#X obj 77 143 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
+-228856 -1 -1 0 256;
+#X text 209 116 sawtooth;
+#X text 224 138 inverted sawtooth;
+#X text 292 163 triangular wave;
+#X text 346 192 trapezoid;
+#X text 89 33 The [function~] object allows line segments and in any
+range. Here we use it in the -1 to 1 range to generate waveforms and
+use them as oscillators with a [phasor~] input., f 62;
+#X text 431 276 <== the [function] object is quite convenient for use
+with [function~]. Check its help file for more info, f 18;
+#X obj 158 373 function~ 1 100 -1;
+#X obj 208 247 function 200 100 empty empty -1 1 220 220 220 50
+50 50 -1 1 1;
+#X obj 205 220 initmess -1 1 1;
+#X connect 2 0 14 0;
+#X connect 3 0 14 0;
+#X connect 4 0 14 0;
+#X connect 5 0 14 0;
+#X connect 6 0 14 0;
+#X connect 7 0 5 0;
+#X connect 14 0 0 0;
+#X connect 14 0 0 1;
+#X connect 14 0 1 0;
+#X connect 15 0 14 0;
+#X connect 16 0 15 0;
+#X restore 472 241 pd example;
+#X text 72 87 [function~] generates functions from arguments/list input.
+Input values from 0 to 1 reads the function. It needs an odd number
+of elements in a list \, staring with 3 values \, the syntax is (point1
+\, period \, point2 \, period \, point3 \, etc...). The overall sum
+of periods is normalized to 1!;
+#X connect 27 0 30 0;
+#X connect 28 0 27 0;
+#X connect 29 0 28 0;

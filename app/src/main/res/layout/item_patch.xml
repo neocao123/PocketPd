@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FD-3.13 file row (PC-98 DOS listing reference): plain name + size/date
+     meta over a soft hairline — no cards, no per-row tab blocks, no row
+     menu. Selection is inverse video drawn by MainActivity on long-press. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/row_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="11dp"
+        android:paddingBottom="11dp">
+
+        <TextView
+            android:id="@+id/patch_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="@font/pd98_latin"
+            android:maxLines="1"
+            android:textColor="@color/pd98_ink"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/patch_meta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:fontFamily="@font/pd98_latin"
+            android:maxLines="1"
+            android:textColor="@color/pd98_dim"
+            android:textSize="9.5sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/pd98_line" />
+</LinearLayout>

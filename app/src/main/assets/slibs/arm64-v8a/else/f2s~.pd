@@ -1,0 +1,12 @@
+#N canvas 0 0 450 190 10;
+#X obj 60 40 inlet;
+#X obj 60 70 t f b;
+#X obj 60 100 pack f 13;
+#X obj 60 130 vline~;
+#X obj 60 160 outlet~;
+#X connect 0 0 1 0;
+#X connect 1 0 2 1;
+#X connect 1 1 2 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X text 150 40 float-to-signal converter (mono). PocketPd's runtime is pd 0.51.3 \, which has no multichannel \, so the upstream mc clone architecture is replaced by a single smoothed ramp. Creation args are ignored \, f 50;

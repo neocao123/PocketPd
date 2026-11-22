@@ -1,0 +1,22 @@
+ELSE (EL Locus Solus' Externals) - vendored upstream subset
+github.com/porres/pd-else (master snapshot, 2026-11-21)
+Author: Alexandre Torres Porres and contributors
+License: GNU GPL v3 (see LICENSE in this directory)
+
+Vendored for the "elsex" incremental build (build_slibs.py): the classes
+the hand-integrated else_core.so never compiled. Source/Control/*.c,
+Source/Audio/*.c and Source/Shared/*.h are verbatim upstream, except:
+
+- retrieve.c: class_new(s, ...) literalized to class_new(gensym("retrieve"),
+  ...) so the vendored build's class_new scan lists the class in
+  core_classes.txt (the runtime behaviour is unchanged - s was already
+  gensym("retrieve")).
+
+- Shared/: only the three implementation files the selected classes link
+  against are kept (buffer.c, magic.c, random.c); the remaining Shared
+  files were headers-only for this build and were dropped.
+
+- pd55/m_pd.h: Pure Data 0.55-0 m_pd.h (pulled from the pure-data repo,
+  tag 0.55-0) used to compile the multichannel classes against the same
+  struct layout the shipped libpd.so has (t_signal offset-verified:
+  ugen_connect reads s_nchans at #0x18, s_sr at #0x10 - 0.17.134).

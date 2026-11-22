@@ -1,0 +1,14 @@
+#N canvas 457 64 562 420 10;
+#X obj 3 4 cnv 15 301 42 empty empty supersaw~ 20 20 2 37 #e0e0e0 #000000 0;
+#X obj 22 41 cnv 4 4 4 empty empty 7\ detuned\ &\ panned\ sawtooths 0 28 2 18 #e0e0e0 #000000 0;
+#X text 62 92 [supersaw~] is a classic JP-8000 style supersaw oscillator: seven slightly detuned sawtooths mixed and panned across a stereo pair. Seven [vsaw~] voices get per-voice detune ratios ([expr] → [sig~] → [*~]) \, an equal-power [pan2~] spread and a 1/7 gain compensation so a full stack peaks like a single saw.;
+#X text 62 176 Upstream ELSE never shipped a release [supersaw~] object (the author's Patreon-era prototype became [else/superosc~] \, whose default mode is "like a supersaw anyway"). This abstraction fills the gap with the classic 7-voice recipe and no shared $0 state \, so any number of copies are fully independent.;
+#X text 62 262 arguments: 1) frequency in hertz (default 220) 2) detune spread in cents (default 25);
+#X text 62 287 inlet 0: frequency in hertz (float/signal) - inlet 1: detune spread in cents (float);
+#X text 62 312 outlets: 0/1: left/right audio;
+#X obj 90 340 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#X obj 90 370 else/supersaw~ 220 25;
+#X obj 90 395 else/out~;
+#X connect 7 0 8 0;
+#X connect 8 0 9 0;
+#X connect 8 1 9 1;

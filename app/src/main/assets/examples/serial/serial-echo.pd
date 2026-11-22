@@ -1,0 +1,13 @@
+#N canvas 0 0 620 420 12;
+#X obj 40 40 r tty0;
+#X obj 40 84 print serial-in;
+#X obj 40 130 s TTY;
+#X obj 40 100 spigot 1;
+#X obj 130 100 tgl 22 0 empty empty echo 0 8 0 10 -4034 -257985 -1 0 1;
+#X text 40 160 OTG USB serial bridge (8N1). Bytes from the wire arrive at [r tty0] as a list of 0..255 floats - one list per USB chunk.;
+#X text 40 220 Send a list of byte values to [r TTY] to write them to the port. Turn the echo toggle on to loop the port input straight back out.;
+#X text 40 280 Setup: Settings -> Serial -> enable -> pick adapter + baud. ASCII lines can be reassembled into text with cyclone [itoa].;
+#X connect 0 0 3 0;
+#X connect 3 0 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 3 1;

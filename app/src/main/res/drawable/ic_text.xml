@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain-text edit glyph: folded-corner document page with two text
+     bars (2px stroke, pixel-stepped fold). Same optical footprint as the
+     old glyph and the rest of the family: x4-20, y6-18 (16x12). The fold
+     is the only diagonal element in the toolbar family — it can no
+     longer be mistaken for the ic_more hamburger bars the old three-bars
+     glyph resembled. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    <path android:fillColor="@android:color/white"
+        android:fillType="evenOdd"
+        android:pathData="M4,6 H16 V8 H18 V10 H20 V18 H4 Z M6,8 H14 V10 H16 V12 H18 V16 H6 Z" />
+    <path android:fillColor="@android:color/white"
+        android:pathData="M8,9 H12 V11 H8 Z M8,13 H16 V15 H8 Z" />
+</vector>

@@ -1,0 +1,205 @@
+#N canvas 433 41 565 701 10;
+#X obj 306 4 cnv 15 250 40 empty empty empty 12 13 0 18 -128992 -233080
+0;
+#X obj 345 11 cnv 10 10 10 empty empty ELSE 0 15 2 30 -128992 -233080
+0;
+#X obj 458 11 cnv 10 10 10 empty empty EL 0 6 2 13 -128992 -233080
+0;
+#X obj 478 11 cnv 10 10 10 empty empty Locus 0 6 2 13 -128992 -233080
+0;
+#X obj 515 11 cnv 10 10 10 empty empty Solus' 0 6 2 13 -128992 -233080
+0;
+#X obj 464 26 cnv 10 10 10 empty empty ELSE 0 6 2 13 -128992 -233080
+0;
+#X obj 502 26 cnv 10 10 10 empty empty library 0 6 2 13 -128992 -233080
+0;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X coords 0 1 100 -1 252 42 1 0 0;
+#X restore 305 3 graph;
+#X obj 22 40 cnv 4 4 4 empty empty Multi-channel 0 28 2 18 -233017
+-1 0;
+#X obj 131 40 cnv 4 4 4 empty empty player 0 28 2 18 -233017 -1 0;
+#X obj 4 675 cnv 15 552 21 empty empty empty 20 12 0 14 -233017 -33289
+0;
+#X obj 6 281 cnv 3 550 3 empty empty inlets 8 12 0 13 -228856 -1 0
+;
+#X obj 6 501 cnv 3 550 3 empty empty outlets 8 12 0 13 -228856 -1 0
+;
+#X obj 5 550 cnv 3 550 3 empty empty arguments 8 12 0 13 -228856 -1
+0;
+#X obj 97 508 cnv 17 3 17 empty empty n 5 9 0 16 -228856 -162280 0
+;
+#X obj 97 288 cnv 17 3 210 empty empty 0 5 9 0 16 -228856 -162280 0
+;
+#X text 120 315 open <symbol> -;
+#X text 127 442 loop <float> -;
+#X text 217 442 loop on <1> or off <0>, f 53;
+#X obj 6 626 cnv 3 550 3 empty empty flags 8 12 0 13 -228856 -1 0;
+#X text 192 554 (optional) channels (default 1 if no file is given
+\, or sound file's if given \, max 64), f 44;
+#X text 115 580 2) symbol;
+#X text 180 580 - the name of the file to open (default none), f 46
+;
+#X text 115 594 3) float;
+#X text 180 594 - autostart <1: on \, 0: off> (default 0), f 46;
+#X text 115 607 4) float;
+#X text 180 608 - loop <1: on \, 0: off> (default 0), f 46;
+#X text 115 557 1) float;
+#X text 179 555 -;
+#X text 174 286 bang - (re)start playing the buffer from the beggining
+, f 60;
+#X text 120 300 speed <float> -;
+#X text 217 300 sets the playing speed, f 53;
+#X text 119 644 -speed <float>: sets playing speed (default 100);
+#X text 173 630 -loop: turns loop mode on (default off);
+#X text 152 509 signal - the buffer signal of the corresponding channel
+;
+#X obj 3 3 cnv 15 301 42 empty empty player~ 20 20 2 37 -233017 -1
+0;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X coords 0 1 100 -1 302 42 1;
+#X restore 2 3 graph;
+#X obj 97 529 cnv 17 3 17 empty empty n+1 5 9 0 16 -228856 -162280
+0;
+#X text 164 530 bang - a bang when finishing playing the buffer;
+#X text 175 470 show -;
+#X text 217 470 shows the buffer subpatch window, f 53;
+#X text 175 484 hide -;
+#X text 217 484 hides the buffer subpatch window, f 53;
+#N canvas 574 23 588 508 multi-channel 0;
+#X obj 169 332 else/meter2~;
+#X obj 56 342 else/out~;
+#X obj 346 323 else/out~;
+#X msg 120 215 open violin.wav;
+#X obj 299 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -228856
+-1 -1;
+#X obj 529 302 bng 15 250 50 0 empty empty empty 17 7 0 10 -228856
+-1 -1;
+#X msg 134 240 open stereo.wav;
+#X text 122 30 If you give an optional float argumewnt as the first
+argument \, it specifies the number of channels. If no float argument
+and no sound file are given \, then the default number of channels
+is 1 (mono). But if the first optional argument is not given and a
+file name is given \, then the number of channels is the same as the
+sound file's. The maximum number is 64 channels.;
+#X text 222 213 <= mono file;
+#X text 235 239 <= stereo file;
+#X text 123 115 If you have a file with less channels than specified
+(like a mono file in a stereo buffer player) \, the extra channels
+are silent. Conversely \, a file with more channels than specified
+(like a stereo file in a mono buffer player) has its remaining channels
+ignored.;
+#X msg 35 190 start;
+#X obj 346 238 tgl 20 0 empty empty empty 17 7 0 10 -228856 -1 -1 0
+1;
+#X obj 56 268 else/player~ stereo.wav -loop -speed -100;
+#X msg 56 214 stop;
+#X obj 346 277 else/player~ 1 stereo.wav -loop;
+#X connect 3 0 13 0;
+#X connect 6 0 13 0;
+#X connect 11 0 13 0;
+#X connect 12 0 15 0;
+#X connect 13 0 1 0;
+#X connect 13 0 0 0;
+#X connect 13 1 1 1;
+#X connect 13 1 0 1;
+#X connect 13 2 4 0;
+#X connect 14 0 13 0;
+#X connect 15 0 2 0;
+#X connect 15 0 2 1;
+#X connect 15 1 5 0;
+#X restore 446 251 pd multi-channel;
+#X text 217 314 opens a file with the symbol name (no symbol opens
+dialog box) and starts playing, f 53;
+#X text 66 182 see also:;
+#X text 169 340 start - same as bang, f 61;
+#X text 169 385 pause - pauses playing the buffer, f 61;
+#X text 175 355 stop - stops and goes back to the beggining, f 60
+;
+#X text 169 370 float - <1> is the same as "start" \, "0" is the same
+as "stop", f 61;
+#X text 151 427 continue - unpauses and continues playing the buffer
+, f 64;
+#X text 163 399 reload - reloads the file into the buffer and starts
+playing, f 62;
+#X text 127 413 set <symbol> - sets a file to open (needs a reload
+message), f 68;
+#X obj 63 202 else/play.file~;
+#X text 39 85 [player~] is a convenient abstraction based on [soundfiler]
+and [tabread4~]. It offers many playing capabilities on arrays and
+it's more versatile than [play.file~]. For instance \, you can play
+in different speeds and even backwards. The object is also able to
+search for files relative to the parent patch., f 76;
+#X obj 63 226 else/pvoc.player~;
+#X obj 63 249 else/gran.player~;
+#X text 77 658 -range <float \, float>: sets sample range (default
+0 1);
+#X text 127 456 range <f \, f> -;
+#X text 217 456 sets sample range from 0 (start) to 1 (end), f 53
+;
+#N canvas 783 75 557 319 example 0;
+#X msg 93 91 pause;
+#X msg 148 90 continue;
+#X msg 220 117 speed \$1;
+#X obj 220 96 nbx 4 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
+-228856 -1 -1 0 256;
+#X msg 286 117 loop \$1;
+#X obj 286 93 tgl 15 0 empty empty empty 17 7 0 10 -228856 -1 -1 0
+1;
+#X obj 190 118 bng 15 250 50 0 empty empty empty 17 7 0 10 -228856
+-1 -1;
+#X obj 169 240 else/out~;
+#X obj 304 238 bng 15 250 50 0 empty empty empty 17 7 0 10 -228856
+-1 -1;
+#X text 325 236 <= finished;
+#X msg 134 68 open vacuous.wav;
+#X obj 169 118 tgl 15 0 empty empty empty 17 7 0 10 -228856 -1 -1 0
+1;
+#X text 78 201 click: opens a new file =>, f 13;
+#X msg 30 68 open stereo.wav;
+#X obj 169 210 else/player~ stereo.wav;
+#X obj 286 141 pack2 range f f;
+#X floatatom 344 103 5 0 0 0 - - -;
+#X obj 347 79 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -228856
+-1 -1 0 1;
+#X floatatom 403 121 5 0 0 0 - - -;
+#X obj 406 100 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -228856
+-1 -1 0 1;
+#X text 387 79 minimum;
+#X text 447 100 maximum;
+#X msg 286 164 show;
+#X msg 329 164 hide;
+#X text 107 25 Test the main message methods of [player~].;
+#X connect 0 0 14 0;
+#X connect 1 0 14 0;
+#X connect 2 0 14 0;
+#X connect 3 0 2 0;
+#X connect 4 0 14 0;
+#X connect 5 0 4 0;
+#X connect 6 0 14 0;
+#X connect 10 0 14 0;
+#X connect 11 0 14 0;
+#X connect 13 0 14 0;
+#X connect 14 0 7 0;
+#X connect 14 1 7 1;
+#X connect 14 2 8 0;
+#X connect 15 0 14 0;
+#X connect 16 0 15 1;
+#X connect 17 0 16 0;
+#X connect 18 0 15 2;
+#X connect 19 0 18 0;
+#X connect 22 0 14 0;
+#X connect 23 0 14 0;
+#X restore 482 230 pd example;
+#X msg 264 167 speed \$1;
+#X obj 264 146 nbx 4 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
+-228856 -1 -1 0 256;
+#X obj 256 221 else/out~;
+#X obj 232 160 tgl 15 0 empty empty empty 17 7 0 10 -228856 -1 -1 0
+1;
+#X obj 232 192 else/player~ stereo.wav;
+#X connect 61 0 65 0;
+#X connect 62 0 61 0;
+#X connect 64 0 65 0;
+#X connect 65 0 63 0;
+#X connect 65 1 63 1;

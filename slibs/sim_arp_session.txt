@@ -1,0 +1,4 @@
+  File "C:\Projects\26PDAndroid\slibs\sim_inline.py", line 15
+    if ch == '\':
+             ^
+SyntaxError: unterminated string literal (detected at line 15)

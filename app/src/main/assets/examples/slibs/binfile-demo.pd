@@ -1,0 +1,16 @@
+#N canvas 0 0 760 560 10;
+#X text 20 20 binfile-demo;
+#X text 20 44 mrpeach binfile - arbitrary binary files as byte streams.;
+#X msg 20 70 read demo.bin;
+#X msg 120 70 rewind;
+#X msg 200 70 bang;
+#X obj 20 110 binfile;
+#X obj 20 150 print BIN;
+#X text 110 150 each bang outputs the next byte value;
+#X text 20 200 Tap [read demo.bin( then bang a few times - file bytes print;
+#X text 20 222 to the console. Long-press [binfile] and choose Help for the;
+#X text 20 244 full message set: write seek flush info...;
+#X connect 0 0 3 0;
+#X connect 1 0 3 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;

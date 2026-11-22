@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.pocketpd.app.ui.BloomCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/pd98_chrome"
+        app:elevation="0dp"
+        app:liftOnScroll="false">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            app:navigationIcon="@drawable/ic_back">
+
+            <!-- file name in F5.6, drawn as a plain view so the pixel font
+                 survives MaterialToolbar's own title paint. maxWidth is set
+                 in code from the first toolbar key's position, so a long
+                 patch name ellipsizes and marquees inside the free strip
+                 and never pushes the right keys. -->
+            <TextView
+                android:id="@+id/toolbar_title"
+                style="@style/Text.PocketPd.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="8dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:maxLines="1" />
+
+            <!-- the three design keys, left to right: marquee, dsp, menu -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingEnd="4dp">
+
+                <!-- text/graph edit switch: folded-page glyph in graph mode,
+                     mini-patch glyph while the plain-text editor is up -->
+                <ImageButton
+                    android:id="@+id/btn_text_mode"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@null"
+                    android:contentDescription="@string/action_text_edit"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_text" />
+
+                <ImageButton
+                    android:id="@+id/btn_marquee"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@null"
+                    android:contentDescription="@string/action_marquee_select"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_marquee" />
+
+                <ImageButton
+                    android:id="@+id/btn_audio"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@null"
+                    android:contentDescription="@string/audio_start"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_audio_off" />
+
+                <ImageButton
+                    android:id="@+id/btn_overflow"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:background="@null"
+                    android:contentDescription="@string/more_actions"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_more" />
+            </LinearLayout>
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Persistent Pd console: streams print output between the toolbar
+             and the canvas; same dark surface as the patch area, errors in
+             the warning color. Right edge: Clear (top) empties it, expand
+             (bottom) toggles a large console. -->
+        <FrameLayout
+            android:id="@+id/console_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/console_bg"
+            android:visibility="gone"
+            android:paddingHorizontal="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="1dp">
+
+            <ScrollView
+                android:id="@+id/console_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:scrollbars="none">
+
+                <TextView
+                    android:id="@+id/console_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pd98_latin"
+                    android:textSize="10sp"
+                    android:lineSpacingExtra="0dp"
+                    android:textColor="@color/pd98_edge" />
+            </ScrollView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btn_console_clear"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/console_clear"
+                    app:tint="@color/pd98_edge"
+                    android:src="@drawable/ic_close" />
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/btn_console_expand"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/console_expand"
+                    app:tint="@color/pd98_edge"
+                    android:src="@drawable/ic_expand" />
+            </LinearLayout>
+        </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.pocketpd.app.editor.PatchCanvasView
+            android:id="@+id/canvas"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Plain-text patch editor (toolbar text/graph switch): same field
+             ground + hairline as the console, F5.6, syntax colored by
+             PdTextSpans. Replaces the canvas while visible. -->
+        <EditText
+            android:id="@+id/patch_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/console_bg"
+            android:fontFamily="@font/pd98_latin"
+            android:gravity="top|start"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:paddingHorizontal="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="12dp"
+            android:scrollbars="vertical"
+            android:textColor="@color/pd98_ink"
+            android:textSize="10sp"
+            android:visibility="gone" />
+
+        <!-- AI generation bar (text mode only): status line over the prompt
+             row. While GEN streams, the status line shows the reasoning
+             tail (single line, clipped — overflow never wraps); when a
+             conversation is open it shows its turn count with the CTX and
+             NEW keys (GEN continues the open conversation, NEW starts a
+             fresh one, CTX decides whether the current buffer is quoted —
+             lit solid green when it does). While a request runs GEN
+             becomes STOP; after a successful replace it becomes REVERT
+             until the buffer or the prompt is edited. -->
+        <LinearLayout
+            android:id="@+id/ai_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?attr/colorSurface"
+            android:orientation="vertical"
+            android:paddingHorizontal="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+
+            <!-- status strip, always visible with the AI bar: THINK +
+                 reasoning tail while streaming, CHAT n + CTX/NEW keys
+                 otherwise (n counts the exchanges of the open
+                 conversation, starting at 0) -->
+            <LinearLayout
+                android:id="@+id/ai_status_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="4dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/ai_status_label"
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="6dp"
+                    android:text="@string/ai_think" />
+
+                <TextView
+                    android:id="@+id/ai_status_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="start"
+                    android:fontFamily="@font/pd98_latin"
+                    android:lineSpacingExtra="0dp"
+                    android:maxLines="1"
+                    android:textColor="@color/pd98_edge"
+                    android:textSize="10sp" />
+
+                <!-- quoted-buffer toggle, lit solid green when on -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ai_ctx"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="54dp"
+                    android:layout_height="26dp"
+                    android:layout_marginStart="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:text="@string/ai_ctx"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ai_new"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="56dp"
+                    android:layout_height="26dp"
+                    android:layout_marginStart="6dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:text="@string/ai_new"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/ai_prompt"
+                    style="@style/Text.PocketPd.Value"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/value_box_bg"
+                    android:gravity="center_vertical"
+                    android:hint="@string/ai_prompt_hint"
+                    android:imeOptions="actionSend"
+                    android:inputType="text|textNoSuggestions"
+                    android:maxLines="1"
+                    android:paddingHorizontal="10dp"
+                    android:textColor="@color/pd98_ink"
+                    android:textColorHint="@color/pd98_edge" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ai_send"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="76dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="@string/ai_send" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+
+        <!-- the palette keys own their whole gesture (claimed at DOWN): the
+             |y|-threshold rule decides drag vs scroll inside the touch
+             listener, the scroll view itself never intercepts -->
+        <HorizontalScrollView
+            android:id="@+id/add_bar_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:scrollbars="none"
+            android:background="?attr/colorSurface"
+            android:paddingVertical="3dp"
+            app:layout_behavior="none">
+
+            <LinearLayout
+                android:id="@+id/add_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp" />
+        </HorizontalScrollView>
+
+        <!-- Non-blocking object name bar: opens docked when an item is
+             dropped on the canvas; canvas stays visible and touchable. -->
+        <LinearLayout
+            android:id="@+id/name_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:background="?attr/colorSurface"
+            android:elevation="12dp"
+            android:visibility="gone"
+            android:paddingHorizontal="8dp"
+            android:paddingTop="6dp"
+            app:layout_behavior="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/name_til"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/name_bar_hint"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/name_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pd98_latin"
+                        android:inputType="textNoSuggestions"
+                        android:textSize="10sp"
+                        android:imeOptions="actionDone"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/name_apply"
+                    style="?attr/materialIconButtonFilledTonalStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:contentDescription="@string/save"
+                    app:shapeAppearanceOverlay="@style/Shape.PocketPd.IconSquare"
+                    app:icon="@drawable/ic_check" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/name_cancel"
+                    style="?attr/materialIconButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/cancel"
+                    app:shapeAppearanceOverlay="@style/Shape.PocketPd.IconSquare"
+                    app:icon="@drawable/ic_close" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/name_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/Text.PocketPd.Label"
+                android:textColor="@color/pd98_dim"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:paddingTop="2dp" />
+
+            <HorizontalScrollView
+                android:id="@+id/name_suggestions_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/name_suggestions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="4dp" />
+            </HorizontalScrollView>
+        </LinearLayout>
+
+        <!-- Mini VU strip: left bookend of the OSD row (badge sits top-right);
+             level from the patch's [send pocketpd-vu], palette $D/$E/$A. -->
+        <com.pocketpd.app.editor.VuStripView
+            android:id="@+id/vu_strip"
+            android:layout_width="96dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|start"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="6dp" />
+
+        <!-- VHS OSD mode badge = the mode switch (design 02/03: 26px label,
+             6px black outline, red/cyan ghosts); tap toggles EDIT/RUN. -->
+        <com.pocketpd.app.editor.VhsOsdView
+            android:id="@+id/osd_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingStart="18dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:fontFamily="@font/pd98_latin"
+            android:textSize="13sp"
+            android:textColor="@color/pd98_ink" />
+    </FrameLayout>
+    </LinearLayout>
+
+    <!-- design 05 §4: ONE full-screen CRT scanline layer over everything
+         (the mockups' final url(#scan) rect); non-interactive. -->
+    <View
+        android:id="@+id/scan_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+</com.pocketpd.app.ui.BloomCoordinatorLayout>

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PocketPd: PC-98 analog (CRT) look — dark chrome over a near-black
+         field, blue title bars, square corners, pixel Latin (F5.6).
+         Accents: cyan = signal/active, magenta = edit/selection,
+         green = run/dsp, red = error. Spec: design/pc98-analog/README.md. -->
+    <style name="Theme.PocketPd" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/pd98_signal</item>
+        <item name="colorOnPrimary">@color/pd98_field</item>
+        <item name="colorPrimaryContainer">@color/pd98_raised</item>
+        <item name="colorOnPrimaryContainer">@color/pd98_signal</item>
+        <item name="colorSecondary">@color/pd98_signal</item>
+        <item name="colorOnSecondary">@color/pd98_field</item>
+        <item name="colorSecondaryContainer">@color/pd98_raised</item>
+        <item name="colorOnSecondaryContainer">@color/pd98_edge</item>
+        <item name="colorTertiary">@color/pd98_edit</item>
+        <item name="colorOnTertiary">@color/pd98_field</item>
+        <item name="colorError">@color/pd98_error</item>
+        <item name="colorOnError">@color/pd98_field</item>
+        <item name="colorSurface">@color/pd98_body</item>
+        <item name="colorOnSurface">@color/pd98_ink</item>
+        <item name="colorSurfaceVariant">@color/pd98_raised</item>
+        <item name="colorOnSurfaceVariant">@color/pd98_edge</item>
+        <item name="colorSurfaceContainer">@color/pd98_body</item>
+        <item name="colorSurfaceContainerHigh">@color/pd98_raised</item>
+        <item name="colorSurfaceContainerHighest">@color/pd98_raised</item>
+        <item name="colorOutline">@color/pd98_edge</item>
+        <item name="colorOutlineVariant">@color/pd98_line</item>
+        <item name="android:colorBackground">@color/pd98_field</item>
+        <item name="android:windowBackground">@drawable/window_bg_pd98</item>
+        <item name="android:statusBarColor">@color/pd98_body</item>
+        <item name="android:navigationBarColor">@color/pd98_body</item>
+        <item name="android:textColorPrimary">@color/pd98_ink</item>
+        <item name="android:textColorSecondary">@color/pd98_edge</item>
+        <item name="android:textColorTertiary">@color/pd98_dim</item>
+        <item name="colorControlNormal">@color/pd98_edge</item>
+
+        <!-- menus & dialogs also speak F5.6 -->
+        <item name="android:textAppearanceLargePopupMenu">@style/Text.PocketPd.Menu</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/Text.PocketPd.Menu</item>
+        <item name="android:textAppearanceListItem">@style/Text.PocketPd.Menu</item>
+        <item name="android:textAppearanceListItemSmall">@style/Text.PocketPd.Menu</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.PocketPd.AlertDialog</item>
+        <item name="textAppearanceButton">@style/Text.PocketPd.Button</item>
+        <item name="textAppearanceLabelLarge">@style/Text.PocketPd.Button</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.PocketPd.BottomSheet</item>
+        <item name="android:spinnerItemStyle">@style/Text.PocketPd.SpinnerItem</item>
+        <item name="android:dropDownItemStyle">@style/Text.PocketPd.DropDownItem</item>
+        <item name="chipStyle">@style/Widget.PocketPd.Chip</item>
+
+        <!-- square-corner language -->
+        <item name="shapeAppearanceSmallComponent">@style/Shape.PocketPd.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.PocketPd.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/Shape.PocketPd.Large</item>
+
+        <item name="pocketPdKeyStyle">@style/Widget.PocketPd.Key</item>
+    </style>
+
+    <style name="Shape.PocketPd.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">0dp</item>
+    </style>
+
+    <style name="Shape.PocketPd.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">0dp</item>
+    </style>
+
+    <style name="Shape.PocketPd.Large" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">0dp</item>
+    </style>
+
+    <!-- Square icon-button overlay: the Material3 IconButton styles hardcode
+         a circular shape; this restores the test-card square (user: shape
+         only — fills, strokes and the transparent-at-rest behavior of the
+         plain icon button are untouched). -->
+    <style name="Shape.PocketPd.IconSquare" parent="">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">0dp</item>
+    </style>
+
+    <!-- Typography: F5.6 pixel Latin everywhere (system font falls back for
+         any CJK the user types); hierarchy by size + color only, no
+         synthetic bold — PC-98 emphasis is inversion and hue. -->
+    <style name="Text.PocketPd.Label" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">8.5sp</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/pd98_edge</item>
+    </style>
+
+    <!-- Title-bar heading: mockup titlebar text 22px = the scale's MIDDLE
+         value; at device 1.5x/px that is 12sp. -->
+    <style name="Text.PocketPd.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="Text.PocketPd.Mono" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- Buttons: uniform 40dp instrument keys, square, hairline border on the
+         field ground (PC-98 keycap). -->
+    <style name="Widget.PocketPd.Key" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">40dp</item>
+        <item name="android:minWidth">72dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/key_text</item>
+        <item name="android:backgroundTint">@color/key_bg</item>
+        <item name="strokeColor">@color/pd98_edge</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.PocketPd.Key.Segment" parent="Widget.PocketPd.Key">
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="Text.PocketPd.Menu" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="Text.PocketPd.Button" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">0.04</item>
+    </style>
+
+    <!-- MaterialAlertDialog reads title/body styles from the dialog theme
+         overlay, not the activity theme; the container style squares the
+         dialog itself (M3 default is a 28dp rounded card). -->
+    <style name="ThemeOverlay.PocketPd.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.PocketPd</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.PocketPd.Title</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.PocketPd.Body</item>
+    </style>
+
+    <style name="MaterialAlertDialog.PocketPd" parent="MaterialAlertDialog.Material3">
+        <item name="shapeAppearance">@style/Shape.PocketPd.Dialog</item>
+        <item name="colorSurfaceContainerHigh">@color/pd98_raised</item>
+    </style>
+
+    <style name="Shape.PocketPd.Dialog" parent="ShapeAppearance.Material3.Corner.Full">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">0dp</item>
+    </style>
+
+    <!-- Bottom sheet (object palette): square raised panel, no rounded top,
+         no drag handle pill. -->
+    <style name="ThemeOverlay.PocketPd.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.PocketPd.BottomSheet</item>
+        <item name="bottomSheetDragHandleStyle">@style/Widget.PocketPd.BottomSheet.Handle</item>
+    </style>
+
+    <style name="Widget.PocketPd.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">@style/Shape.PocketPd.Dialog</item>
+        <item name="backgroundTint">@color/pd98_raised</item>
+    </style>
+
+    <style name="Widget.PocketPd.BottomSheet.Handle" parent="Widget.Material3.BottomSheet.DragHandle">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="MaterialAlertDialog.PocketPd.Title" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">11.5sp</item>
+    </style>
+
+    <style name="MaterialAlertDialog.PocketPd.Body" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <!-- ================= BIOS screen pieces (design 04) ================= -->
+
+    <!-- section header: cyan caps, wide tracking -->
+    <style name="Text.PocketPd.Group" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">8.5sp</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/pd98_signal</item>
+    </style>
+
+    <!-- row label: plain ink -->
+    <style name="Text.PocketPd.Row" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/pd98_ink</item>
+    </style>
+
+    <!-- hint row under a section -->
+    <style name="Text.PocketPd.Hint" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">8.5sp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:textColor">@color/pd98_hint</item>
+    </style>
+
+    <!-- value text inside a BIOS value box (cyan) -->
+    <style name="Text.PocketPd.Value" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/pd98_signal</item>
+    </style>
+
+    <!-- cyan action row (refresh / scan links) -->
+    <style name="Text.PocketPd.Link" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:textColor">@color/pd98_signal</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <!-- ON/OFF value chip: keycap that inverts to solid cyan when checked -->
+    <style name="Widget.PocketPd.ValueChip" parent="Widget.PocketPd.Key">
+        <item name="android:minWidth">88dp</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="strokeColor">@color/pd98_signal</item>
+        <item name="android:textColor">@color/vchip_text</item>
+        <item name="android:backgroundTint">@color/vchip_bg</item>
+    </style>
+
+    <!-- full-width signal key (apply / import) -->
+    <style name="Widget.PocketPd.Key.Signal" parent="Widget.PocketPd.Key">
+        <item name="android:textColor">@color/pd98_signal</item>
+        <item name="strokeColor">@color/pd98_signal</item>
+    </style>
+
+    <!-- spinner closed item (cyan, sits inside the value box) -->
+    <style name="Text.PocketPd.SpinnerItem" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/pd98_signal</item>
+    </style>
+
+    <!-- spinner dropdown row -->
+    <style name="Text.PocketPd.DropDownItem" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/pd98_ink</item>
+    </style>
+    <!-- object palette chips: square keycaps, not M3 pills -->
+    <style name="Widget.PocketPd.Chip" parent="Widget.Material3.Chip.Assist">
+        <item name="chipCornerRadius">0dp</item>
+        <item name="chipBackgroundColor">@color/pd98_field</item>
+        <item name="chipStrokeColor">@color/pd98_edge</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/pd98_edge</item>
+        <item name="android:fontFamily">@font/pd98_latin</item>
+        <item name="fontFamily">@font/pd98_latin</item>
+        <item name="chipMinHeight">28dp</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+</resources>

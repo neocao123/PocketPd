@@ -1,0 +1,15 @@
+#N canvas 0 0 760 560 10;
+#X text 20 20 fftease-demo;
+#X text 20 44 Eric Lyon's FFT toolkit - 30+ spectral objects.;
+#X obj 20 70 osc~ 220;
+#X obj 20 110 pvoc~;
+#X text 110 110 pvoc~: phase vocoder - transpose and stretch;
+#X text 20 152 transpose in semitones - drag me into pvoc~ inlet 2 in run mode;
+#X obj 20 175 hsl 128 15 -24 24 0 empty empty empty 0 0 0 8 -262144 -1 -1 0 1;
+#X obj 20 230 output~;
+#X obj 250 70 loadbang;
+#X msg 250 100 \; pd dsp 1;
+#X connect 4 0 5 0;
+#X connect 0 0 1 0;
+#X connect 2 0 1 1;
+#X connect 1 0 3 0;

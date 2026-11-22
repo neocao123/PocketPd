@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PC-98 marquee glyph, thin: 2px corner brackets + center square.
+     Optical height y6-18, matching the ic_text/ic_audio family. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    <path android:fillColor="@android:color/white"
+        android:pathData="M5,6 H12 V8 H7 V12 H5 Z M12,6 H19 V12 H17 V8 H12 Z M5,12 H7 V16 H12 V18 H5 Z M17,12 H19 V18 H12 V16 H17 Z M11,11 H13 V13 H11 Z" />
+</vector>

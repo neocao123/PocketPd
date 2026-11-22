@@ -1,0 +1,10 @@
+ym2612~
+vgm~
+sn76489~
+sid6581~
+sid~
+opl3~
+nes~
+nsf~
+xm~
+mpein

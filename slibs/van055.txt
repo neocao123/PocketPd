@@ -1,0 +1,313 @@
+!=
+%
+&
+&&
+*
+*~
++
++~
+-
+-~
+/
+/~
+<
+<<
+<=
+==
+>
+>=
+>>
+abs
+abs~
+adc~
+append
+array
+array define
+array get
+array max
+array min
+array quantile
+array random
+array set
+array size
+array sum
+atan
+atan2
+b
+backtracer
+bag
+bang
+bang~
+bendin
+bendout
+bindlist
+biquad~
+block~
+bng
+bp~
+canvas
+canvasmaker
+catch~
+change
+clip
+clip~
+clone
+clone-inlet
+clone-outlet
+cnv
+cos
+cos~
+cpole~
+cputime
+ctlin
+ctlout
+czero_rev~
+czero~
+dac~
+dbtopow
+dbtopow~
+dbtorms
+dbtorms~
+declare
+del
+delay
+delread4~
+delread~
+delwrite~
+div
+drawcurve
+drawnumber
+drawpolygon
+drawsymbol
+drawtext
+element
+env~
+exp
+expr
+exprproxy
+expr~
+exp~
+f
+fexpr~
+fft~
+file
+file copy
+file cwd
+file define
+file delete
+file glob
+file handle
+file isabsolute
+file isdirectory
+file isfile
+file join
+file mkdir
+file move
+file normalize
+file patchpath
+file size
+file split
+file splitext
+file splitname
+file stat
+file which
+filledcurve
+filledpolygon
+float
+framp~
+fswap
+ftom
+ftom~
+fudiformat
+fudiparse
+gatom
+get
+getsize
+gfxstub
+guiconnect
+hdl
+hip~
+hradio
+hsl
+hslider
+i
+ifft~
+inlet
+inlet~
+int
+key
+keyname
+keyup
+libpd_receive
+line
+line~
+list append
+list fromsymbol
+list inlet
+list length
+list prepend
+list split
+list store
+list tosymbol
+list trim
+loadbang
+log
+log~
+lop~
+makefilename
+makenote
+max
+max~
+message
+messresponder
+metro
+midiin
+midiout
+midirealtimein
+min
+min~
+mod
+moses
+mtof
+mtof~
+my_canvas
+my_numbox
+namecanvas
+nbx
+netreceive
+netsend
+noise~
+notein
+noteout
+objectmaker
+openpanel
+oscformat
+oscparse
+osc~
+outlet
+outlet~
+pack
+page
+pd
+pdcontrol
+pgmin
+pgmout
+phasor~
+pipe
+plot
+pointer
+poly
+polytouchin
+polytouchout
+pow
+powtodb
+powtodb~
+pow~
+print
+print~
+q8_rsqrt~
+q8_sqrt~
+qlist
+r
+radiobut
+radiobutton
+random
+rdb
+readsf~
+realtime
+receive
+receive~
+rfft~
+rifft~
+rmstodb
+rmstodb~
+route
+rpole~
+rsqrt~
+rzero_rev~
+rzero~
+r~
+s
+samphold~
+samplerate~
+savepanel
+savestate
+scalar
+scalar define
+sel
+select
+send
+send~
+set
+setsize
+sig~
+sin
+slop~
+snake_in~
+snake_out~
+snake~
+snapshot~
+soundfiler
+spigot
+sqrt
+sqrt~
+stripnote
+struct
+swap
+switch~
+symbol
+sysexin
+s~
+t
+table
+tabosc4~
+tabplay~
+tabread
+tabread4
+tabread4~
+tabread~
+tabreceive~
+tabsend~
+tabwrite
+tabwrite~
+tan
+template
+text
+text define
+text delete
+text fromlist
+text get
+text insert
+text search
+text sequence
+text set
+text size
+text tolist
+textfile
+tgl
+threshold~
+throw~
+timer
+toggle
+touchin
+touchout
+trace
+trigger
+unpack
+until
+v
+value
+vcf~
+vdl
+vd~
+vline~
+vradio
+vsl
+vslider
+vsnapshot~
+vu
+wrap
+wrap~
+writesf~
+|
+||

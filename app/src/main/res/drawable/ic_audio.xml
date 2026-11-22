@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PC-98 DSP glyph, thin: pixel speaker + two level bars. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    <path android:fillColor="@android:color/white"
+        android:pathData="M4,10 H7 V14 H4 Z M7,10 H9 V8 H11 V6 H13 V18 H11 V16 H9 V14 H7 Z M15,10 H17 V14 H15 Z M18,8 H20 V16 H18 Z" />
+</vector>

@@ -1,0 +1,17 @@
+#N canvas 0 0 760 560 10;
+#X text 20 20 slibs-overview - bundled pd-extended libraries;
+#X text 20 50 Ten libraries are compiled in and load at startup:;
+#X text 20 74 cyclone zexy iemlib fftease bsaylor creb cxc osc midifile binfile;
+#X text 20 98 ;
+#X text 20 122 Every object works under both spellings:;
+#X text 20 146   [counter]          (bare name);
+#X text 20 170   [cyclone/counter]  (namespaced form);
+#X text 20 194 ;
+#X text 20 218 If two libraries ship the same name the console reports who wins:;
+#X text 20 242 bare names go to cyclone > zexy > iemlib > ... the loser stays;
+#X text 20 266 reachable as lib/name. Example: bare [svf~] is bsaylor's while;
+#X text 20 290 [cyclone/svf~] reaches the cyclone one.;
+#X text 20 314 ;
+#X text 20 338 One audible demo per library lives in this folder: turn DSP on;
+#X text 20 362 with the speaker toolbar icon and play. Long-press any object;
+#X text 20 386 and choose Help to open its help patch (gray when unavailable).;

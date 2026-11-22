@@ -1,0 +1,9 @@
+#N canvas 0 0 900 640 10;
+#X obj 80 60 osc~ 220;
+#X obj 80 100 graph~ 240 140;
+#X obj 80 300 spectrograph~ 240 140;
+#X obj 420 60 keyboard;
+#X text 80 20 ELSE demo: graph~ / spectrograph~ / keyboard (tap keys in RUN);
+#X text 420 470 all objects also exist as else/graph~ etc.;
+#X connect 0 0 1 0;
+#X connect 0 0 2 0;

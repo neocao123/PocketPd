@@ -1,0 +1,11 @@
+#N canvas 0 0 560 320 10;
+#X text 12 8 display - show the last received message in the widget;
+#X text 12 40 The box itself is the display: the last message arriving at the inlet renders inside it \, and passes through the outlet unchanged. An optional creation argument ([display mytag]) namespaces multiple displays. (The upstream else version draws into a dynamically rebuilt canvas \, which crashes this runtime \, so this build uses the app's widget text bridge.) Bangs pass through but have no text to show.;
+#X msg 20 160 hello world;
+#X obj 20 200 display;
+#X obj 110 200 print after;
+#X obj 220 200 display tagged;
+#X obj 340 160 msg 1 \; display-tagged 42 \; pocketpd-display-tagged 42;
+#X text 340 220 a [msg] can also drive a named display directly \; the echo leg of the atom widgets does the same;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;

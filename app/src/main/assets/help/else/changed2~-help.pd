@@ -1,0 +1,73 @@
+#N canvas 569 32 560 450 10;
+#X obj 4 307 cnv 3 550 3 empty empty inlets 8 12 0 13 -228856 -1 0
+;
+#X obj 4 339 cnv 3 550 3 empty empty outlets 8 12 0 13 -228856 -1 0
+;
+#X obj 4 394 cnv 3 550 3 empty empty arguments 8 12 0 13 -228856 -1
+0;
+#X obj 4 422 cnv 15 552 21 empty empty empty 20 12 0 14 -233017 -33289
+0;
+#X obj 94 348 cnv 17 3 17 empty empty 0 5 9 0 16 -228856 -162280 0
+;
+#X obj 94 315 cnv 17 3 17 empty empty 0 5 9 0 16 -228856 -162280 0
+;
+#X text 143 315 signal;
+#X text 143 348 signal;
+#X obj 165 229 else/out~;
+#X obj 2 3 cnv 15 301 42 empty empty changed2~ 20 20 2 37 -233017 -1
+0;
+#X obj 306 4 cnv 15 250 40 empty empty empty 12 13 0 18 -128992 -233080
+0;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X coords 0 1 100 -1 302 42 1;
+#X restore 2 3 graph;
+#N canvas 382 141 749 319 (subpatch) 0;
+#X coords 0 -1 1 1 252 42 2 0 0;
+#X restore 305 3 pd;
+#X obj 345 11 cnv 10 10 10 empty empty ELSE 0 15 2 30 -128992 -233080
+0;
+#X obj 23 40 cnv 4 4 4 empty empty Detect 0 28 2 18 -233017 -1 0;
+#X obj 154 40 cnv 4 4 4 empty empty changes 0 28 2 18 -233017 -1 0
+;
+#X obj 458 11 cnv 10 10 10 empty empty EL 0 6 2 13 -128992 -233080
+0;
+#X obj 478 11 cnv 10 10 10 empty empty Locus 0 6 2 13 -128992 -233080
+0;
+#X obj 464 26 cnv 10 10 10 empty empty ELSE 0 6 2 13 -128992 -233080
+0;
+#X obj 79 40 cnv 4 4 4 empty empty direction 0 28 2 18 -233017 -1 0
+;
+#X obj 208 185 changed2~;
+#X text 143 400 (none);
+#X text 189 315 - signal to detect direction changes;
+#X text 189 348 - impulse at detected direction change;
+#X obj 81 185 sig2float~;
+#X obj 81 209 vsl 15 80 -1 1 0 0 skhb slkl empty 0 -9 0 10 -228856
+-1 -1 7714 1;
+#X obj 289 229 else/display~;
+#X obj 94 370 cnv 17 3 17 empty empty 1 5 9 0 16 -228856 -162280 0
+;
+#X text 143 370 signal;
+#X text 82 87 [changed2~] sends an impulse whenever an input value
+changes its direction. The right outlet sends the status information
+(1 when increasing \, -1 when decreasing and 0 for no change).;
+#X obj 208 150 osc~ 1;
+#X text 189 370 - status (1 \, -1 or 0);
+#X obj 396 195 line~;
+#X obj 396 220 changed2~;
+#X obj 477 242 else/display~;
+#X msg 374 149 -1 \, 1 1000;
+#X msg 396 170 1 \, -1 1000;
+#X obj 353 245 else/out~;
+#X connect 20 0 8 0;
+#X connect 20 0 8 1;
+#X connect 20 1 26 0;
+#X connect 24 0 25 0;
+#X connect 30 0 20 0;
+#X connect 30 0 24 0;
+#X connect 32 0 33 0;
+#X connect 33 0 37 1;
+#X connect 33 0 37 0;
+#X connect 33 1 34 0;
+#X connect 35 0 32 0;
+#X connect 36 0 32 0;

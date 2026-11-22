@@ -1,0 +1,4 @@
+#N canvas 0 0 450 300 10;
+#X obj 100 100 superosc~ 440 0.5 1 0.5;
+#X obj 100 220 print~ out;
+#X connect 0 0 1 0;

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spinner dropdown row: dark-cyan pixel (same value color as the closed
+     box) at the scale's BODY step (10sp); row height matches the 32dp value
+     box so the popup rows read like stacked value boxes. -->
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fontFamily="@font/pd98_latin"
+    android:gravity="center_vertical"
+    android:minHeight="32dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:singleLine="true"
+    android:textColor="@color/pd98_cyd"
+    android:textSize="10sp" />

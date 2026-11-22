@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings as the PC-98 BIOS screen (design 04): every row is
+     LABEL + right-aligned value box (field fill, signal-cyan stroke,
+     cyan value), toggles are ON/OFF value chips that invert to solid
+     cyan, section headers and action rows are cyan. -->
+<com.pocketpd.app.ui.BloomFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/settings_root"
+        android:background="@color/pd98_chrome"
+        android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/pd98_chrome"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_back">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                style="@style/Text.PocketPd.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="8dp"
+                android:text="@string/settings_title" />
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="32dp">
+
+            <!-- ============================================== Audio -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_audio" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/audio_sample_rate" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_sample_rate"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/audio_buffer" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_buffer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/audio_input" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_audio_input"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/audio_input_summary" />
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/audio_apply_hint" />
+
+            <!-- ============================================== MIDI -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_midi" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/midi_enable" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_midi"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/midi_device" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_midi_devices"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btn_midi_refresh"
+                style="@style/Text.PocketPd.Link"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/midi_scan" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/midi_ble_scan" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_midi_ble"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btn_midi_ble_scan"
+                style="@style/Text.PocketPd.Link"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/midi_ble_scan" />
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/midi_summary" />
+
+            <!-- ============================================== OSC -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_osc" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/osc_enable_in" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_osc_in"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/osc_port_in" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <EditText
+                        android:id="@+id/edit_osc_in_port"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:inputType="number"
+                        android:paddingHorizontal="10dp"
+                        android:text="8000" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/osc_enable_out" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_osc_out"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/osc_host_out" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <EditText
+                        android:id="@+id/edit_osc_host"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:inputType="text"
+                        android:paddingHorizontal="10dp"
+                        android:text="127.0.0.1" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/osc_port_out" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <EditText
+                        android:id="@+id/edit_osc_out_port"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:inputType="number"
+                        android:paddingHorizontal="10dp"
+                        android:text="9000" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/osc_summary" />
+
+            <TextView
+                android:id="@+id/text_local_ip"
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/pd98_latin"
+                android:textIsSelectable="true" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_osc_apply"
+                style="@style/Widget.PocketPd.Key.Signal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="14dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/apply" />
+
+            <!-- ============================================== Serial -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_serial" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/serial_enable" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_serial"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/serial_lines" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_serial_lines"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="ON" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/midi_device" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_serial_devices"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btn_serial_refresh"
+                style="@style/Text.PocketPd.Link"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/serial_scan" />
+
+            <TextView
+                android:id="@+id/txt_serial_status"
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/serial_baud" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_serial_baud"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/serial_summary" />
+
+            <!-- ============================================== Console -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_console" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/console_lines" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <EditText
+                        android:id="@+id/edit_console_lines"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:inputType="number"
+                        android:paddingHorizontal="10dp"
+                        android:text="5" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- ============================================== Externals -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_externals" />
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/externals_summary" />
+
+            <TextView
+                android:id="@+id/text_ext_internal"
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/pd98_latin"
+                android:textIsSelectable="true" />
+
+            <TextView
+                android:id="@+id/text_ext_external"
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/pd98_latin"
+                android:textIsSelectable="true" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_ext_import"
+                style="@style/Widget.PocketPd.Key.Signal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="14dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/externals_import" />
+
+            <LinearLayout
+                android:id="@+id/list_externals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
+                android:orientation="vertical" />
+
+            <!-- ============================================== Screen -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_screen" />
+
+            <TextView
+                style="@style/Text.PocketPd.Row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/bloom_enable" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.pocketpd.app.ui.Pc98Slider
+                    android:id="@+id/slider_bloom"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1" />
+
+                <FrameLayout
+                    android:layout_width="64dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <TextView
+                        android:id="@+id/text_bloom_value"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="100%" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- ============================================== AI assistant -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/section_llm" />
+
+            <TextView
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/llm_summary" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/llm_format" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <Spinner
+                        android:id="@+id/spinner_llm_format"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:popupBackground="@drawable/popup_bg_pd98" />
+
+                    <TextView
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:text="▼"
+                        android:textSize="9sp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/Text.PocketPd.Row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/llm_endpoint" />
+
+            <EditText
+                android:id="@+id/edit_llm_endpoint"
+                style="@style/Text.PocketPd.Value"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/value_box_bg"
+                android:inputType="textUri|textNoSuggestions"
+                android:paddingHorizontal="10dp" />
+
+            <TextView
+                style="@style/Text.PocketPd.Row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/llm_key" />
+
+            <EditText
+                android:id="@+id/edit_llm_key"
+                style="@style/Text.PocketPd.Value"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/value_box_bg"
+                android:inputType="text|textNoSuggestions"
+                android:paddingHorizontal="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/llm_model" />
+
+                <FrameLayout
+                    android:layout_width="124dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <EditText
+                        android:id="@+id/edit_llm_model"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:inputType="text|textNoSuggestions"
+                        android:paddingHorizontal="10dp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_llm_apply"
+                style="@style/Widget.PocketPd.Key.Signal"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="14dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/apply" />
+
+            <TextView
+                android:id="@+id/btn_llm_test"
+                style="@style/Text.PocketPd.Link"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/llm_test" />
+
+            <!-- ============================================== About -->
+            <TextView
+                style="@style/Text.PocketPd.Group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/about_title" />
+
+            <TextView
+                android:id="@+id/text_about_version"
+                style="@style/Text.PocketPd.Row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/pd98_ink" />
+
+            <TextView
+                android:id="@+id/text_about_engine"
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/text_about_licenses"
+                style="@style/Text.PocketPd.Hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/about_licenses"
+                android:textIsSelectable="true" />
+        </LinearLayout>
+    </ScrollView>
+    </LinearLayout>
+
+    <!-- design 05 §4: ONE full-screen CRT scanline layer over everything
+         (the mockups' final url(#scan) rect); non-interactive. -->
+    <View
+        android:id="@+id/scan_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+</com.pocketpd.app.ui.BloomFrameLayout>

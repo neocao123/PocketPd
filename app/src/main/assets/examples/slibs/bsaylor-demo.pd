@@ -1,0 +1,14 @@
+#N canvas 0 0 760 560 10;
+#X text 20 20 bsaylor-demo;
+#X text 20 44 svf~ - the state variable filter that owns the bare name.;
+#X text 20 66 cutoff - drag me in run mode (send symbol feeds svf~ inlet 2);
+#X obj 20 90 hsl 128 15 100 3000 0 empty empty empty 0 0 0 8 -262144 -1 -1 600 1;
+#X obj 20 140 osc~ 110;
+#X obj 20 180 svf~;
+#X obj 20 220 output~;
+#X obj 250 90 loadbang;
+#X msg 250 120 \; pd dsp 1;
+#X connect 4 0 5 0;
+#X connect 1 0 2 0;
+#X connect 0 0 2 1;
+#X connect 2 0 3 0;

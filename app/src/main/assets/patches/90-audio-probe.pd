@@ -1,0 +1,15 @@
+#N canvas 0 0 720 480 10;
+#X text 40 30 Audio probe. Turn DSP on and watch the console print live sample values from osc~ 440.;
+#X text 40 60 Values should swing between -0.5 and 0.5 while audio runs.;
+#X obj 60 130 osc~ 440;
+#X obj 60 190 *~ 0.5;
+#X obj 60 250 dac~;
+#X obj 300 130 loadbang;
+#X obj 300 180 metro 300;
+#X obj 300 230 snapshot~;
+#X obj 300 280 print level;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 3 0 7 0;
+#X connect 5 0 6 0;
+#X connect 6 0 7 0;

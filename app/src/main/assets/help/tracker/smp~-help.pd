@@ -1,0 +1,15 @@
+#N canvas 0 0 620 420 10;
+#X text 60 30 smp~ — wav sample player from device storage;
+#X text 60 52 loads a PCM wav (8/16/24-bit — mono or stereo) relative to;
+#X text 60 70 the patch and plays it pitch-shifted by MIDI note. Works;
+#X text 60 88 alone or driven by [modseq]'s note events;
+#X obj 400 60 smp~ sound.wav;
+#X msg 300 150 note 60 0.8;
+#X msg 300 180 note 67;
+#X msg 300 210 off;
+#X obj 430 220 smp~;
+#X text 60 260 messages: open <file> / note <midi> [gain] (float and;
+#X text 60 278 list also work) / bang = retrigger / off or stop;
+#X text 60 296 base <midi> — note at rate 1.0 (auto from smpl chunk);
+#X text 60 314 gain / loop 0|1 / looppts <start> <end> / info;
+#X text 60 348 outlets: signal + a bang when a non-looping note ends;

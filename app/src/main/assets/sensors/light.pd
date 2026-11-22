@@ -1,0 +1,4 @@
+#N canvas 0 0 200 160 10;
+#X obj 60 40 r pocketpd-light;
+#X obj 60 110 outlet;
+#X connect 0 0 1 0;

@@ -1,0 +1,16 @@
+#N canvas 0 0 760 560 10;
+#X text 20 20 midifile-demo;
+#X text 20 44 mrpeach midifile - reads and writes standard MIDI files.;
+#X msg 20 70 read demo.mid;
+#X msg 120 70 start;
+#X msg 200 70 stop;
+#X obj 20 110 midifile;
+#X obj 20 150 print MIDI;
+#X text 110 150 outlet 1 streams raw midi bytes while playing;
+#X text 20 200 Tap [read demo.mid( then [start(: noteon/noteoff bytes appear;
+#X text 20 222 in the console. Decode them with [midiin]-style logic for a;
+#X text 20 244 software player or route to [midiout] hardware.;
+#X connect 0 0 3 0;
+#X connect 1 0 3 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;

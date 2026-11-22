@@ -1,0 +1,8 @@
+#N canvas 0 0 560 300 10;
+#X text 12 8 display~ - show the signal value in the widget;
+#X text 12 40 The box itself is the display: the live signal sample (100 ms) renders inside it \, and the signal passes through the outlet unchanged. An optional creation argument ([display~ mytag]) namespaces multiple displays. (The upstream else version draws into a dynamically rebuilt canvas \, which crashes this runtime.) The upstream size/rate arguments are ignored.;
+#X obj 20 160 osc~ 220;
+#X obj 20 200 display~;
+#X obj 110 200 dac~;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;

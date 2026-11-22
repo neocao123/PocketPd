@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Closed spinner value: dark-cyan pixel at the scale's BODY step (10sp),
+     fills the whole value box (the Spinner has no padding of its own so the
+     dropdown popup matches its full width); end padding clears the ▼. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fontFamily="@font/pd98_latin"
+    android:gravity="center_vertical"
+    android:paddingStart="10dp"
+    android:paddingEnd="22dp"
+    android:singleLine="true"
+    android:textColor="@color/pd98_cyd"
+    android:textSize="10sp" />

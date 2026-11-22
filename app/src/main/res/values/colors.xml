@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PocketPd design language: PC-98 analog (VHS/CRT), spec in
+         design/pc98-analog/README.md.
+         Strict NEC PC-98 16-color window language over a near-black field:
+         cyan = signal, magenta = edit, green = run, blue = chrome.
+         No gradients, no rounded corners; depth comes from the grounds
+         (field/body/raised/box/line) instead of elevation. -->
+
+    <!-- grounds -->
+    <color name="pd98_field">#FF04040C</color>      <!-- canvas field / window ground -->
+    <color name="pd98_body">#FF0A0A1E</color>       <!-- window chrome surfaces -->
+    <color name="pd98_raised">#FF101040</color>     <!-- popups / keycaps -->
+    <color name="pd98_box">#FF0D0D28</color>        <!-- object box fill on canvas -->
+    <color name="pd98_line">#FF2A2A5C</color>       <!-- hairlines / separators -->
+    <color name="pd98_shell">#FF14141C</color>      <!-- VHS tape shell -->
+
+    <!-- strokes & ink -->
+    <color name="pd98_edge">#FFA8A8C0</color>       <!-- box/window strokes, msg ports -->
+    <color name="pd98_ink">#FFFCFCFC</color>        <!-- primary text -->
+    <color name="pd98_dim">#FF6C6C8A</color>        <!-- tertiary text, tgl-off X -->
+    <color name="pd98_cord_msg">#FF7C7CA0</color>   <!-- non-signal patch cords -->
+
+    <!-- PC-98 accents -->
+    <color name="pd98_signal">#FF54FCFC</color>     <!-- $D cyan: signal cords/ports, live widgets -->
+    <color name="pd98_edit">#FFFC54FC</color>       <!-- $B magenta: edit mode, selection -->
+    <color name="pd98_run">#FF54FC54</color>        <!-- $C green: run mode, dsp on -->
+    <color name="pd98_warn">#FFFCFC54</color>       <!-- $E yellow: console warnings -->
+    <color name="pd98_error">#FFFC5454</color>      <!-- $A red: errors, delete -->
+    <color name="pd98_chrome">#FF0000A8</color>     <!-- $1 blue: title bars, BIOS field -->
+    <color name="pd98_chrome_hi">#FF5454FC</color>  <!-- bright blue: title-bar underline -->
+    <color name="pd98_hint">#B3C8C8E8</color>       <!-- BIOS hint rows (75% lavender) -->
+    <color name="pd98_cyd">#FF00A8A8</color>        <!-- dark cyan: BIOS value glyphs (mockup 04) -->
+
+    <!-- tape label paper (browser rows) -->
+    <color name="pd98_paper">#FFD8D8CE</color>
+    <color name="pd98_paper_ink">#FF14141C</color>
+    <color name="pd98_paper_dim">#FF55554E</color>
+    <color name="pd98_paper_rule">#FFB9B9AF</color>
+
+    <color name="ic_launcher_background">#FF141414</color>
+</resources>

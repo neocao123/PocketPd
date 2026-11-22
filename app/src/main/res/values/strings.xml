@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PocketPd</string>
+
+    <!-- Browser -->
+    <string name="patches_title">Patches</string>
+    <string name="action_new_patch">New patch</string>
+    <string name="action_import_patch">Import files</string>
+    <string name="action_import_folder">Import folder</string>
+    <string name="import_done">Imported %1$d file(s)</string>
+    <string name="action_settings">Settings</string>
+    <string name="empty_patches">No patches yet.\nUse + to create one, or import a .pd file.</string>
+    <string name="patch_delete">Delete</string>
+    <string name="patch_rename">Rename</string>
+    <string name="patch_duplicate">Duplicate</string>
+    <string name="confirm_delete_patch">Delete “%1$s”? This cannot be undone.</string>
+    <string name="patch_meta">%1$s • %2$s</string>
+
+    <!-- Editor -->
+    <string name="edit_mode">Edit</string>
+    <string name="run_mode">Run</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_redo">Redo</string>
+    <string name="action_save">Save</string>
+    <string name="action_add">Add object</string>
+    <string name="action_console">Console</string>
+    <string name="action_zoom_fit">Zoom to fit</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_duplicate_selection">Duplicate selection</string>
+    <string name="action_delete_selection">Delete selection</string>
+    <string name="action_marquee_select">Marquee select</string>
+    <string name="audio_start">Audio on</string>
+    <string name="audio_stop">Audio off</string>
+    <string name="saved">Saved</string>
+    <string name="unsaved_changes">Unsaved changes</string>
+    <string name="discard_changes_title">Discard changes?</string>
+    <string name="discard_changes_msg">The patch has unsaved edits.</string>
+    <string name="keep_editing">Keep editing</string>
+    <string name="discard">Discard</string>
+    <string name="save">Save</string>
+    <string name="set_value">Set value…</string>
+    <string name="examples_title">Examples</string>
+    <string name="action_save_as">Save as…</string>
+    <string name="action_share">Share</string>
+    <string name="save_as_name">Save as (goes to your patches)</string>
+    <string name="saved_as">Saved a copy to your patches</string>
+    <string name="examples_missing">Examples not found</string>
+    <string name="name_bar_hint">TYPE OBJECT NAME — DROP POINT PLACES IT</string>
+    <string name="add_bar_drag_hint">DRAG A KEY OUT OF THE BAR ONTO THE CANVAS</string>
+
+    <!-- Object editing -->
+    <string name="hint_object_name">Object name and arguments, e.g. osc~ 440</string>
+    <string name="hint_message">Message, e.g. ; freq 440 or 0 1</string>
+    <string name="hint_comment">Comment text</string>
+    <string name="obj_class_object">Object</string>
+    <string name="obj_class_message">Message</string>
+    <string name="obj_class_comment">Comment</string>
+    <string name="obj_class_floatatom">Number</string>
+    <string name="obj_class_symbolatom">Symbol</string>
+    <string name="obj_class_listbox">List</string>
+    <string name="apply">Apply</string>
+    <string name="edit_text">Edit text</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="select_more">Select more</string>
+    <string name="properties">Properties</string>
+    <string name="prop_label">Label</string>
+    <string name="prop_label_x">Label X</string>
+    <string name="prop_label_y">Label Y</string>
+    <string name="prop_label_pos">Label position</string>
+    <string name="prop_draw_style">Draw style</string>
+    <string name="cut">Cut</string>
+    <string name="copy">Copy</string>
+    <string name="paste">Paste</string>
+    <string name="action_open">Open</string>
+    <string name="open_none">abstractions only</string>
+    <string name="action_help">Help</string>
+    <string name="help_none">no help patch</string>
+    <string name="action_properties">Properties</string>
+    <string name="about_title">About</string>
+    <string name="about_version">%1$s %2$s (versionCode %3$d) by EUfON</string>
+    <string name="about_engine">Pure Data %1$s via libpd · %2$d bundled object libraries</string>
+    <string name="about_licenses">Open-source components\n• libpd — github.com/libpd/libpd — Standard Improved BSD License\n• Pure Data 0.51.3 — © Miller Puckette and others — Standard Improved BSD License\n• YM2612 core (ym2612~) — Nuked-OPN2 ym3438.c — © 2017-2022 Alexey Khokholov (Nuke.YKT) — LGPL-2.1\n• SN76489 core (sn76489~) — original in-house implementation; chip semantics follow the SMSpower docs (Charles MacDonald, Maxim) as implemented by VGMPlay (LGPL) and Genesis Plus GX (GPL) — no third-party code vendored
+\n• OPL3 core (opl3~) — Nuked OPL3 v1.8 opl3.c — © 2013-2020 Nuke.YKT — LGPL-2.1
+\n• opl3~ GM preset bank (Mobilnik-v2, 128 presets) — Vitaliy Novichkov (Wohlstand), OPL3BankEditor — MIT; in the lineage of The Fat Man 1993 OPL instruments (K. Weston Phelan, George Alistair Sanger) — MIT\n• SID 6581/8580 core (sid6581~) — reSID — © 1998-2022 Dag Lem — GPLv2+ (vendored under slibs/pocketpd/src/resid)\n• 6502/6510 CPU core (sid~) — original in-house implementation (sid6502.c)\n• Example tune ZeckenSID.sid (sid-player example) — © 2016 Jan Wassermann (Spider Jerusalem), Mayday! — CC BY-NC-ND 4.0, from "A Lazy Year [8580]" (csdb.dk/release/?id=160991)\n• diy2 abstractions — plugdata / ugur (doctorWah) — GPLv3\n• cyclone — © Krzysztof Czaja and others — Standard Improved BSD License\n• zexy — © 1999–2011 IOhannes m zmölnig, IEM — GPLv2\n• iemlib — Thomas Musil, IEM Graz — LGPL\n• fftease — © 1999–2021 Eric Lyon and Christopher Penrose — MIT\n• bsaylor — © Steve Harris and Ben Saylor — GPL\n• creb — © Tom Schouten — GPLv2\n• cxc — zt0ln d4ta — GPLv2\n• osc — CNMAT (Matt Wright, UC Berkeley) and Martin Peach — BSD-style\n• midifile / binfile — © Martin Peach — GPLv2+\n• usb-serial-for-android — github.com/mik3y/usb-serial-for-android — MIT\n• tracker object library — EUfON (bundled with this app)\n• F5.6 pixel font — © Sora Sagano, dotcolon.net (embedded for the whole UI; verify redistribution terms before public release)
+\n• XM/MOD/S3M player core (xm~) — libxm (github.com/Artefact2/libxm) — © Romain "Artefact2" Dalmaso, contributor Dan Spencer — WTFPL v2, vendored under slibs/pocketpd/src/libxm (demo.xm example module from the upstream test fixtures)</string>
+    <string name="more_actions">More actions</string>
+    <string name="gop_location">Location</string>
+    <string name="gop_unsaved">(unsaved — use Save as…)</string>
+    <string name="gop_section">UI range (graph-on-parent)</string>
+    <string name="gop_enable">Show UI on parent (graph-on-parent)</string>
+    <string name="gop_hint">Widgets fully inside the range appear on the parent box, like pd\'s graph-on-parent.</string>
+
+    <!-- Add menu -->
+    <string name="add_object">Object…</string>
+    <string name="add_message">Message…</string>
+    <string name="add_comment">Comment</string>
+    <string name="add_number">Number box</string>
+    <string name="add_toggle">Toggle</string>
+    <string name="add_bang">Bang</string>
+    <string name="add_hslider">Horizontal slider</string>
+    <string name="add_vslider">Vertical slider</string>
+    <string name="add_radio_v">Vertical radio</string>
+    <string name="add_radio_h">Horizontal radio</string>
+    <string name="add_canvas">Canvas (panel)</string>
+    <string name="add_vu">VU meter</string>
+    <string name="palette_title">Add to patch</string>
+    <string name="palette_search_hint">Search objects…</string>
+
+    <!-- Long press menu -->
+    <string name="menu_add_here">Add object here</string>
+    <string name="menu_select_area">Select area</string>
+    <string name="menu_paste_here">Paste here</string>
+
+    <!-- Text/graph edit switch (editor toolbar) -->
+    <string name="action_text_edit">Toggle text edit</string>
+    <string name="text_parse_failed">Text not parseable — fix the buffer</string>
+    <string name="text_parse_errors">Text applied with %1$d parse issue(s) — see console</string>
+
+    <!-- Properties dialog -->
+    <string name="prop_title">Properties</string>
+    <string name="prop_class">Class</string>
+    <string name="prop_send">Send symbol (blank = none)</string>
+    <string name="prop_receive">Receive symbol (blank = none)</string>
+    <string name="prop_min">Min</string>
+    <string name="prop_max">Max</string>
+    <string name="prop_int_steps">Integer steps (slider outputs whole numbers)</string>
+    <string name="prop_args">Arguments (after the class name)</string>
+    <string name="prop_size">Size</string>
+    <string name="prop_width">Width</string>
+    <string name="prop_height">Height</string>
+    <string name="prop_hold">Hold (ms)</string>
+    <string name="prop_interrupt">Interrupt (ms)</string>
+    <string name="prop_nonzero">Nonzero value</string>
+    <string name="prop_cells">Cells</string>
+    <string name="prop_log_height">Log height</string>
+    <string name="prop_key_width">Key width</string>
+    <string name="prop_octaves">Octaves</string>
+    <string name="prop_hits">Hits</string>
+    <string name="prop_steps">Steps (1-64)</string>
+    <string name="prop_rotation">Rotation</string>
+    <string name="prop_interactive">Tap triggers (1 = yes, 0 = no)</string>
+    <string name="prop_key">Key (1 = C, clockwise fifths; negative = relative minor, -1 = am)</string>
+    <string name="prop_chord_size">Chord size (3 = triad, 4 = seventh)</string>
+    <string name="prop_gridx">Grid columns (1-64)</string>
+    <string name="prop_gridy">Grid rows (1-64)</string>
+
+    <!-- Variable manager -->
+    <string name="action_variables">Variables</string>
+    <string name="var_title">Variables</string>
+    <string name="var_rename">Rename</string>
+    <string name="var_delete">Delete</string>
+    <string name="var_new">New value variable</string>
+    <string name="var_none">No named variables in this patch.\n\nVariables are the names shared between objects:\n[value] [send] [receive] [throw~] [catch~] [table],\nsend~/receive~ pairs, arrays, and the send/receive\nsymbols bound to gui widgets and atoms.</string>
+    <string name="var_uses">Used in %1$d place(s)</string>
+    <string name="var_name_hint">Variable name (no spaces)</string>
+    <string name="var_invalid">Invalid name — use one word, no \';\'</string>
+
+    <!-- Console -->
+    <string name="console_title">Console</string>
+    <string name="console_clear">Clear</string>
+    <string name="console_expand">Expand / shrink console</string>
+    <string name="console_empty">Pd print output appears here.</string>
+    <string name="section_console">Console</string>
+    <string name="console_lines">Console lines (1–30)</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="section_audio">Audio</string>
+    <string name="audio_sample_rate">Sample rate</string>
+    <string name="audio_buffer">Buffer size (ticks of 64 samples)</string>
+    <string name="audio_input">Microphone input ([adc~])</string>
+    <string name="audio_input_summary">Requires microphone permission</string>
+    <string name="audio_apply_hint">Sample rate and buffer take effect the next time audio starts.</string>
+    <string name="midi_summary">Patches read [notein] [ctlin] [bendin]… and write [noteout] [ctlout]… to the selected device.</string>
+    <string name="local_ip">Local IP</string>
+    <string name="local_ip_none">Local IP: (no network)</string>
+    <string name="osc_summary">In: /address args → [r address]. Out: send a list starting with an address to [r OSC].</string>
+    <string name="section_midi">MIDI</string>
+    <string name="midi_enable">MIDI bridge</string>
+    <string name="midi_device">Device</string>
+    <string name="midi_none">None</string>
+    <string name="midi_scan">Refresh devices</string>
+    <string name="midi_ble_scan">Scan for Bluetooth LE MIDI devices</string>
+    <string name="midi_ble_none">Bluetooth LE: none</string>
+    <string name="midi_ble_scanning">Scanning for LE MIDI devices…</string>
+    <string name="midi_ble_off">Bluetooth is off</string>
+    <string name="section_serial">Serial (OTG USB)</string>
+    <string name="serial_enable">Serial bridge</string>
+    <string name="serial_none">None</string>
+    <string name="serial_scan">Refresh serial devices</string>
+    <string name="serial_baud">Baud</string>
+    <string name="serial_summary">Wire → patch: [r tty0]. Lines ON: each newline-terminated line is parsed — a println\'d number arrives as one float, "a 1 2" as a list, a word as a symbol. Lines OFF: every USB read chunk as a raw byte list (0–255). Patch → wire: [s TTY] with a byte value or list, values mod 256. 8N1.</string>
+    <string name="serial_lines">Line framing (parse text lines)</string>
+    <string name="serial_mode_lines">lines</string>
+    <string name="serial_mode_bytes">raw bytes</string>
+    <string name="serial_status_open">Open: %1$s @ %2$d 8N1 — wire → %3$s (%4$s), patch → %5$s</string>
+    <string name="serial_status_closed">Port closed — once open: wire → %1$s (%2$s), patch → %3$s</string>
+    <string name="section_osc">OSC</string>
+    <string name="osc_enable_in">Listen for OSC (UDP)</string>
+    <string name="osc_port_in">Listen port</string>
+    <string name="osc_enable_out">Send OSC replies</string>
+    <string name="osc_host_out">Target host</string>
+    <string name="osc_port_out">Target port</string>
+
+    <!-- Abstractions (externals) -->
+    <string name="section_externals">Abstractions (externals)</string>
+    <string name="section_screen">Screen</string>
+    <string name="bloom_enable">CRT bloom</string>
+    <string name="externals_summary">.pd files here — with [inlet]/[outlet] declaring their ports — can be called by name from any patch, like desktop Pd. The app folder is the import target; the shared folder can also be filled over adb/MTP. New files apply the next time a patch opens.</string>
+    <string name="externals_app_folder">App folder</string>
+    <string name="externals_shared_folder">Shared folder (adb/MTP)</string>
+    <string name="externals_import">Import .pd…</string>
+    <string name="externals_imported">Imported %1$d file(s)</string>
+    <string name="externals_none">No abstraction files yet</string>
+    <string name="externals_remove">Remove</string>
+    <string name="externals_remove_confirm">Remove %1$s from externals?</string>
+    <string name="externals_removed">Removed %1$s</string>
+
+    <!-- Errors / toasts -->
+    <string name="err_parse">Could not parse patch: %1$s</string>
+    <string name="err_audio">Audio error: %1$s</string>
+    <string name="err_mic_permission">Microphone permission needed for audio input</string>
+    <!-- shared-storage working directory (WorkStore) -->
+    <string name="storage_title">Patch storage location</string>
+    <string name="storage_msg">PocketPD now stores patches in /sdcard/pocketPD so they survive app updates and uninstalls. Grant All files access to use that folder; until then patches go to the app-specific folder, which Android erases if the app is uninstalled.</string>
+    <string name="storage_grant">Grant access</string>
+    <string name="storage_later">Later</string>
+    <!-- popmenu properties (complete upstream parameter set) -->
+    <string name="prop_font_size">Font size</string>
+    <string name="prop_output">Output</string>
+    <string name="prop_initial">Initial selection</string>
+    <string name="prop_loadbang">Fire on loadbang</string>
+    <string name="prop_items">Items (one per line)</string>
+    <string name="err_no_editor">Nothing selected</string>
+    <string name="err_import_failed">Import failed</string>
+    <string name="err_storage">Storage is not writable. Patches moved to app-internal storage — please reopen this screen.</string>
+    <string name="save_as_readonly">This file is read-only (bundled example). Saving creates a copy in your patch collection.</string>
+    <string name="ok">OK</string>
+
+    <!-- AI assistant (OpenAI-compatible patch generation in text mode) -->
+    <string name="section_llm">AI assistant</string>
+    <string name="llm_summary">Chat-completions endpoint used by the GEN key in the patch text editor. Anthropic Messages API (default) or OpenAI-compatible; works with Claude, OpenAI, DeepSeek, Ollama/LM Studio (http://localhost:11434/v1/…) and similar servers.</string>
+    <string name="llm_format">API format</string>
+    <string name="llm_endpoint">Endpoint URL</string>
+    <string name="llm_key">API key</string>
+    <string name="llm_model">Model</string>
+    <string name="llm_test">Send test request</string>
+    <string name="llm_testing">Sending test request…</string>
+    <string name="llm_applied">AI settings saved</string>
+    <string name="llm_test_ok">LLM OK, model replied</string>
+    <string name="llm_test_fail">LLM failed: %1$s</string>
+    <string name="ai_prompt_hint">Describe the patch to generate…</string>
+    <string name="ai_send">GEN</string>
+    <string name="ai_stop">STOP</string>
+    <string name="ai_revert">REVERT</string>
+    <string name="ai_think">THINK</string>
+    <string name="ai_chat">CHAT</string>
+    <string name="ai_turns">%d TURNS</string>
+    <string name="ai_new">NEW</string>
+    <string name="ai_ctx">CTX</string>
+    <string name="ai_not_configured">Set endpoint and model in Settings → AI assistant</string>
+    <string name="ai_empty_prompt">Type a prompt first</string>
+    <string name="ai_done">AI patch inserted — REVERT restores the previous text</string>
+    <string name="ai_failed">AI request failed: %1$s</string>
+</resources>

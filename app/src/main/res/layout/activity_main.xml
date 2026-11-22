@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.pocketpd.app.ui.BloomCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/pd98_chrome"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            app:navigationIcon="@null">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                style="@style/Text.PocketPd.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="8dp"
+                android:text="@string/patches_title" />
+
+            <!-- Toolbar lays end-gravity children right-to-left in XML order,
+                 so btn_menu first = menu key rightmost, new key left of it. -->
+            <ImageButton
+                android:id="@+id/btn_menu"
+                android:layout_width="40dp"
+                android:layout_height="36dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="4dp"
+                android:background="@null"
+                android:contentDescription="@string/more_actions"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/ic_more" />
+
+            <ImageButton
+                android:id="@+id/btn_new"
+                android:layout_width="40dp"
+                android:layout_height="36dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="4dp"
+                android:background="@null"
+                android:contentDescription="@string/action_new_patch"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/ic_new_patch" />
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/patch_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="52dp" />
+
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/empty_patches"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:visibility="gone" />
+
+        <!-- FD-3.13 function-key bar: rename / duplicate / delete act on the
+             long-press selection; the keys stay gray until one exists. -->
+        <LinearLayout
+            android:id="@+id/action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/pd98_field"
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <!-- design 05 §1 palette: $D cyan keys left, $B magenta delete
+                 right; dark field labels like the editor add-bar -->
+            <TextView
+                android:id="@+id/key_rename"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginEnd="6dp"
+                android:background="@color/pd98_signal"
+                android:fontFamily="@font/pd98_latin"
+                android:gravity="center"
+                android:paddingHorizontal="14dp"
+                android:text="@string/patch_rename"
+                android:textAllCaps="true"
+                android:textColor="@color/pd98_field"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/key_duplicate"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginEnd="6dp"
+                android:background="@color/pd98_signal"
+                android:fontFamily="@font/pd98_latin"
+                android:gravity="center"
+                android:paddingHorizontal="14dp"
+                android:text="@string/patch_duplicate"
+                android:textAllCaps="true"
+                android:textColor="@color/pd98_field"
+                android:textSize="12sp" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/key_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:background="@color/pd98_edit"
+                android:fontFamily="@font/pd98_latin"
+                android:gravity="center"
+                android:paddingHorizontal="14dp"
+                android:text="@string/patch_delete"
+                android:textAllCaps="true"
+                android:textColor="@color/pd98_field"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- design 05 §4: ONE full-screen CRT scanline layer over everything
+         (the mockups' final url(#scan) rect); non-interactive. -->
+    <View
+        android:id="@+id/scan_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false" />
+</com.pocketpd.app.ui.BloomCoordinatorLayout>

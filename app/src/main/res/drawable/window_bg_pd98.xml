@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Window ground: field black with the CRT scanline texture (1 dark device
+     row per 4-row tile, same rate as the canvas overlay). Sits UNDER all
+     content — visible in list/settings gaps, never over text. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="@color/pd98_field" />
+    </item>
+</layer-list>
