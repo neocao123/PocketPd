@@ -11,8 +11,17 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 302
-    versionName = "0.17.160" // FULL REVERT to the 0.17.157 code content per
+    versionCode = 303
+    versionName = "0.17.161" // [/] and [/~] drew ONE inlet (user report:
+    // "奇怪的/ obj 只有一个 inlet"). PdObjectMeta.resolveObject's lib-prefix
+    // strip ("zexy/lister" -> "lister") ran substringAfter('/') on ANY name
+    // containing a slash - but vanilla's division objects ARE named "/" and
+    // "/~", so the strip produced "" / "~", both defs lookups missed, and
+    // the box fell through to the 1-inlet unknown-class fallback (pd itself
+    // created them fine - drawing-only bug). Fix: strip only when a real
+    // prefix exists (indexOf('/') > 0).
+    //
+    // ---- 0.17.160 (history) FULL REVERT to the 0.17.157 code content per
     // user order ("回到改timer之前") after the 0.17.158/159 clock-watchdog
     // experiment broke pipe/delay pacing and more (user: "大量东西都被你改
     // 失效了，你现在的行为太危险了"). REMOVED entirely: libpdclock.so (4

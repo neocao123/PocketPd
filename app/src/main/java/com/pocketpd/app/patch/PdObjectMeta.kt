@@ -1573,8 +1573,13 @@ object PdObjectMeta {
         // the registered class keeps its bare name, so defs / abstraction
         // ports / the known-class set are all keyed bare. Without this the
         // editor drew every prefixed compiled class red ("爆红不识别") even
-        // though pd created it fine.
-        val bare = if (name.contains('/')) name.substringAfter('/') else name
+        // though pd created it fine. Strip only when a real prefix exists:
+        // vanilla's [/] (division) and [/~] have a slash AS the name —
+        // substringAfter('/') on those yields "" / "~", both lookups miss,
+        // and the box fell through to the 1-inlet unknown fallback
+        // (user report: "奇怪的/ obj 只有一个 inlet").
+        val slash = name.indexOf('/')
+        val bare = if (slash > 0) name.substring(slash + 1) else name
         val twoWord =
             if (args.size > 1 && bare in TWO_WORD_PREFIXES) "$bare ${args[1]}" else null
         // variable-port classes first (a static defs row must never shadow
