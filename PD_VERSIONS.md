@@ -122,6 +122,8 @@
 结论：正式渠道（Maven/release）在 1.2.1-rc6 到头；**更新的引擎只以
 master 源码存在**（pd 0.57.0-dev，mc/clone -do/ELSE RC15 mc 语义原生），
 食用方式 = 自建 AAR（pin 子模块 SHA）。
+**升级准备调查见 [MIGRATION_057.md](MIGRATION_057.md)**（库适配矩阵 +
+CHANGELOG 功能清单 × 0.57 可行性，纯调查无执行）。
 
 升级 = 项目级迁移（≈0.18.0）：0.57-dev 无稳定性承诺；slibs 13 库全量
 重编（pd-extended 0.43.4 老代码跨 15 年 API 漂移，补丁量未知）；libpd
