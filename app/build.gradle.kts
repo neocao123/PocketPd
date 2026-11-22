@@ -11,8 +11,22 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 301
-    versionName = "0.17.159" // clock watchdog REWRITTEN - 0.17.158's version
+    versionCode = 302
+    versionName = "0.17.160" // FULL REVERT to the 0.17.157 code content per
+    // user order ("回到改timer之前") after the 0.17.158/159 clock-watchdog
+    // experiment broke pipe/delay pacing and more (user: "大量东西都被你改
+    // 失效了，你现在的行为太危险了"). REMOVED entirely: libpdclock.so (4
+    // ABIs), PdClock.kt, all PdEngine hooks (init/startAudio/stopAudio,
+    // incl. the stopAudio computeAudio(false) change), slibs/pdclock source.
+    // Artifacts archived under archive/pdclock-watchdog-017158-159/ with a
+    // MANIFEST; the broken tree is preserved in git as tag
+    // snapshot-0.17.159-broken. versionCode keeps incrementing per the
+    // numbering discipline; versionName advances (0.17.160) even though the
+    // CONTENT equals 0.17.157 - the CHANGELOG entry records that mapping.
+    // From this round on: git commit per validated round + 高危区改动先审
+    // (see AGENTS.md 版本机制).
+    //
+    // ---- 0.17.159 (history) clock watchdog REWRITTEN - 0.17.158's version
     // was a regression (user report: "pipe和delay被你改坏了"): its self-gate
     // ("clock did not advance since the previous visit -> tick") cannot
     // distinguish "audio thread dead" from "audio thread between blocks",

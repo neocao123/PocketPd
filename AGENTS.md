@@ -106,6 +106,30 @@
   "之前的配置"这类相对表述必须先确认指向哪个版本再动手；换数据集必须
   逐条对照用户指令；每轮动手前先对照本节逐条自查。
 
+## 版本机制（2026-11-22 用户明令，永久生效）：git 每轮一提交 + 高危改动先审
+
+背景：0.17.158 看门狗回归（pipe/delay 被拉快）且用户判定"大量东西被改
+失效、agent 行为太危险"，下令回到改 timer 之前并建立版本机制。本节为
+对 agent 的硬性约束。
+
+- **git 每轮一提交**：每轮改动构建验收（aapt 版本核对 + 装机 dumpsys
+  核对）通过后，立即 `git commit`，消息格式
+  `v<versionCode>/<versionName> <主题>`，与 CHANGELOG 一一对应。
+  回退一律走 git（checkout/revert），**保留历史、不改写**；回退轮
+  versionCode 照常 +1、versionName 递增，CHANGELOG 注明
+  "内容 = <某版本>"。
+- **高危区改动先审后动**：凡触碰音频引擎生命周期（PdAudio/PdEngine 的
+  start/stop/computeAudio/initAudio）、pd 调度与逻辑时钟（sched_tick、
+  看门狗类常驻线程）、native 层（jniLibs 新增 .so、libpd 内部调用）、
+  会话构建管线（buildInteractiveSession 及其改写）的改动，动手前
+  **必须先向用户提交方案并获明确同意**，严禁随其他 bug 修复顺手携带；
+  **一次交付只含一个主题**。
+- **用户报"改坏了"的固定动作**：先 git 回退到上一个用户验收过的版本
+  并交付验证，再离线分析坏版本；**严禁在已知有害的版本上继续叠加
+  新修复**。
+- .gitignore：app/build/、.gradle、local.properties、archive/（与归档
+  禁令一致）不进版本管理；git 仓库仅本地，不推远端。
+
 ## 其他持久约束
 
 - 不要乱截图触发多模态成本；验证一律用 logcat / dumpsys / uiautomator dump

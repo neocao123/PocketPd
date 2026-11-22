@@ -473,13 +473,6 @@ object PdEngine {
         if (PdTweaks.available) PdTweaks.setLoadbangEnabled(true)
         // Touch a trivial native call so the JNI library is loaded up front.
         synchronized(PdBase::class.java) { PdBase.clearSearchPath() }
-        // Clock watchdog (0.17.159): libpd advances pd's logical time only
-        // inside the audio render callback, so without a render thread
-        // ([timer]/[delay]/[metro]/[pipe] measure nothing). Audio-off is the
-        // process's initial state: arm the watchdog here; startAudio/stopAudio
-        // mirror it from then on. The watchdog advances by real elapsed wall
-        // time and stays idle once the render thread owns the clock.
-        PdClock.start()
     }
 
     // ------------------------------------------------------------------ audio
@@ -503,26 +496,13 @@ object PdEngine {
             log("WARNING: media volume is 0 - raise the volume to hear output")
         }
         PdAudio.startAudio(ctx)
-        // render thread owns the clock again: retire the watchdog only AFTER
-        // a successful start - on failure it must keep running, or a failed
-        // audio init would freeze logical time (the 0.17.157-era timer bug)
-        PdClock.stop()
         // pd's own DSP switch: PdAudio ticks the scheduler, but signal
         // objects stay idle until "compute audio" is on (desktop pd's DSP
         // toggle — without this every ~ object runs silent)
         synchronized(PdBase::class.java) { PdBase.computeAudio(true) }
     }
 
-    fun stopAudio() {
-        PdAudio.stopAudio()
-        // pd's own dsp switch off with the render thread gone: the signal
-        // graph releases instead of being silently re-run at block rate by
-        // the clock watchdog (startAudio re-arms it)
-        synchronized(PdBase::class.java) { PdBase.computeAudio(false) }
-        // render thread gone: the watchdog advances pd's logical clock to
-        // wall time so [timer]/[delay]/[metro]/[pipe] keep measuring
-        PdClock.start()
-    }
+    fun stopAudio() = PdAudio.stopAudio()
 
     fun isAudioRunning(): Boolean = try { PdAudio.isRunning() } catch (t: Throwable) { false }
 
