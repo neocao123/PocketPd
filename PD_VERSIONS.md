@@ -110,6 +110,26 @@
     类本来就不工作）。
 - 帮助补丁里出现的失配对象**不是运行时坏了**，是素材版本超前。
 
+## 五A、运行时升级路径取证（2026-11-23）
+
+| 生态线 | 最新状态 | 内核 pd |
+|---|---|---|
+| Maven `io.github.libpd.android:pd-core` | 1.2.1-rc6（2021-04-19）= 该坐标**最后一版**，此后未再发布 | 0.51.3 |
+| `libpd/pd-for-android` GitHub releases | 停在 1.1.0（2018-07） | — |
+| `libpd/libpd` 本体 | 不发 release（tags 停在 0.16.1 旧线） | — |
+| **`libpd/pd-for-android` master** | **1.4.4-SNAPSHOT，活跃（2026-11-16）** | **0.57.0-dev**（子模块链：pd-for-android → libpd@e3cd52fd7517 → pure-data@43a5b8922a35，m_pd.h 版本宏实测） |
+
+结论：正式渠道（Maven/release）在 1.2.1-rc6 到头；**更新的引擎只以
+master 源码存在**（pd 0.57.0-dev，mc/clone -do/ELSE RC15 mc 语义原生），
+食用方式 = 自建 AAR（pin 子模块 SHA）。
+
+升级 = 项目级迁移（≈0.18.0）：0.57-dev 无稳定性承诺；slibs 13 库全量
+重编（pd-extended 0.43.4 老代码跨 15 年 API 漂移，补丁量未知）；libpd
+内部机制（canvas_getcurrent 绑定、loadbang、sys_noloadbang 导出）需重新
+反汇编核实；app 侧围绕 0.51.3 的机制（clone 内联、前缀剥离、单声道
+替代版、initmess 旗标替换、lazy-boot 时序）拆除。不迁移则在 0.51.3 上
+走 elsex de-mc 路线（16 类全部单声道特化，零剔除——见"修而不删"规则）。
+
 ## 六、历史误判纠错（时间线）
 
 | 轮次 | 当时结论 | 现在的裁定 |
