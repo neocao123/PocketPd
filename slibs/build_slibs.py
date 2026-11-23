@@ -205,15 +205,25 @@ LIBS = [
     ("cxc", dict(
         src=["cxc"], support=[], inc=["cxc"],
     )),
+    # mrpeach current (0.18.17): the library moved to github pd-externals;
+    # the umbrella repo pd-externals/mrpeach carries osc/midifile/binfile
+    # as SUBMODULES - the object sources live in pd-externals/{osc,binfile,
+    # midifile} (cloned to mrpeach-*). Real upstream drift vs the 0.43.4
+    # snapshot: packOSC 1593->1433 lines, unpackOSC 693->631, midifile
+    # 1603->2192, binfile 364->361. The umbrella's other families (net =
+    # tcpsend/tcpreceive..., cmos, life2x, flist2tab, op~, slip) are NOT
+    # shipped - the 0.51 baseline never carried them (parity).
     ("osc", dict(
-        src=["mrpeach/osc"], support=[], inc=["mrpeach/osc"],
-        excl=["osc-help.pd"],
+        src=[SRCROOT + "/mrpeach-osc"], support=[],
+        inc=[SRCROOT + "/mrpeach-osc"],
     )),
     ("midifile", dict(
-        src=["mrpeach/midifile"], support=[], inc=["mrpeach/midifile"],
+        src=[SRCROOT + "/mrpeach-midifile"], support=[],
+        inc=[SRCROOT + "/mrpeach-midifile"],
     )),
     ("binfile", dict(
-        src=["mrpeach/binfile"], support=[], inc=["mrpeach/binfile"],
+        src=[SRCROOT + "/mrpeach-binfile"], support=[],
+        inc=[SRCROOT + "/mrpeach-binfile"],
     )),
     # PocketPd's own tracker library (XM/MOD sequencer + wav player);
     # sources live in the repo, not the pd-extended tree

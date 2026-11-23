@@ -785,7 +785,11 @@
 | `susloop~(else 抢名,bare 不可达)` | 4 | 1 | 0 | 0 | 源码核对 |
 | `svf~(cyclone 抢名,bare 不可达)` | 3 | 4 | 0,1,2 | 0,1,2,3 | 源码核对 |
 
-### osc(4 类,0.17.142 源码核对)
+### osc(
+> **0.18.17(pd-externals 现版换版)增补**——osc/midifile/binfile 三件套
+> 源码对 pd-externals 现版重编:packOSC/unpackOSC/midifile 大幅改写,但
+> 类集与端口 io 经 audit_io 逐类核对**零漂移**,本表全部行继续有效。
+4 类,0.17.142 源码核对)
 
 | 对象 | 进 | 出 | 信号进 | 信号出 | 来源 |
 |---|---|---|---|---|---|

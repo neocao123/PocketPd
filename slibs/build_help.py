@@ -37,9 +37,9 @@ TREES = [
     ("bsaylor", EX + "/bsaylor", True),
     ("creb", EX + "/creb/doc", True),
     ("cxc", EX + "/cxc", True),
-    ("osc", EX + "/mrpeach/osc", True),
-    ("midifile", EX + "/mrpeach/midifile", True),
-    ("binfile", EX + "/mrpeach/binfile", True),
+    ("osc", SRC + "/mrpeach-osc", True),
+    ("midifile", SRC + "/mrpeach-midifile", True),
+    ("binfile", SRC + "/mrpeach-binfile", True),
     # fftease 3.0.1 (0.18.14): upstream helpfiles ship with the sources;
     # pvgrain~-help.pd references Piano.aif (copied from sound/ after this
     # tree runs - see the MEDIA post-pass below, only help dir is on the pd

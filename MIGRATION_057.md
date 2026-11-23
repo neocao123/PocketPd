@@ -2,7 +2,7 @@
 
 ## ★ 当前进度与下一步（2026-11-24，round 4 后更新）
 
-**分支状态**：`0.57` 分支。设备在装 v320/0.18.16。0.51 主线冻结于
+**分支状态**：`0.57` 分支。设备在装 v321/0.18.17。0.51 主线冻结于
 `freeze-0.51-base`（= 0.17.161/vc303）。
 
 **已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.13）：
@@ -54,7 +54,10 @@ help 自身接线的显示噪音（桌面 pd 同样会报），非故障。
    git.iem.at 即可——墙挡浏览器不挡 git，2.4.4 master 5521523；io 零
    漂移 +envvar/-abs~，lpt 走上游自带 Z_WANT_LPT=0 stub，help 换
    reference/ 76 补丁）；
-4. mrpeach 重编（预期漂移小）。
+4. ~~mrpeach 重编~~ ✅ 0.18.17/321 完成（github pd-externals/{osc,
+   binfile,midifile}；伞形仓 mrpeach 挂 submodule；packOSC/unpackOSC/
+   midifile 实质改写，类集/io 零漂移；net/cmos/life2x/op~/slip 不随船 =
+   parity）。**任务一全部完成。**
 每库一轮：换源 → 试编 → 修补（修而不删）→ Slibs.VERSION bump →
 装机 → CHANGELOG → commit。
 

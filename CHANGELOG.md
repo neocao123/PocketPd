@@ -7,6 +7,25 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.17 (versionCode 321) — 2026-11-24 【0.57 分支 round 8:mrpeach 三件套快照 → pd-externals 现版重编】
+
+**任务一换版轮收官。** osc/midifile/binfile 的上游已从 pd-extended SVN
+搬到 GitHub：伞形仓 `pd-externals/mrpeach` 把三件套挂为 **submodule**，
+对象源实际住在 `pd-externals/{osc,binfile,midifile}`（分别克隆到
+`%TEMP%/srcrepo/mrpeach-*`）。0.43.4 快照退役。
+
+**实质漂移**（0.43.4 → 现版）：packOSC 1593→1433 行、unpackOSC
+693→631、midifile 1603→2192、binfile 364→361。**类集零增减**（osc 4 =
+packOSC/unpackOSC/routeOSC/pipelist；midifile 1；binfile 1），
+audit_blobs 六项全绿，audit_io 对 PdObjectMeta **零漂移**（三件套端口
+行全部照旧成立）。
+
+**范围纪律**：伞形仓的其它家族（net 的 tcpsend/tcpreceive 家族、cmos、
+life2x、flist2tab、op~、slip）**不随船**——0.51 基线从未带过（parity），
+留作可选后续轮。help 从三个新仓刷新（osc 6 / midifile 1 / binfile 1）。
+
+**验收**：aapt = 321/0.18.17；GM800 force-stop + install + dumpsys 复核。
+
 ## 0.18.16 (versionCode 320) — 2026-11-24 【0.57 分支 round 7:iemlib 快照 → 1.17 master 重编】
 
 **任务一换版轮第四击。** 源码 = git.iem.at/pd/iemlib master Release

@@ -29,9 +29,9 @@ LIBS = {
     "cxc": ["cxc"],
     "fftease": ["../../fftease"],
     "bsaylor": ["bsaylor"],
-    "osc": ["mrpeach/osc"],
-    "midifile": ["mrpeach/midifile"],
-    "binfile": ["mrpeach/binfile"],
+    "osc": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/mrpeach-osc"],
+    "midifile": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/mrpeach-midifile"],
+    "binfile": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/mrpeach-binfile"],
     "tracker": [r"C:/Projects/26PDAndroid/slibs/tracker/src"],
     # cyclone 0.9-5 (0.18.13 audit redo): binaries/ carries cyclone_lib.c at
     # its top level; cfiles() yields plain file paths directly

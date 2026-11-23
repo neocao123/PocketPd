@@ -11,8 +11,21 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 320
-    versionName = "0.18.16" // ---- 0.57 BRANCH round 7: iemlib swapped
+    versionCode = 321
+    versionName = "0.18.17" // ---- 0.57 BRANCH round 8: mrpeach trio swapped
+    // osc/midifile/binfile: pd-extended 0.43.4 snapshot -> github
+    // pd-externals current. The umbrella repo pd-externals/mrpeach carries
+    // them as SUBMODULES - sources live in pd-externals/{osc,binfile,
+    // midifile} (cloned separately). Real upstream drift: packOSC
+    // 1593->1433 lines, unpackOSC 693->631, midifile 1603->2192, binfile
+    // 364->361 - class sets unchanged (osc 4, midifile 1, binfile 1),
+    // audit_blobs clean, zero io drift vs PdObjectMeta (audit_io). The
+    // umbrella's extra families (net tcpsend/tcpreceive, cmos, life2x,
+    // flist2tab, op~, slip) NOT shipped - the 0.51 baseline never carried
+    // them (parity; optional follow-up). help refreshed from the new
+    // repos (osc 6 / midifile 1 / binfile 1 patches).
+    //
+    // ---- 0.18.16 (0.57 history) round 7: iemlib swapped
     // pd-extended snapshot -> git.iem.at/pd/iemlib master 1.17 (proxied
     // clone). Class set IDENTICAL (100, no adds/losses - the pd-extended
     // snapshot was already the merged-layout tree), zero io drift (audit_io

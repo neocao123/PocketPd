@@ -25,8 +25,16 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 144: 0.57 branch
-     *  (0.18.16) - iemlib swapped pd-extended snapshot -> git.iem.at
+    /** Bump to re-extract after an assets/slibs update. 145: 0.57 branch
+     *  (0.18.17) - mrpeach trio (osc/midifile/binfile) swapped pd-extended
+     *  0.43.4 snapshot -> github pd-externals current (the umbrella repo
+     *  mrpeach carries them as SUBMODULES: pd-externals/{osc,binfile,
+     *  midifile}): real drift (packOSC 1593->1433 lines, unpackOSC
+     *  693->631, midifile 1603->2192), class sets unchanged, zero io
+     *  drift; umbrella's extra families (net/cmos/life2x/flist2tab/op~/
+     *  slip) NOT shipped (baseline parity); help refreshed from the new
+     *  repos.
+     *  144: 0.57 branch (0.18.16) - iemlib swapped pd-extended snapshot -> git.iem.at
      *  master 1.17 (same proxied clone as zexy): class set identical
      *  (100), zero io drift, iem_pbank_csv const patch dropped (fixed
      *  upstream), abs/ refreshed to the 165 upstream abstractions (old
@@ -58,7 +66,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 144
+    private const val VERSION = 145
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2
