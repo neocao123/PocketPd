@@ -1,10 +1,69 @@
 # PocketPd 版本记录 / Changelog
 
-基于 libpd (`io.github.libpd.android:pd-core:1.2.1-rc6`) 的 Android 可视化
-Pure Data 编辑器。本文件自 0.6.2 起专门维护版本历史;签名组织 EUfON
-(`app/eufon.keystore`,alias `eufon`)。注意:slibs 编译头主线用 pd-0.51-4,
-运行时 pd 内核为 **pd 0.51.3**(libpd.so banner 实证;0.17.70 的"0.55 系"
-系误判,已在 0.17.161 纠正)。版本考古详见 `PD_VERSIONS.md`。
+Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目起）运行时
+内核 = pd 0.57.0test1**(自建 AAR,详见下);**0.51 主线(master/0.51 分支,
+0.17.161,vc303)已冻结于 tag `freeze-0.51-base`**,其内核为 pd 0.51.3
+(Maven `io.github.libpd.android:pd-core:1.2.1-rc6`)。签名组织 EUfON
+(`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
+迁移计划与验收清单详见 `MIGRATION_057.md`。
+
+## 0.18.0 (versionCode 304) — 2026-11-23 【0.57 分支 round 1:引擎置换】
+
+**W0 地基（MIGRATION_057.md §7）:只换内核,库矩阵不动——vanilla 冒烟轮。**
+
+用户指令:"现有基于0.51的版本冻结。新建分支基于0.57(注意代码上对0.51的
+不要搞丢,保留好)。根据之前调查的结果(几个md文档总结),开始工作。"
+
+- **git**:0.51 基线冻结 = tag `freeze-0.51-base`(master/0.51 分支均停在
+  7cea1d1,已推 GitHub);新分支 `0.57` 自该点开出,本轮为其首个提交。
+- **引擎**:依赖从 Maven `io.github.libpd.android:pd-core:1.2.1-rc6`
+  (pd 0.51.3,该坐标 2021 后绝版)切换为**自建 AAR**——pd-for-android
+  master,pin 子模块链 libpd@e3cd52fd7517 → pure-data@43a5b8922a35
+  (m_pd.h 实测 = **pd 0.57.0test1**)。AAR 在 `C:/Projects/pd-for-android`
+  构建(工作区之外,不进本仓),以 mavenLocal 坐标
+  `io.github.libpd.android:pd-core:1.4.4-SNAPSHOT` 消费
+  (settings.gradle.kts 增 mavenLocal())。
+- **自建 AAR 的本地偏差(全部记录在 build 与 MIGRATION_057.md)**:
+  1. **minSdk 28→26**(用户决定:保留安卓 8.0+ 支持面)。这暴露了一个
+     硬约束:上游 minSdk=28 不是随意的——bionic 的 `glob()` 只在
+     API 28 存在,而 pd 0.57 的 `x_file.c`([file glob])在非 Windows
+     平台无条件调用它。**处置 = glob shim**(新文件 `jni/glob_compat.h/c`
+     + libpd/Android.mk 两个局部编辑):API<28 编译时用 dirent+fnmatch
+     实现_subset_(段级展开/FNM_PERIOD 点文件语义/排序/尾斜杠=仅目录),
+     pd 源码零改动,pin 的 SHA 不受影响;API≥28 自动回落 bionic。
+  2. NDK 29→27.2.12479018(本机已装链)。
+  3. AGP 9 的 javadoc 任务 `android.sdkDirectory` 配置期 IOException →
+     android.jar 路径硬编码 + failOnError=false(javadoc jar 仅
+     mavenLocal 发布手续,app 不消费)。
+  4. PdCore `local.properties` 指向本机 SDK。
+- **W0.3 核查清单(对新 libpd.so 静态核查,结果入 PD_VERSIONS.md)**:
+  banner `Pd-0.57.0`;clone 用法串 = `usage: clone [flags] <name>
+  <number>`(0.57 原生旗标体系,mc 通道数失配警告串在);`multichannel`
+  串 2 次(0.51.3 为 0 次);**10 项关键导出全部在**(sys_noloadbang /
+  sys_getsr / sys_getblksize / sched_tick / clock_getlogicaltime /
+  signal_setmultiout / pdgui_vmess / sys_gui / sys_vgui /
+  canvas_getcurrent)——PdTweaks(sys_noloadbang dlsym)与 elsex 的
+  pdgui_vmess 垫片都有对应符号可查。canvas_getcurrent 的 "pd" 绑定
+  语义、懒启动时序、dsp 沿行为留待 W0.5 设备实测。
+- **W0.4 Java API 机械 diff(javap 老/新 AAR)**:PdBase **零移除**
+  (新增 versionString/setVerbose/audioRuntimeInfo);PdAudio 零移除
+  (新增 setDevicesId/setBufferSizeInFrames/setAutoReopen)。**app 侧
+  Kotlin 零改动编译通过**。
+- **运行时层重大变化(行为,非编译)**:1.4.x 的 PdBaseLoader 在 Android
+  上加载 `pd` + `pdnativeoboe` → `implementsAudio()=true` → PdAudio 走
+  **原生 oboe 音频**(PdBase.startAudio/pauseAudio,无 Java AudioWrapper
+  线程);pd 消息经主线程 Handler 5ms 泵。app 自己的 poller(PdEngine
+  pollRunner,0.15.x 起独立于音频状态)与该模型同构,消息通路无损。
+  AudioOpen 三态(0.17.110)监视的对象从 Java 线程变为原生 start/pause
+  ——语义保留,参数按 W0.5 实测调。
+- **验收**:`aapt dump badging` = versionCode 304 / versionName 0.18.0 /
+  minSdk 26;APK 内 lib/arm64-v8a/libpd.so banner = `Pd-0.57.0`;4 ABI
+  (arm64-v7a/x86/x86_64)齐全含 oboe+pdnativeoboe;GM800(Android 11)
+  `install -r` + dumpsys 复核 304/0.18.0。
+- **本轮接受的中间态(已知,勿当回归报)**:slibs 仍是 0.51-4 头编译的
+  旧 .so——0.57 的 t_signal 布局变了(s_nchans 插入,s_refcount 位移),
+  信号类 external 可能读错字段。**phase 2(0.18.1)全量重编**后才谈
+  slibs 行为;本轮冒烟目标 = vanilla 控制对象 + 基础信号链。
 
 ## 0.17.161 (versionCode 303) — 2026-11-22
 

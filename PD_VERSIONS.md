@@ -132,6 +132,47 @@ CHANGELOG 功能清单 × 0.57 可行性，纯调查无执行）。
 替代版、initmess 旗标替换、lazy-boot 时序）拆除。不迁移则在 0.51.3 上
 走 elsex de-mc 路线（16 类全部单声道特化，零剔除——见"修而不删"规则）。
 
+### 五A-1、0.57 自建 AAR 实录（0.18.0/304，0.57 分支 round 1）
+
+**已执行**（2026-11-23）：pd-for-android master @ 2026-11-23，
+pin libpd@e3cd52fd7517 → pure-data@43a5b8922a35 = **pd 0.57.0test1**；
+构建树 `C:/Projects/pd-for-android`（工作区外），Gradle 9.9.2 + AGP
+9.0.1 + NDK 27.2 + minSdk 26（用户决定保安卓 8.0+）；产物以 mavenLocal
+坐标 `io.github.libpd.android:pd-core:1.4.4-SNAPSHOT` 消费。
+
+**W0.3 静态核查（arm64 libpd.so）**：
+
+| 项 | 结果 | 对比 0.51.3 |
+|---|---|---|
+| banner | `Pd-0.57.0` | `Pd-0.51.3` |
+| clone 用法串 | `usage: clone [flags] <name> <number>`（旗标体系） | 只有 `-s` |
+| mc 通道失配警告串 | 有（`channel count of outlet … does not match first instance`） | 无 |
+| `multichannel` 串 | 2 次 | 0 次 |
+| sys_noloadbang / sched_tick / clock_getlogicaltime | **导出** | 导出（PdTweaks 依赖） |
+| sys_getsr / sys_getblksize | **导出** | 导出 |
+| signal_setmultiout | **导出**（elsex mc 类原生 API） | 无此符号（0.17.137 曾垫片 no-op） |
+| pdgui_vmess / sys_gui / sys_vgui | **导出** | 导出（0.17.137 knob 桥依据） |
+| canvas_getcurrent | 导出（"pd" 绑定语义待 W0.5 反汇编/压测） | "pd" 符号绑定查表 |
+
+**t_signal 布局（0.57 头，m_pd.h:721）**：`{union{s_length|s_n}, s_vec,
+s_sr, s_nchans, s_overlap, s_refcount, s_isborrowed, s_isscalar,
+s_borrowedfrom, …}`——s_nchans 插入 + s_refcount 位移 ⇒ **0.51-4 头编译
+的旧 slibs .so 在 0.57 上读错字段**，phase 2（0.18.1）全量重编是硬前提；
+这也是 §四矛盾 1 的终裁：0.17.134 当年"反汇编看到 s_nchans@24"读的
+offset 在 0.57 布局里指向别的东西，矛盾解除。
+
+**运行时音频层（W0.4）**：PdBaseLoader 加载 `pd` + `pdnativeoboe` →
+implementsAudio()=true → PdAudio 走原生 oboe（PdBase.startAudio/pauseAudio，
+无 Java AudioWrapper）；0.51.3 的 1.2.1-rc6 是 Java AudioWrapper+
+opensl_stream。消息泵：app 自带 5ms 主线程 poller（先于迁移存在），
+通路无损。Java API：PdBase/PdAudio 对 app **零移除、纯增量**
+（javap 机械 diff），app 侧 Kotlin 零改动。
+
+**glob shim**（minSdk 26 的代价）：bionic `glob()` 仅 API 28+，
+pd 0.57 `x_file.c` 无条件调用 → 构建树新增 `jni/glob_compat.h/c`
+（dirent+fnmatch 实现 flags=0 语义），Android.mk 局部编辑，pd 源码零改动；
+API≥28 编译时自动回落 bionic。
+
 ## 六、历史误判纠错（时间线）
 
 | 轮次 | 当时结论 | 现在的裁定 |

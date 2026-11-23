@@ -11,8 +11,30 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 303
-    versionName = "0.17.161" // [/] and [/~] drew ONE inlet (user report:
+    versionCode = 304
+    versionName = "0.18.0" // ---- 0.57 BRANCH round 1 (W0 地基): ENGINE SWAP.
+    // Replaced libpd 1.2.1-rc6 (pd 0.51.3, Maven, last formal release 2021)
+    // with a self-built AAR from pd-for-android master pinned at
+    // libpd@e3cd52fd7517 -> pure-data@43a5b8922a35 = pd 0.57.0test1
+    // (mavenLocal coordinate io.github.libpd.android:pd-core:1.4.4-SNAPSHOT).
+    // Local build deviations, all documented (MIGRATION_057.md W0.1/W0.2):
+    // minSdk 28->26 (user decision: keep Android 8.0+; bionic glob exists
+    // only since API 28 and pd 0.57 x_file.c needs glob -> shipped a
+    // glob_compat shim compiled into the pd module for API<28 builds), NDK
+    // 29->27.2 (installed toolchain), AGP-9 javadoc sdkDirectory workaround.
+    // W0.3 static checks on the new libpd.so: banner Pd-0.57.0, clone
+    // "usage: clone [flags]", multichannel strings present, ALL 10 key
+    // exports present (sys_noloadbang/sched_tick/clock_getlogicaltime/
+    // signal_setmultiout/pdgui_vmess/sys_gui/sys_vgui/...). Runtime layer
+    // is now NATIVE oboe audio (PdBaseLoader loads pdnativeoboe;
+    // implementsAudio()=true -> PdAudio drives start/pause natively and
+    // pd messages flow via the app's own 5ms poller, which predates this
+    // switch). KNOWN INTERIM LIMITS accepted in this round: slibs are still
+    // the 0.51-4-header builds (phase 2 = 0.18.1 rebuilds them against 0.57;
+    // mc-era signal classes may misbehave until then - vanilla is the smoke
+    // target). 0.51 line frozen at tag freeze-0.51-base (=0.17.161, vc303).
+    //
+    // ---- 0.17.161 (0.51 history) [/] and [/~] drew ONE inlet (user report:
     // "奇怪的/ obj 只有一个 inlet"). PdObjectMeta.resolveObject's lib-prefix
     // strip ("zexy/lister" -> "lister") ran substringAfter('/') on ANY name
     // containing a slash - but vanilla's division objects ARE named "/" and
@@ -614,8 +636,14 @@ android {
 }
 
 dependencies {
-    // libpd for Android: Pure Data runtime (audio + .pd interpreter, all ABIs)
-    implementation("io.github.libpd.android:pd-core:1.2.1-rc6")
+    // libpd for Android: Pure Data runtime (audio + .pd interpreter, all ABIs).
+    // 0.18.0 (0.57 branch): switched from Maven 1.2.1-rc6 (pd 0.51.3, last
+    // formal release, 2021) to the SELF-BUILT AAR from pd-for-android master,
+    // pinned libpd@e3cd52fd7517 -> pure-data@43a5b8922a35 = pd 0.57.0test1.
+    // Built in C:/Projects/pd-for-android (local deviations: minSdk 26, NDK
+    // 27.2, glob shim for API<28 - see MIGRATION_057.md W0.1/W0.2); consumed
+    // via mavenLocal as io.github.libpd.android:pd-core:1.4.4-SNAPSHOT.
+    implementation("io.github.libpd.android:pd-core:1.4.4-SNAPSHOT")
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
