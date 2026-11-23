@@ -7,6 +7,31 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.4 (versionCode 308) — 2026-11-24 【0.57 分支 round 3c:十六进制转义 setup 名终于被调用】
+
+**用户诊断先行并一击命中:"rand.f 引发的问题,rand.i 和 rand.u 也有"**
+（arp → else/tempo → rand.f 链的最后一环,前两环已由 0.18.3 修掉）。
+
+**根因（构建器层,通用性缺陷）**:pd 对含非标识符字符的类名做符号转义
+——`rand.f` 的注册函数是 `setup_rand0x2ef`（`.`→`0x2e`）,**不以后缀
+`_setup` 结尾**。build_slibs.py 的**对象主循环**收集 core_wrap 调用清单
+时只用 `endswith("_setup")` 过滤 → 所有 `setup_` 前缀拼写被静默丢弃:
+这些类在 core_classes.txt 里有名字（收集器的类扫描是另一套逻辑）、会话
+内联也正常,但**注册函数从未被调用** → pd 层 couldn't create。受影响面
+= 所有带点/横线类名:rand.f/rand.i/rand.u/rand.seq 等。zexy 的
+support_setups 分支（0.17.81 的注册失明教训）早就两种拼写同收,对象循环
+没跟上——同一类坑的第二处。
+
+**修复** = 对象循环过滤条件改为 `endswith("_setup") or
+startswith("setup_")`（与 support 分支对齐）。else 核 core_wrap 调用数
+约 150 → **289**;链接零失败（直调符号缺失会直接 CORE LINK FAIL,本次
+通过即证明全部在位）;audit 两 ABI 零未解析;`setup_rand0x2ef` 字符串在
+新 blob 中确认。Slibs.VERSION 137→138。
+
+**验收**:aapt = 308/0.18.4;GM800 install -r + dumpsys 复核。本轮与
+0.18.3 一起构成 arp 链的完整修复（0.18.3 修 else/count 等前缀抽象
+内联,0.18.4 修 rand.f 注册）。
+
 ## 0.18.3 (versionCode 307) — 2026-11-24 【0.57 分支 round 3b:`else/` 前缀抽象引用复活】
 
 **用户 0.18.2 冒烟:arp 仍 couldn't-create。** 代码级根因:

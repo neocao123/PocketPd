@@ -11,8 +11,25 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 307
-    versionName = "0.18.3" // ---- 0.57 BRANCH round 3b: else/ prefixed
+    versionCode = 308
+    versionName = "0.18.4" // ---- 0.57 BRANCH round 3c: hexmangled setup
+    // names now called. USER DIAGNOSIS (they pinned it before I could):
+    // rand.f/rand.i/rand.u fail to create, inside else/tempo (arp chain).
+    // Root cause: pd hexmangles non-identifier class names - rand.f's
+    // registration function is setup_rand0x2ef ("." -> 0x2e), which does
+    // NOT end in "_setup". build_slibs.py's OBJECT loop collected setup
+    // calls with an endswith("_setup") filter ONLY, so every setup_-
+    // PREFIXED spelling was silently dropped from the core_wrap call list:
+    // the classes were listed in core_classes.txt (and inlined fine by the
+    // session builder) but their registration functions never ran ->
+    // couldn't create at pd level. The support_setups branch (zexy,
+    // 0.17.81) already accepted both spellings; the object loop now does
+    // too. else wrap went from ~150 to 289 setups called. Everything else
+    // in arp already worked (0.18.3's locate fix handled count/swap2/
+    // makenote2 via inline; else/tempo's rand.f was the last blocker).
+    // Slibs.VERSION 137 -> 138.
+    //
+    // ---- 0.18.3 (0.57 history) round 3b: else/ prefixed
     // abstraction refs resolve again. User smoke of 0.18.2: arp still
     // couldn't-create. Root cause (code-level): Abstractions.locate mapped
     // `lib/name` to <dir>/lib/name.pd, but for the else lib the search dir

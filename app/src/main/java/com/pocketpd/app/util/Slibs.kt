@@ -25,11 +25,13 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 137: 0.57 branch
-     *  (0.18.2) - vintage else_core.so REPLACED by the full ELSE RC15
-     *  build (slibs/else-src/full, ~390 objects, native mc API, vendored
-     *  opus/aubio/FluidLite/SF3 chain); manifest 1436 -> 2039. */
-    private const val VERSION = 137
+    /** Bump to re-extract after an assets/slibs update. 138: 0.57 branch
+     *  (0.18.4) - core_wrap setup-call list now accepts BOTH pd setup
+     *  spellings: classes with non-identifier names (rand.f/rand.i/rand.u/
+     *  rand.seq etc - dots hexmangle) use setup_-PREFIXED symbols
+     *  (setup_rand0x2ef) that the old _setup-suffix filter silently
+     *  dropped from the call list; else wrap 289 setups (was ~150). */
+    private const val VERSION = 138
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

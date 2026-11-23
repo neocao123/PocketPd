@@ -539,8 +539,17 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
             continue
         uniquify_generic_symbols(o, cc)
         core_objs.append(o)
+        # accept BOTH setup spellings: classes whose names contain
+        # non-identifier characters (rand.f/rand.i/rand.u/rand.seq - dots
+        # hexmangle to 0x2e) get pd's setup_-PREFIXED setup symbol
+        # (setup_rand0x2ef), NOT a *_setup suffix - filtering on the suffix
+        # alone left those classes registered in core_classes.txt but their
+        # setup functions never called (0.18.2/0.18.3: [rand.f] &
+        # [else/tempo] inside every arp session failed to create). The
+        # support_setups branch below already accepted both (0.17.81 zexy).
         core_setups.append(list(dict.fromkeys(
-            s2 for s2 in defined if s2.endswith("_setup"))))
+            s2 for s2 in defined
+            if s2.endswith("_setup") or s2.startswith("setup_"))))
         for cls in classes:
             manifest.append((name, cls, "%s_core.so" % name))
             c_classes.add(cls)
