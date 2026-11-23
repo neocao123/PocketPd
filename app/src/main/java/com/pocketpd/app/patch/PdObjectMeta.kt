@@ -1050,6 +1050,9 @@ object PdObjectMeta {
         put("pdf~", Def(1, 1, setOf(0), emptySet()))
         put("fifop", d(2, 2)); put("lifop", d(2, 2))
         put("freadln", d(1, 2)); put("fwriteln", d(1, 0))
+        // envvar (zexy 2.4.4 addition, 0.18.15): bang = get + set, second
+        // outlet echoes the set value
+        put("envvar", d(1, 2))
         put("glue", d(2, 1)); put("l", d(2, 1)); put("lister", d(2, 1))
         put("l2s", d(2, 1)); put("list2symbol", d(2, 1))
         put("s2l", d(2, 1)); put("symbol2list", d(2, 1))

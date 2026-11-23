@@ -27,8 +27,10 @@ HELP_RE = re.compile(r"(-help\.pd$)|(^(help|doc)-.*\.pd$)", re.I)
 TREES = [
     ("vanilla", PD, False),
     ("cyclone", CYC + "/documentation/help_files", False),
-    ("zexy", EX + "/zexy/reference", False),
-    ("zexy", EX + "/zexy/abs", True),
+    # zexy 2.4.4 master (0.18.15): reference/ = the -help set (76 patches);
+    # abs/ NOT shipped (the build ships src only, parity with the old
+    # baseline), so its help would document unavailable objects
+    ("zexy", SRC + "/zexy-current/reference", False),
     ("iemlib", EX + "/iemlib/iemabs", True),
     ("bsaylor", EX + "/bsaylor", True),
     ("creb", EX + "/creb/doc", True),

@@ -2,7 +2,7 @@
 
 ## ★ 当前进度与下一步（2026-11-24，round 4 后更新）
 
-**分支状态**：`0.57` 分支。设备在装 v318/0.18.14。0.51 主线冻结于
+**分支状态**：`0.57` 分支。设备在装 v319/0.18.15。0.51 主线冻结于
 `freeze-0.51-base`（= 0.17.161/vc303）。
 
 **已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.13）：
@@ -50,7 +50,10 @@ help 自身接线的显示噪音（桌面 pd 同样会报），非故障。
 2. ~~fftease 2.5.2 → **3.0.1**~~ ✅ 0.18.14/318 完成（6/7 找回，
    loopsea~ 3.0.1 上游不存在；bare cross~ 归 cyclone，fftease 版走
    fftease/cross~；源码仓 = ericlyon/pd-fftease）；
-3. zexy / iemlib 抓当前版（git.iem.at 有反爬墙，手动过）；
+3. ~~zexy 抓当前版~~ ✅ 0.18.15/319 完成（git clone 走代理直连
+   git.iem.at 即可——墙挡浏览器不挡 git，2.4.4 master 5521523；io 零
+   漂移 +envvar/-abs~，lpt 走上游自带 Z_WANT_LPT=0 stub，help 换
+   reference/ 76 补丁）；
 4. mrpeach 重编（预期漂移小）。
 每库一轮：换源 → 试编 → 修补（修而不删）→ Slibs.VERSION bump →
 装机 → CHANGELOG → commit。

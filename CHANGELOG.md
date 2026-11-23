@@ -7,6 +7,36 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.15 (versionCode 319) — 2026-11-24 【0.57 分支 round 6:zexy 快照 → 2.4.4 master 重编】
+
+**任务一换版轮第三击。** 源码 = git.iem.at/pd/zexy master（2.4.4 线，
+commit 5521523）。**迁移笔记的"反爬墙需手动过"过时了：墙挡浏览器，不挡
+git clone**——代理下直连成功（iemlib 同理，下轮验证）。
+
+**类集（增量合并 107 → 108）**：+`envvar`（1 进 2 出：bang 取/设环境
+变量，副出口回显设值，PdObjectMeta 加行）；−`abs~`（上游弃名，vanilla
+0.57 同语义接管）。audit_zexy.py（新写的宏感知 io 对比器——zexy_new 宏
+注册让通用 audit_io 全盲）老树 vs 新树逐类比对：**io 零漂移**。
+
+**lpt.c 回归处理**：上游在 `__linux__` 下默认武装 ioperm/iopl（Android
+也定义 `__linux__`，直接编 = dlopen 无符号）。这次不手工 stub——
+`-DZ_WANT_LPT=0` 选上游**自带的 stub 分支**（sys_outb/sys_inb dummy，
+类注册为 no-op）。
+
+**构建机制（治本第二例）**：core_wrap 的 setup 调用表现在**过滤到对象
+文件实际导出的符号**（编译后 llvm-nm 取交集，`obj_defined_syms`）——
+纯文本收集看不见预处理，zexy 2.4.4 的 sort.c 在 `#ifdef ZEXY_LIBRARY`
+门里藏着一个 `sort_setup` 定义，旧收集器把它当真定义收进调用表，blob
+缺符号（audit_blobs 抓到 1 UNRESOLVED）。此过滤与 cyclone 轮的"只认
+定义"修复互补：原型与被 #ifdef 掉的定义两头都堵死。
+
+**help/**：zexy help 换 2.4.4 `reference/`（76 补丁；abs 的 help 不带
+——abs 抽象本身不随船，与旧基线 parity）。lint 12/76 报 `#A color/width`
+= pd 数组属性行，合法语法。
+
+**验收**：两 ABI ok=79 / core_wrap 91 setups / audit_blobs 全绿；
+aapt = 319/0.18.15；GM800 force-stop + install + dumpsys 复核。
+
 ## 0.18.14 (versionCode 318) — 2026-11-24 【0.57 分支 round 5:fftease 2.5.2 → 3.0.1 换版重编（迁移 §7 W2.4）】
 
 **任务一换版轮第二击。** 源码 = ericlyon/**pd-fftease** tag `v3.0.1`

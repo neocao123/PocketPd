@@ -38,6 +38,8 @@ LIBS = {
     "cyclone": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/pd-cyclone-0.9-5/cyclone_objects/binaries"],
     # fftease 3.0.1 (0.18.14 audit): flat layout, excl pd-lib-builder tests
     "fftease": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/fftease-3.0.1"],
+    # zexy 2.4.4 master (0.18.15 audit): flat src/
+    "zexy": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/zexy-current/src"],
 }
 
 IO_CALLS = ("inlet_new", "floatinlet_new", "symbolinlet_new", "pointerinlet_new",

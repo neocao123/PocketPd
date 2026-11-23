@@ -21,6 +21,9 @@ CYC = SRCROOT + "/pd-cyclone-0.9-5"
 # fftease 3.0.1 (0.18.14): ericlyon/pd-fftease tag v3.0.1 (repo moved from
 # the 2.5.2 Debian snapshot; "ericlyon/fftease" 404s - it is pd-fftease)
 FFTS = SRCROOT + "/fftease-3.0.1"
+# zexy 2.4.4 master (0.18.15): git.iem.at/pd/zexy HEAD - the anti-bot wall
+# blocks BROWSERS, not git clones; proxied clone works
+ZEXY = SRCROOT + "/zexy-current"
 # 0.57 branch (0.18.1): slibs compile against the pd 0.57.0test1 headers -
 # the EXACT tree the runtime libpd.so was built from (pd-for-android
 # submodule pure-data@43a5b8922a35, vendored under the pd-core jni dir).
@@ -112,18 +115,23 @@ LIBS = [
         },
     )),
     ("zexy", dict(
-        src=["zexy/src"], support=[], inc=["zexy/src"],
+        # zexy 2.4.4 master (0.18.15): git.iem.at/pd/zexy HEAD 5521523 -
+        # the anti-bot wall blocks browsers, not git clones; proxied clone
+        # works. src/ is flat with hexmangled filenames (0x260x260x7e.c =
+        # "&&~.c"); abs/ ships separately (53 abstractions, unshipped here -
+        # the 2.4.4-era baseline shipped src only).
+        src=[ZEXY + "/src"], support=[], inc=[ZEXY + "/src"],
         # zexy object files register via the zexy_new macro (no literal
         # class_new), so the collector files them under "supports" - with
         # support_setups their setup functions still get called from
         # core_wrap.
         support_setups=True,
         excl=["zexy.c", "z_zexy.c"],
-        # lpt.c is a direct ANDROID STUB in srcrepo (see the file header):
-        # bionic has no port I/O and no ppdev, the upstream text armed
-        # Z_WANT_LPT and referenced ioperm/iopl which dlopen could not
-        # resolve, and fresh upstream writes get emptied by the local AV
-        # anyway - never hand-restore it.
+        # lpt.c arms ioperm/iopl under __linux__ (Android defines it too);
+        # passing -DZ_WANT_LPT=0 selects upstream's OWN stub branch
+        # (sys_outb/sys_inb dummies, class registers as a no-op) - bionic
+        # has neither syscall and dlopen would fail (0.17.81 lesson)
+        extra_flags=["-DZ_WANT_LPT=0"],
     )),
     ("iemlib", dict(
         # upstream master merged iemlib1/iemlib2 sources into one top-level
@@ -609,9 +617,14 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
         # setup functions never called (0.18.2/0.18.3: [rand.f] &
         # [else/tempo] inside every arp session failed to create). The
         # support_setups branch below already accepted both (0.17.81 zexy).
+        # Then keep only setups the OBJECT actually exports (obj_defined_syms:
+        # text scans cannot see #ifdef - zexy 2.4.4 sort.c's gated
+        # sort_setup, 0.18.15).
+        syms = obj_defined_syms(o)
         core_setups.append(list(dict.fromkeys(
             s2 for s2 in defined
-            if s2.endswith("_setup") or s2.startswith("setup_"))))
+            if (s2.endswith("_setup") or s2.startswith("setup_"))
+            and s2 in syms)))
         for cls in classes:
             manifest.append((name, cls, "%s_core.so" % name))
             c_classes.add(cls)
@@ -638,12 +651,16 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
             # macro-registering libraries (zexy): the collected "supports"
             # ARE the object files - their setups must be called from
             # core_wrap just like the object loop's, or the classes stay
-            # exported-but-uncalled (0.17.81-0.17.83 zexy regression)
+            # exported-but-uncalled (0.17.81-0.17.83 zexy regression).
+            # obj_defined_syms filter: same #ifdef blindness guard as the
+            # objects loop (zexy 2.4.4 sort.c's gated sort_setup, 0.18.15).
             defined = set(RE_SETUP.findall(text)) | set(
                 RE_SETUP_SYMBOL.findall(text))
+            syms = obj_defined_syms(o)
             core_setups.append(list(dict.fromkeys(
                 s2 for s2 in defined
-                if s2.endswith("_setup") or s2.startswith("setup_"))))
+                if (s2.endswith("_setup") or s2.startswith("setup_"))
+                and s2 in syms)))
             # their CLASS names go into the manifest + core_classes.txt too:
             # the objects loop's class_new scan never sees macro
             # registrations (zexy_new("<name>", ...)), so the manifest
@@ -747,6 +764,23 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
                 "".join(l + "\n" for l in merged))
             print("  core_classes.txt: %s" % ", ".join(merged))
     return ok, fail
+
+def obj_defined_syms(o):
+    """Global symbols DEFINED by a compiled object. Setup collection scans
+    SOURCE TEXT and cannot see the preprocessor: zexy 2.4.4's sort.c keeps
+    a `void sort_setup(void)` definition inside #ifdef ZEXY_LIBRARY
+    (undefined here) and cyclone 0.9-5 had the prototype twin of this bug -
+    text-matched "definitions" that the object never exports leave
+    core_wrap calling a symbol the blob does not carry (audit_blobs:
+    UNRESOLVED). Filter every collected setup through the object's nm."""
+    code, log = run([NDK + "/llvm-nm.exe", "-g", "--defined-only", o])
+    out = set()
+    for line in log.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[1] in ("T", "t", "W", "w"):
+            out.add(parts[2])
+    return out
+
 
 def uniquify_generic_symbols(o, cc):
     """Some old sources define a non-static helper literally named `setup`;

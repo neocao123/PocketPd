@@ -11,8 +11,26 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 318
-    versionName = "0.18.14" // ---- 0.57 BRANCH round 5: fftease swapped
+    versionCode = 319
+    versionName = "0.18.15" // ---- 0.57 BRANCH round 6: zexy swapped
+    // pd-extended snapshot -> git.iem.at/pd/zexy master 2.4.4 (commit
+    // 5521523; the anti-bot wall blocks browsers, NOT proxied git clones -
+    // MIGRATION's "manual fetch" note obsolete). Shipped class set 107 ->
+    // 108 (additive merge): +envvar, -abs~ upstream (vanilla owns the name
+    // with equal semantics). lpt.c arms ioperm/iopl under __linux__;
+    // -DZ_WANT_LPT=0 selects upstream's own stub branch (sys_outb/sys_inb
+    // dummies) - no hand-patched stub this time. core_wrap setups are now
+    // FILTERED TO SYMBOLS THE OBJECTS ACTUALLY EXPORT (obj_defined_syms nm
+    // pass): text collection cannot see #ifdef, and zexy 2.4.4's sort.c
+    // keeps a sort_setup definition inside #ifdef ZEXY_LIBRARY that the
+    // old collector called into a blob lacking it (audit_blobs: 1
+    // UNRESOLVED -> clean). No io drift vs the old tree (audit_zexy.py
+    // macro-aware diff: 0 changed classes). help/zexy refreshed from
+    // reference/ (76 patches; abs help skipped - abs not shipped, parity
+    // with the old baseline). 12 lint #A color/width notes = pd array
+    // attribute lines, legal syntax.
+    //
+    // ---- 0.18.14 (0.57 history) round 5: fftease swapped
     // 2.5.2 Debian -> ericlyon/pd-fftease v3.0.1 (repo is pd-fftease;
     // "ericlyon/fftease" 404s): flat layout, 37 real classes both ABIs,
     // audit_blobs clean. 6 long-phantom objects from the 0.17.142

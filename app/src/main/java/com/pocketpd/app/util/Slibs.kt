@@ -25,8 +25,15 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 142: 0.57 branch
-     *  (0.18.14) - fftease swapped 2.5.2 Debian -> ericlyon/pd-fftease
+    /** Bump to re-extract after an assets/slibs update. 143: 0.57 branch
+     *  (0.18.15) - zexy swapped pd-extended snapshot -> git.iem.at master
+     *  2.4.4 (5521523; anti-bot wall blocks browsers, not proxied git
+     *  clones): +envvar, -abs~ (vanilla takes the name), lpt safe via
+     *  upstream's own Z_WANT_LPT=0 stub branch, core_wrap setups now
+     *  filtered to symbols the objects actually export (sort.c's #ifdef
+     *  ZEXY_LIBRARY sort_setup phantom caught by audit_blobs), help/zexy
+     *  refreshed from reference/ (76 patches).
+     *  142: 0.57 branch (0.18.14) - fftease swapped 2.5.2 Debian -> ericlyon/pd-fftease
      *  v3.0.1: 37 real classes, 6 long-phantom 3.0-only objects now really
      *  ship (cross~/enrich~/pileup~/pvwarpb~/schmear~/residency_buffer~;
      *  loopsea~ does not exist in 3.0.1), pd-lib-builder test stubs
@@ -45,7 +52,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 142
+    private const val VERSION = 143
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2
