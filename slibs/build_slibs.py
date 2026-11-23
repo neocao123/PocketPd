@@ -23,8 +23,8 @@ NDK = "C:/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64/
 NDKROOT = "C:/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64"
 
 ABIS = {
-    "arm64-v8a": "aarch64-linux-android21-clang.cmd",
-    "x86_64": "x86_64-linux-android21-clang.cmd",
+    "arm64-v8a": "aarch64-linux-android26-clang.cmd",
+    "x86_64": "x86_64-linux-android26-clang.cmd",
 }
 
 # priority order = bare-name conflict resolution order (first wins)
@@ -189,6 +189,94 @@ LIBS = [
              # headers (stdckdint/stdbit) live here
              "C:/Projects/26PDAndroid/slibs/pocketpd/src/libxm"],
     )),
+    # ELSE full core (0.18.2, W2.2): complete upstream RC15 set replacing
+    # the vintage hand-integrated else_core.so (0.17.134-era, sources lost,
+    # dead on 0.57 - see CHANGELOG 0.18.1 and slibs/else-src/full/
+    # VENDORED.txt for provenance + exclusion justifications). Compiles
+    # against the 0.57 headers natively (same as elsex below). Shared/
+    # support files AND the vendored aubio sources under Shared/aubio/src
+    # are pulled in by the recursive support walk (beat~ links aubio).
+    ("else", dict(
+        src=["C:/Projects/26PDAndroid/slibs/else-src/full/Control",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio"],
+        support=["C:/Projects/26PDAndroid/slibs/else-src/full/Shared"],
+        inc=[  # opus dirs FIRST: opus/celt carries its own kiss_fft.h, which
+               # must win over Shared/kiss_fft for opus/src/analysis.c
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/opus/include",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/opus/celt",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/opus/silk",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/opus/silk/float",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/aubio/src",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/link",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/kiss_fft",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/libsamplerate",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Shared/fftease",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/plaits~",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/circuit~/Libraries",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/sfont~/FluidLite/include",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/sfont~/FluidLite/src",
+             # SF3 (ogg-compressed soundfont) support chain headers
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/sfont~/FluidLite/libogg-1.3.2/include",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/sfont~/FluidLite/libvorbis-1.3.5/include",
+             "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/sfont~/FluidLite/libvorbis-1.3.5/lib"],
+        # upstream GUI-bridge objects excluded (see VENDORED.txt): bare
+        # names keyboard/pad/button/popmenu are PocketPd app-native touch
+        # widgets; knob is already provided by elsex (identical RC15
+        # source) and bare-name priority resolves it there.
+        patches={"else.c": [
+                     # [else] master: pdlua sublibrary not vendored -> drop
+                     # the lua_setup call, keep the [else] info class
+                     ("\nextern void lua_setup();",
+                      "/* Android rebuild: pdlua sublibrary not vendored */\n"
+                      "/* extern void lua_setup(); */"),
+                     ("\n    lua_setup();\n}",
+                      "\n    /* lua_setup(): pdlua not vendored (Android) */\n}")]},
+        excl=["knob.c", "keyboard.c", "pad.c", "button.c", "popmenu.c",
+              # external-dependency objects: play.file~ needs ffmpeg,
+              # sfload/sfinfo need sfizz (sfz~'s vendored C++ engine),
+              # streamout~/streamin~ need vorbis/ogg - none of those
+              # vendor trees build (or exist) on Android here; upstream
+              # ships them as external desktop libs.
+              "play.file~.c", "sfload.c", "sfinfo.c",
+              "streamout~.c", "streamin~.c",
+              # stb_vorbis.c is #included INTO fluid_defsfont.c (single-file
+              # decoder) - compiling it standalone would duplicate symbols
+              "stb_vorbis.c"],
+        # NOTE: Windows os.walk yields backslash paths - keep these as
+        # bare substrings that match both slash styles where possible.
+        excl_dirs=["ffmpeg", "sfz~",
+                   "Shared\\vorbis", "Shared/vorbis",
+                   "aubio\\examples", "aubio/examples",
+                   "aubio\\build", "aubio/build",
+                   # FluidLite's own build skips both: fluid_dsp_simple.c
+                   # is an experiment fragment with code at file scope,
+                   # fluidsynth.c is the CLI utility (defines main()).
+                   "fluid_dsp_simple", "fluidsynth",
+                   # opus arch-specific intrinsics need external libs
+                   # (NE10 for arm NE10 paths) or x86 SIMD (SSE4.1), and
+                   # dump_modes/analysis are dev tooling - the generic C
+                   # paths cover Android builds.
+                   "celt\\arm", "celt/arm", "silk\\arm", "silk/arm",
+                   "silk\\x86", "silk/x86", "celt\\x86", "celt/x86",
+                   "float\\x86", "float/x86",
+                   # silk/fixed = FIXED-POINT build only (upstream CMake
+                   # excludes it from float builds; its files reference
+                   # fixed-only helpers like
+                   # silk_insertion_sort_decreasing_int16)
+                   "silk\\fixed", "silk/fixed",
+                   "dump_modes",
+                   # opus unit tests + cmake build helpers
+                   "celt\\tests", "celt/tests", "silk\\tests",
+                   "silk/tests", "src\\tests", "src/tests", "cmake"],
+        # -DOPUS_BUILD + -DVAR_ARRAYS: standalone-build switches for the
+        # vendored opus codec (pdlink/pdlink~ pull it via
+        # Shared/opus_compression.h); only opus headers read them, harmless
+        # everywhere else. VAR_ARRAYS selects VLA temporary allocation
+        # (clang/Android supports VLAs).
+        extra_flags=["-DOPUS_BUILD", "-DVAR_ARRAYS"],
+        excl_main=True,
+    )),
     # ELSE incremental classes (0.17.134): the hand-integrated else_core.so
     # predates upstream master, so a batch of classes referenced by the
     # newly shipped abstractions (mpe.in, ptouch.in/out, canvas.*,
@@ -268,6 +356,10 @@ EXTRA_C["elsex"] = (
     "    (void)portno; (void)byte;\n"
     "}\n"
 )
+# else full core (0.18.2): same midi-out drop as elsex - libpd (0.51.3 AND
+# 0.57) does not export sys_putmidibyte; else's midi-OUT classes feed it,
+# the app's own noteout/ctlin bridge is a separate listener path.
+EXTRA_C["else"] = EXTRA_C["elsex"]
 
 
 RE_CLASS = re.compile(r'class_new\s*\(\s*gensym\s*\(\s*"([^"]+)"')
@@ -339,6 +431,23 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
     inc += ["-I" + PDSRC] + ["-I" + (p if os.path.isabs(p) else EX + "/" + p)
                              for p in cfg["inc"]]
     excl = set(cfg.get("excl", []))
+    extra_flags = cfg.get("extra_flags", [])
+    # excl_dirs: skip any source whose path contains one of these substrings
+    # (vendor trees built as external libraries upstream - ELSE's Shared/
+    # ffmpeg, sfz~'s sfizz/abseil, ogg-less vorbis dirs, test/example dirs).
+    excl_dirs = cfg.get("excl_dirs", [])
+    # excl_main: skip any source defining main() (CLI demos/tests vendored
+    # inside third-party trees - pd objects never define main). Two mains
+    # in one core blob = duplicate-symbol link failure.
+    excl_main = cfg.get("excl_main", False)
+    RE_MAIN_DEF = re.compile(r'\bmain\s*\(')
+    # dead-code stripper for the main() check: upstream vendors test mains
+    # behind #if 0 (opus celt/laplace.c) or self-test guards (_V_SELFTEST in
+    # libogg/libvorbis framing.c/tone.c/sharedbook.c) - they never compile.
+    # Over-stripping is safe here: a false "no main" only means the file is
+    # compiled with its guarded main inert.
+    RE_IFZERO = re.compile(
+        r'#if\s+0\b.*?#endif|#ifdef\s+\w*SELFTEST\w*.*?#endif', re.S)
     patches = cfg.get("patches", {})
     objects, supports = [], []
 
@@ -348,7 +457,9 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
     for d in cfg["src"]:
         for f in collect(srcdir(d), EX):
             b = os.path.basename(f)
-            if not (b.endswith(".c") or b.endswith(".cc")) or b in excl or b.endswith(".inc.c"):
+            if not (b.endswith(".c") or b.endswith(".cc") or b.endswith(".cpp")) or b in excl or b.endswith(".inc.c"):
+                continue
+            if any(ed in f for ed in excl_dirs):
                 continue
             text = open(f, encoding="utf-8", errors="replace").read()
             for old, new in patches.get(b, []):
@@ -356,11 +467,17 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
                     text = text.replace(old, new)
                     open(f, "w", newline="").write(text)
                     print("  patched: %s" % b)
+            if excl_main and RE_MAIN_DEF.search(RE_IFZERO.sub("", text)):
+                print("  main() skipped: %s" % b)
+                continue
             if "class_new" in text or RE_ADDCREATOR.search(text):
                 objects.append(f)
-            elif RE_INCLUDE_C.search(text):
+            elif RE_INCLUDE_C.search(text) and len(text) < 2000:
                 # pure include-wrapper (e.g. cxc cxmean.c #include "mean~.c"):
-                # its code lives in the included file, skip entirely.
+                # its code lives in the included file, skip entirely. Size
+                # guard: vendored consolidations (FluidLite's fluid_defsfont.c
+                # pulls stb_vorbis.c into 1700+ lines of its own code) must
+                # NOT be skipped - only tiny wrappers are.
                 print("  include-wrapper skipped: %s" % b)
             else:
                 supports.append(f)
@@ -372,7 +489,12 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
         # with "cannot locate symbol" (0.17.134-0.17.135 bug)
         for f in collect(srcdir(d), EX):
             b = os.path.basename(f)
-            if (f.endswith(".c") or f.endswith(".cc")) and b not in excl and not b.endswith(".inc.c"):
+            if any(ed in f for ed in excl_dirs):
+                continue
+            if (f.endswith(".c") or f.endswith(".cc") or f.endswith(".cpp")) and b not in excl and not b.endswith(".inc.c"):
+                if excl_main and RE_MAIN_DEF.search(RE_IFZERO.sub("", open(f, encoding="utf-8", errors="replace").read())):
+                    print("  main() skipped: %s" % b)
+                    continue
                 supports.append(f)
     # masters: call many foreign setups, define no class of their own -> drop
     kept = []
@@ -406,7 +528,7 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
             print("  no classes, skipped: %s" % os.path.basename(f))
             continue
         o = os.path.join(workdir, hashlib_name(f) + ".o")
-        code, log = run([cc] + CFLAGS + inc + [f, "-o", o])
+        code, log = run([cc] + CFLAGS + extra_flags + inc + [f, "-o", o])
         if code:
             fail += 1
             print("  OBJ FAIL %s\\n%s" % (f, log[-800:]))
@@ -430,7 +552,7 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
                 text = text.replace(old_, new_)
                 open(f, "w", newline="").write(text)
         o = os.path.join(workdir, hashlib_name(f) + ".o")
-        code, log = run([cc] + CFLAGS + inc + [f, "-o", o])
+        code, log = run([cc] + CFLAGS + extra_flags + inc + [f, "-o", o])
         if code:
             fail += 1
             print("  SUPPORT FAIL %s\\n%s" % (f, log[-800:]))
@@ -471,7 +593,7 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
         ec = os.path.join(workdir, "extra_compat.c")
         open(ec, "w").write(extra)
         eco = os.path.join(workdir, "extra_compat.c.o")
-        code, log = run([cc] + CFLAGS + inc + [ec, "-o", eco])
+        code, log = run([cc] + CFLAGS + extra_flags + inc + [ec, "-o", eco])
         if code == 0:
             core_sup.append(eco)
         else:
@@ -486,7 +608,7 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
     wc = os.path.join(workdir, "core_wrap.c")
     open(wc, "w").write(wsrc)
     wobj = wc + ".o"
-    code, log = run([cc] + CFLAGS + inc + [wc, "-o", wobj])
+    code, log = run([cc] + CFLAGS + extra_flags + inc + [wc, "-o", wobj])
     if code:
         print("  CORE WRAP FAIL %s: %s" % (name, log[-500:]))
         return ok, fail + 1
@@ -508,7 +630,7 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
     flat = [p.replace(chr(92), "/") for p in core_objs + core_sup + [wobj]]
     open(rsp, "w").write(" ".join('"%s"' % p for p in flat))
     extra_link = ["-lz"] if name == "pocketpd" else []
-    if name in ("creb", "pocketpd"):
+    if name in ("creb", "pocketpd", "else"):
         # C++ TUs (creb modules++, pocketpd's vendored reSID engine under
         # resid/) use operator new/delete and the exception personality;
         # the libpd runtime loads no C++ runtime, so static-link libc++

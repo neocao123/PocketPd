@@ -1,0 +1,524 @@
+static const char *note_dialog_tcl =
+// BBOX (send to Pd text bounding box)
+"proc note_bbox {target cvname tag} {\n\
+    pdsend \"$target _bbox $target [$cvname bbox $tag]\"}\n"
+
+// NOTE CLICK / Send click info to Pd when text is clicked
+"proc note_click {target cvname x y tag} {\n\
+    pdsend \"$target _click $target [$cvname canvasx $x] [$cvname canvasy $y]\
+    [$cvname index $tag @$x,$y] [$cvname bbox $tag]\"}\n"
+
+// NOTE DRAG / Send character index as the user drags over the text
+"proc note_drag {target cvname x y tag} {\n\
+    pdsend \"$target _drag [$cvname index $tag @$x,$y]\"}\n"
+
+// Double click
+"proc note_dblclick {target} {\n\
+    pdsend \"$target _select_all\"}\n"
+
+// COPY / CUT / PASTE while a [note] is being edited.
+// Ctrl/Cmd+C/X/V and the Edit menu all fire the virtual events <<Edit|Copy>> etc. on the
+// focused canvas. We catch them with a bindtag placed BEFORE the canvas' own tags, and
+// 'break' so Pd's "bind all" handler (menu_send copy/cut/paste) never sees them -
+// otherwise Pd copies/cuts/pastes the note OBJECT instead of its text.
+"proc note_install_edit_bindings {cv} {\n\
+    if {[lsearch -exact [bindtags $cv] NoteEdit] < 0} {\n\
+        bindtags $cv [linsert [bindtags $cv] 0 NoteEdit]\n\
+    }\n}\n"
+
+// Mapping from canvas -> active note's bindsym, so we don't depend on
+// the text item's canvas focus (which note_update clears on selection
+// in order to hide the blinking insertion caret).
+"array set ::note_editing {} ;\n"
+
+// returns the [note]'s bind symbol if one is being edited in this canvas, else {}
+"proc note_target {cv} {\n\
+    if {[info exists ::note_editing($cv)]} {return $::note_editing($cv)}\n\
+    return {}\n}\n"
+
+// receives the selected text from C (escaped by pdgui_vmess) and puts it on the clipboard
+"proc note_clipboard {txt} {\n\
+    clipboard clear\n\
+    clipboard append [note_unescape $txt]}\n"
+
+"bind NoteEdit <<Edit|Copy>> {if {[set t [note_target %W]] ne {}} {pdsend [concat $t _copy]; break}}\n"
+"bind NoteEdit <<Edit|Cut>> {if {[set t [note_target %W]] ne {}} {pdsend [concat $t _cut]; break}}\n"
+"bind NoteEdit <<Edit|Paste>> {if {[note_target %W] ne {}} {pdtk_pastetext %W; break}}\n"
+
+// UNESCAPE: pdgui_vmess() ("s"/"p" formats) puts a backslash before \ { } [ ]
+// so the string survives Tcl parsing. Undo it here, same as Pd's own pdtk_text_set.
+"proc note_unescape {s} {\n\
+    return [subst -nocommands -novariables $s]}\n"
+
+// UPDATE the text contents and optionally wrap width
+"proc note_update {cv tag tt wd} {\n\
+    set tt [note_unescape $tt]\n\
+    if {$wd > 0} {$cv itemconfig $tag -text $tt -width $wd} else {\n\
+    $cv itemconfig $tag -text $tt}}\n"
+
+// BIND ENTER TO APPLY IN MACOS
+"proc note_bind_enter_to_apply {id} {\n"
+"    note_apply $id\n"
+"    bind $id <KeyPress-Return> \"note_ok $id\"\n"
+"    focus $id.buttonframe.ok\n"
+"    return 0\n"
+"}\n"
+"\n"
+
+// UNBIND
+"proc note_unbind_return {id} {\n"
+"    bind $id <KeyPress-Return> break\n"
+"    return 1\n"
+"}\n"
+
+// Get font list
+"proc get_font_list {} {\n\
+    return [lsort [font families]]\n}\n"
+
+// DRAW - creates text item and bind to note_click / note_drag
+"proc note_draw {tgt cv tag1 tag2 x y fnm fsz clr tt wd wt sl just ul} {\n\
+    set tt [note_unescape $tt]\n\
+    if {$ul} {\n\
+        set font [list $fnm $fsz $wt $sl underline]\n\
+    } else {\n\
+        set font [list $fnm $fsz $wt $sl]\n\
+    }\n\
+    if {$wd > 0} {\n\
+        $cv create text $x $y -text $tt -tags [list $tag1 $tag2 note:$tgt] \\\n\
+        -font $font -justify $just -fill $clr -width $wd -anchor nw\n\
+    } else {\n\
+        $cv create text $x $y -text $tt -tags [list $tag1 $tag2 note:$tgt] \\\n\
+        -font $font -justify $just -fill $clr -anchor nw\n\
+    }\n\
+    note_install_edit_bindings $cv\n\
+    note_bbox $tgt $cv $tag1\n\
+    $cv bind $tag1 <Button> [list note_click $tgt %W %x %y $tag1]\n\
+    $cv bind $tag1 <B1-Motion> [list note_drag $tgt %W %x %y $tag1]\n\
+    $cv bind $tag1 <Double-Button> [list note_dblclick $tgt]\n\
+}\n"
+
+// PROPERTIES
+"if {[catch {pd}]} {\n"
+"    proc pd {args} {pdsend [join $args \" \"]}\n"
+"}\n"
+
+"namespace eval ::dialog_note:: {\n"
+"}\n"
+"\n"
+
+// Arrays for color state (knob/scope-style)
+"array set ::dialog_note::var_theme {} ;\n"
+"array set ::dialog_note::var_transp {} ;\n"
+"array set ::dialog_note::var_colorradio {} ;\n"
+"array set ::dialog_note::var_color_bg {} ;\n"
+"array set ::dialog_note::var_color_fg {} ;\n"
+"array set ::dialog_note::var_pd_bg {} ;\n"
+"array set ::dialog_note::var_pd_fg {} ;\n"
+"array set ::dialog_note::var_hex_bgcolor_text {} ;\n"
+"array set ::dialog_note::var_hex_fgcolor_text {} ;\n"
+"\n"
+
+"proc note_ok {id} {\n"
+"    note_apply $id\n"
+"    note_cancel $id\n"
+"}\n"
+
+"proc note_apply {id} {\n"
+"    set vid [string trimleft $id .]\n"
+"    set var_name [concat var_name_$vid]\n"
+"    set var_size [concat var_size_$vid]\n"
+"    set var_bold [concat var_bold_$vid]\n"
+"    set var_italic [concat var_italic_$vid]\n"
+"    set var_just [concat var_just_$vid]\n"
+"    set var_underline [concat var_underline_$vid]\n"
+"    set var_outline [concat var_outline_$vid]\n"
+"    set var_rcv [concat var_rcv_$vid]\n"
+"    set var_wdt [concat var_wdt_$vid]\n"
+"\n"
+"    global $var_name\n"
+"    global $var_size\n"
+"    global $var_just\n"
+"    global $var_underline\n"
+"    global $var_bold\n"
+"    global $var_italic\n"
+"    global $var_outline\n"
+"    global $var_rcv\n"
+"    global $var_wdt\n"
+"\n"
+// Guard: empty receive would be dropped by concat and shift all later args
+"    set rcv_out [string map {\"$\" {\\$} \" \" {\\ } \";\" \"\" \",\" \"\" \"\\\\\" \"\" \"\\{\" \"\" \"\\}\" \"\"} [eval concat $$var_rcv]]\n"
+"    if {$rcv_out eq \"\"} {set rcv_out empty}\n"
+"\n"
+"    set cmd [concat $id ok \\\n"
+"        [string map {\" \" {\\ } \";\" \"\" \",\" \"\" \"\\\\\" \"\" \"\\{\" \"\" \"\\}\" \"\"} [eval concat $$var_name]] \\\n"
+"        [eval concat $$var_size] \\\n"
+"        [eval concat $$var_wdt] \\\n"
+"        [eval concat $$var_bold] \\\n"
+"        [eval concat $$var_italic] \\\n"
+"        [eval concat $$var_just] \\\n"
+"        [eval concat $$var_underline] \\\n"
+"        $::dialog_note::var_transp($vid) \\\n"
+"        [string tolower $::dialog_note::var_color_bg($vid)] \\\n"
+"        [string tolower $::dialog_note::var_color_fg($vid)] \\\n"
+"        [eval concat $$var_outline] \\\n"
+"        $rcv_out \\\n"
+"        $::dialog_note::var_theme($vid) \\;]\n"
+"    pd $cmd\n"
+"}\n"
+
+"proc note_applymacos {id} {\n"
+"    if {$::windowingsystem eq \"aqua\"} {\n"
+"        note_apply $id\n"
+"    }\n"
+"}\n"
+"\n"
+"proc note_cancel {id} {\n"
+"    set cmd [concat $id cancel \\;]\n"
+"    pd $cmd\n"
+"}\n"
+
+// update_swatch: trace callback on hex entry changes
+"proc ::dialog_note::note_update_swatch {id target varName index op} {\n"
+"    set vid [string trimleft $id .]\n"
+"    upvar #0 $varName var\n"
+"    set hexval $var($vid)\n"
+"    if {[regexp {^#[0-9A-Fa-f]{6}$} $hexval]} {\n"
+"        switch -- $target {\n"
+"            bg { $id.colors.bgrow.swatch configure -background $hexval }\n"
+"            fg { $id.colors.fgrow.swatch configure -background $hexval }\n"
+"        }\n"
+"    }\n"
+"}\n"
+
+// theme_check: only update DISPLAY (hex entries + swatches) and control states.
+// var_color_* ALWAYS keeps the custom colors (what apply sends to C side), so
+// toggling theme on/off never corrupts them.
+"proc ::dialog_note::note_theme_check {id} {\n"
+"    set vid [string trimleft $id .]\n"
+"    if { $::dialog_note::var_theme($vid) == 1 } {\n"
+"        set ::dialog_note::var_hex_bgcolor_text($vid) [string toupper $::dialog_note::var_pd_bg($vid)]\n"
+"        set ::dialog_note::var_hex_fgcolor_text($vid) [string toupper $::dialog_note::var_pd_fg($vid)]\n"
+"        $id.colors.bgrow.swatch configure -background $::dialog_note::var_pd_bg($vid)\n"
+"        $id.colors.fgrow.swatch configure -background $::dialog_note::var_pd_fg($vid)\n"
+"        $id.colors.radio.bg configure -state disabled\n"
+"        $id.colors.radio.fg configure -state disabled\n"
+"        $id.colors.radio.but configure -state disabled\n"
+"        $id.colors.bgrow.ent configure -state disabled\n"
+"        $id.colors.fgrow.ent configure -state disabled\n"
+"    } else {\n"
+"        set ::dialog_note::var_hex_bgcolor_text($vid) [string toupper $::dialog_note::var_color_bg($vid)]\n"
+"        set ::dialog_note::var_hex_fgcolor_text($vid) [string toupper $::dialog_note::var_color_fg($vid)]\n"
+"        $id.colors.bgrow.swatch configure -background $::dialog_note::var_color_bg($vid)\n"
+"        $id.colors.fgrow.swatch configure -background $::dialog_note::var_color_fg($vid)\n"
+"        $id.colors.radio.bg configure -state normal\n"
+"        $id.colors.radio.fg configure -state normal\n"
+"        $id.colors.radio.but configure -state normal\n"
+"        $id.colors.fgrow.ent configure -state normal\n"
+"        if { $::dialog_note::var_transp($vid) == 0 } {\n"
+"            $id.colors.bgrow.ent configure -state normal\n"
+"        }\n"
+"    }\n"
+"    if {$::windowingsystem eq \"aqua\"} {\n"
+"        note_apply $id\n"
+"    }\n"
+"}\n"
+
+// transp_check: disable bg entry when transparent
+"proc ::dialog_note::note_transp_check {id} {\n"
+"    set vid [string trimleft $id .]\n"
+"    if { $::dialog_note::var_transp($vid) == 1 } {\n"
+"        $id.colors.bgrow.ent configure -state disabled\n"
+"    } else {\n"
+"        if { $::dialog_note::var_theme($vid) == 0 } {\n"
+"            $id.colors.bgrow.ent configure -state normal\n"
+"        }\n"
+"    }\n"
+"    if {$::windowingsystem eq \"aqua\"} {\n"
+"        note_apply $id\n"
+"    }\n"
+"}\n"
+
+// preset_col: set selected color from preset hex (writes custom color + display)
+"proc ::dialog_note::note_preset_col {id presetcol} {\n"
+"    set vid [string trimleft $id .]\n"
+"    if { $::dialog_note::var_theme($vid) == 1 } {\n"
+"        return\n"
+"    }\n"
+"    set uppercol [string toupper $presetcol]\n"
+"    switch -- $::dialog_note::var_colorradio($vid) {\n"
+"        0 {\n"
+"            set ::dialog_note::var_color_bg($vid) $presetcol\n"
+"            set ::dialog_note::var_hex_bgcolor_text($vid) $uppercol\n"
+"            $id.colors.bgrow.swatch configure -background $presetcol\n"
+"        }\n"
+"        1 {\n"
+"            set ::dialog_note::var_color_fg($vid) $presetcol\n"
+"            set ::dialog_note::var_hex_fgcolor_text($vid) $uppercol\n"
+"            $id.colors.fgrow.swatch configure -background $presetcol\n"
+"        }\n"
+"    }\n"
+"    if {$::windowingsystem eq \"aqua\"} {\n"
+"        note_apply $id\n"
+"    }\n"
+"}\n"
+
+// compose_color: open color picker for current radio selection
+"proc ::dialog_note::note_compose_color {id} {\n"
+"    set vid [string trimleft $id .]\n"
+"    switch -- $::dialog_note::var_colorradio($vid) {\n"
+"        0 {\n"
+"            set title [_ \"Background color\"]\n"
+"            set color $::dialog_note::var_color_bg($vid)\n"
+"        }\n"
+"        1 {\n"
+"            set title [_ \"Text color\"]\n"
+"            set color $::dialog_note::var_color_fg($vid)\n"
+"        }\n"
+"    }\n"
+"    set color [tk_chooseColor -title $title -initialcolor $color]\n"
+"    if { $color ne \"\" } {\n"
+"        ::dialog_note::note_preset_col $id $color\n"
+"    }\n"
+"}\n"
+
+// update_color_from_hex_enter: validate hex entry (macOS enter-to-apply)
+// Uses note_bind_enter_to_apply so OK button receives focus (like knob)
+"proc ::dialog_note::note_update_color_from_hex_enter {id target} {\n"
+"    set vid [string trimleft $id .]\n"
+"    switch -- $target {\n"
+"        bg { set hexval $::dialog_note::var_hex_bgcolor_text($vid) }\n"
+"        fg { set hexval $::dialog_note::var_hex_fgcolor_text($vid) }\n"
+"    }\n"
+"    if {[regexp {^#[0-9A-Fa-f]{6}$} $hexval]} {\n"
+"        switch -- $target {\n"
+"            bg { set ::dialog_note::var_color_bg($vid) $hexval }\n"
+"            fg { set ::dialog_note::var_color_fg($vid) $hexval }\n"
+"        }\n"
+"    }\n"
+"    if {$::windowingsystem eq \"aqua\"} {\n"
+"        note_bind_enter_to_apply $id\n"
+"    }\n"
+"}\n"
+
+// MAIN PROPERTIES PROC
+"proc note_properties {id name size width bold italic just underline transp rcv bg fg ol theme pd_bg pd_fg} {\n"
+"    set vid [string trimleft $id .]\n"
+"    set var_name [concat var_name_$vid]\n"
+"    set var_size [concat var_size_$vid]\n"
+"    set var_just [concat var_just_$vid]\n"
+"    set var_underline [concat var_underline_$vid]\n"
+"    set var_bold [concat var_bold_$vid]\n"
+"    set var_italic [concat var_italic_$vid]\n"
+"    set var_outline [concat var_outline_$vid]\n"
+"    set var_rcv [concat var_rcv_$vid]\n"
+"    set var_wdt [concat var_wdt_$vid]\n"
+"\n"
+"    global $var_name $var_size $var_bold $var_italic\n"
+"    global $var_underline $var_just $var_outline $var_rcv $var_wdt\n"
+"\n"
+"    set $var_name [string map {{\\ } \" \"} $name]\n"
+"    set $var_size $size\n"
+"    set $var_bold $bold\n"
+"    set $var_italic $italic\n"
+"    set $var_underline $underline\n"
+"    set $var_just [lindex {Left Center Right} $just]\n"
+"    set $var_outline $ol\n"
+"    set $var_wdt $width\n"
+"    if {$rcv == \"empty\"} {set $var_rcv [format \"\"]} else {set $var_rcv [string map {{\\ } \" \"} $rcv]}\n"
+"\n"
+// Color initialization
+"    set ::dialog_note::var_theme($vid) $theme\n"
+"    set ::dialog_note::var_transp($vid) $transp\n"
+"    set ::dialog_note::var_colorradio($vid) 0\n"
+"    set ::dialog_note::var_color_bg($vid) $bg\n"
+"    set ::dialog_note::var_color_fg($vid) $fg\n"
+"    set ::dialog_note::var_pd_bg($vid) $pd_bg\n"
+"    set ::dialog_note::var_pd_fg($vid) $pd_fg\n"
+"    if { $theme == 1 } {\n"
+"        set ::dialog_note::var_hex_bgcolor_text($vid) [string toupper $pd_bg]\n"
+"        set ::dialog_note::var_hex_fgcolor_text($vid) [string toupper $pd_fg]\n"
+"        set swatch_bg $pd_bg\n"
+"        set swatch_fg $pd_fg\n"
+"    } else {\n"
+"        set ::dialog_note::var_hex_bgcolor_text($vid) [string toupper $bg]\n"
+"        set ::dialog_note::var_hex_fgcolor_text($vid) [string toupper $fg]\n"
+"        set swatch_bg $bg\n"
+"        set swatch_fg $fg\n"
+"    }\n"
+"\n"
+"    toplevel $id -class DialogWindow\n"
+"    wm title $id {[note] Properties}\n"
+"    wm protocol $id WM_DELETE_WINDOW [concat note_cancel $id]\n"
+"    wm group $id .\n"
+"    wm resizable $id 0 0\n"
+"    wm transient $id $::focused_window\n"
+"    $id configure -menu $::dialog_menubar\n"
+"    $id configure -padx 0 -pady 0\n"
+"    ::pd_bindings::dialog_bindings $id \"note\"\n"
+"\n"
+"    frame $id.name_size\n"
+"    pack $id.name_size -side top\n"
+"    label $id.name_size.lname -text \"Font Name:\"\n"
+"    ttk::combobox $id.name_size.name -textvariable $var_name -values [get_font_list] -state normal -width 28\n"
+"    bind $id.name_size.name <<ComboboxSelected>> \"note_applymacos $id\"\n"
+"    label $id.name_size.lsize -text \"Font Size:\"\n"
+"    entry $id.name_size.size -textvariable $var_size -width 3\n"
+"    pack $id.name_size.lname $id.name_size.name $id.name_size.lsize $id.name_size.size -side left\n"
+"\n"
+"    frame $id.justification\n"
+"    pack $id.justification -side top\n"
+"    checkbutton $id.justification.ol -variable $var_outline\\\n"
+"        -command \"note_applymacos $id\"\n"
+"    label $id.justification.oll -text \"Outline:\"\n"
+"    label $id.justification.lbj -text \"Justification:\"\n"
+"    menubutton $id.justification.mb -textvariable $var_just \\\n"
+"        -menu $id.justification.mb.menu -width 7\n"
+"    menu $id.justification.mb.menu -tearoff 0\n"
+"    $id.justification.mb configure -menu $id.justification.mb.menu\n"
+"    foreach justopt {Left Center Right} {\n"
+"        $id.justification.mb.menu add radiobutton -label $justopt \\\n"
+"            -variable $var_just -value $justopt \\\n"
+"            -command \"note_applymacos $id\"\n"
+"    }\n"
+"    pack $id.justification.oll $id.justification.ol $id.justification.lbj $id.justification.mb -side left\n"
+"\n"
+"    frame $id.ul_bg\n"
+"    pack $id.ul_bg -side top\n"
+"    label $id.ul_bg.lul -text \"Underline:\"\n"
+"    checkbutton $id.ul_bg.ul -variable $var_underline\\\n"
+"        -command \"note_applymacos $id\"\n"
+"    label $id.ul_bg.lbd -text \"Bold:\"\n"
+"    checkbutton $id.ul_bg.bd -variable $var_bold\\\n"
+"        -command \"note_applymacos $id\"\n"
+"    label $id.ul_bg.lit -text \"Italic:\"\n"
+"    checkbutton $id.ul_bg.it -variable $var_italic\\\n"
+"        -command \"note_applymacos $id\"\n"
+"    pack $id.ul_bg.lul $id.ul_bg.ul $id.ul_bg.lbd $id.ul_bg.bd $id.ul_bg.lit $id.ul_bg.it -side left\n"
+"\n"
+"    frame $id.rcv_sym\n"
+"    pack $id.rcv_sym -side top\n"
+"    label $id.rcv_sym.lrcv -text \"Receive symbol:\"\n"
+"    entry $id.rcv_sym.rcv -textvariable $var_rcv -width 12\n"
+"    label $id.rcv_sym.lwdt -text \"Width:\"\n"
+"    entry $id.rcv_sym.wdt -textvariable $var_wdt -width 12\n"
+"    pack $id.rcv_sym.lwdt $id.rcv_sym.wdt $id.rcv_sym.lrcv $id.rcv_sym.rcv -side left\n"
+"\n"
+// Colors section
+"    labelframe $id.colors -borderwidth 1 -text [_ \"Colors\"] -padx 5 -pady 5\n"
+"    pack $id.colors -fill x\n"
+"\n"
+// Background row
+"    frame $id.colors.bgrow\n"
+"    pack $id.colors.bgrow -side top -fill x -pady 2\n"
+"    label $id.colors.bgrow.lab -text [_ \"Background:\"] -width 12 -anchor e\n"
+"    entry $id.colors.bgrow.ent -textvariable ::dialog_note::var_hex_bgcolor_text($vid) -width 10\n"
+"    label $id.colors.bgrow.swatch -background $swatch_bg -relief ridge -width 24 -height 1\n"
+"    pack $id.colors.bgrow.lab $id.colors.bgrow.ent $id.colors.bgrow.swatch -side left -padx 2\n"
+"\n"
+// Text row
+"    frame $id.colors.fgrow\n"
+"    pack $id.colors.fgrow -side top -fill x -pady 2\n"
+"    label $id.colors.fgrow.lab -text [_ \"Text:\"] -width 12 -anchor e\n"
+"    entry $id.colors.fgrow.ent -textvariable ::dialog_note::var_hex_fgcolor_text($vid) -width 10\n"
+"    label $id.colors.fgrow.swatch -background $swatch_fg -relief ridge -width 24 -height 1\n"
+"    pack $id.colors.fgrow.lab $id.colors.fgrow.ent $id.colors.fgrow.swatch -side left -padx 2\n"
+"\n"
+// Traces to update swatches on hex changes
+"    trace add variable ::dialog_note::var_hex_bgcolor_text($vid) write \\\n"
+"        [list ::dialog_note::note_update_swatch $id bg]\n"
+"    trace add variable ::dialog_note::var_hex_fgcolor_text($vid) write \\\n"
+"        [list ::dialog_note::note_update_swatch $id fg]\n"
+"\n"
+// Disable if theme on / transparent on (initial state)
+"    if { $::dialog_note::var_theme($vid) == 1 } {\n"
+"        $id.colors.bgrow.ent configure -state disabled\n"
+"        $id.colors.fgrow.ent configure -state disabled\n"
+"    }\n"
+"    if { $::dialog_note::var_transp($vid) == 1 } {\n"
+"        $id.colors.bgrow.ent configure -state disabled\n"
+"    }\n"
+"\n"
+// Checkboxes: theme + transparent
+"    frame $id.colors.checkboxes\n"
+"    pack $id.colors.checkboxes -side top -fill x\n"
+"    frame $id.colors.checkboxes.theme\n"
+"    label $id.colors.checkboxes.theme.lab -text [_ \"Use Theme: \"]\n"
+"    checkbutton $id.colors.checkboxes.theme.ent -variable ::dialog_note::var_theme($vid) -width 5\\\n"
+"        -command \"::dialog_note::note_theme_check $id\"\n"
+"    pack $id.colors.checkboxes.theme.ent $id.colors.checkboxes.theme.lab -side right -anchor e\n"
+"    frame $id.colors.checkboxes.transp\n"
+"    label $id.colors.checkboxes.transp.lab -text [_ \"Transparent Background: \"]\n"
+"    checkbutton $id.colors.checkboxes.transp.ent -variable ::dialog_note::var_transp($vid) -width 5\\\n"
+"        -command \"::dialog_note::note_transp_check $id\"\n"
+"    pack $id.colors.checkboxes.transp.ent $id.colors.checkboxes.transp.lab -side right -anchor e\n"
+"    pack $id.colors.checkboxes.theme $id.colors.checkboxes.transp -side left -anchor center\n"
+"    $id.colors.checkboxes config -padx 80\n"
+"\n"
+// Radio buttons + Compose
+"    frame $id.colors.radio\n"
+"    pack $id.colors.radio -side top\n"
+"    radiobutton $id.colors.radio.bg -value 0 -variable ::dialog_note::var_colorradio($vid)\\\n"
+"        -text [_ \"Background\"]\n"
+"    radiobutton $id.colors.radio.fg -value 1 -variable ::dialog_note::var_colorradio($vid)\\\n"
+"        -text [_ \"Text\"]\n"
+"    label $id.colors.radio.dummy -text \"\" -width 1\n"
+"    button $id.colors.radio.but -text [_ \"Compose\"] -command \"::dialog_note::note_compose_color $id\"\n"
+"    pack $id.colors.radio.bg $id.colors.radio.fg $id.colors.radio.dummy $id.colors.radio.but -side left\n"
+"    if { $::dialog_note::var_theme($vid) == 1 } {\n"
+"        $id.colors.radio.bg configure -state disabled\n"
+"        $id.colors.radio.fg configure -state disabled\n"
+"        $id.colors.radio.but configure -state disabled\n"
+"    }\n"
+"\n"
+// Presets (color scheme by Mary Ann Benedetto http://piR2.org)
+"    frame $id.colors.presets -pady 8\n"
+"    pack $id.colors.presets -fill x\n"
+"    foreach r {r1 r2 r3} hexcols {\n"
+"       { \"#FFFFFF\" \"#DFDFDF\" \"#BBBBBB\" \"#FFC7C6\" \"#FFE3C6\" \"#FEFFC6\" \"#C6FFC7\" \"#C6FEFF\" \"#C7C6FF\" \"#E3C6FF\" }\n"
+"       { \"#9F9F9F\" \"#7C7C7C\" \"#606060\" \"#FF0400\" \"#FF8300\" \"#FAFF00\" \"#00FF04\" \"#00FAFF\" \"#0400FF\" \"#9C00FF\" }\n"
+"       { \"#404040\" \"#202020\" \"#000000\" \"#551312\" \"#553512\" \"#535512\" \"#0F4710\" \"#0E4345\" \"#131255\" \"#2F004D\" } }\\\n"
+"    {\n"
+"       frame $id.colors.presets.$r\n"
+"       pack $id.colors.presets.$r -side top\n"
+"       foreach i { 0 1 2 3 4 5 6 7 8 9} hexcol $hexcols \\\n"
+"           {\n"
+"               label $id.colors.presets.$r.c$i -background $hexcol -activebackground $hexcol -relief ridge -padx 7 -pady 0 -width 1\n"
+"               bind $id.colors.presets.$r.c$i <Button> \"::dialog_note::note_preset_col $id $hexcol\"\n"
+"           }\n"
+"       pack $id.colors.presets.$r.c0 $id.colors.presets.$r.c1 $id.colors.presets.$r.c2 $id.colors.presets.$r.c3 \\\n"
+"           $id.colors.presets.$r.c4 $id.colors.presets.$r.c5 $id.colors.presets.$r.c6 $id.colors.presets.$r.c7 \\\n"
+"           $id.colors.presets.$r.c8 $id.colors.presets.$r.c9 -side left\n"
+"    }\n"
+"\n"
+// Cancel / OK buttons
+"    frame $id.buttonframe\n"
+"    pack $id.buttonframe -side bottom -fill x -pady 2m\n"
+"    button $id.buttonframe.cancel -text {Cancel} -command \"note_cancel $id\"\n"
+"    button $id.buttonframe.ok -text {OK} -command \"note_ok $id\" -default active\n"
+"    pack $id.buttonframe.cancel -side left -expand 1\n"
+"    pack $id.buttonframe.ok -side left -expand 1\n"
+"\n"
+// macOS Enter-to-apply + focus handling
+"    if {$::windowingsystem eq \"aqua\"} {\n"
+"        bind $id.name_size.size <KeyPress-Return> \"note_bind_enter_to_apply $id\"\n"
+"        bind $id.rcv_sym.rcv <KeyPress-Return> \"note_bind_enter_to_apply $id\"\n"
+"        bind $id.rcv_sym.wdt <KeyPress-Return> \"note_bind_enter_to_apply $id\"\n"
+"        bind $id.colors.bgrow.ent <KeyPress-Return> \"::dialog_note::note_update_color_from_hex_enter $id bg\"\n"
+"        bind $id.colors.fgrow.ent <KeyPress-Return> \"::dialog_note::note_update_color_from_hex_enter $id fg\"\n"
+"\n"
+"        $id.name_size.size config -validate focusin -vcmd \"note_unbind_return $id\"\n"
+"        $id.rcv_sym.rcv config -validate focusin -vcmd \"note_unbind_return $id\"\n"
+"        $id.rcv_sym.wdt config -validate focusin -vcmd \"note_unbind_return $id\"\n"
+"        $id.colors.bgrow.ent config -validate focusin -vcmd \"note_unbind_return $id\"\n"
+"        $id.colors.fgrow.ent config -validate focusin -vcmd \"note_unbind_return $id\"\n"
+"\n"
+"        $id.buttonframe.cancel config -takefocus 0\n"
+"        $id.buttonframe.ok config -default normal\n"
+"        bind $id.buttonframe.ok <FocusIn> \"$id.buttonframe.ok config -default active\"\n"
+"        bind $id.buttonframe.ok <FocusOut> \"$id.buttonframe.ok config -default normal\"\n"
+"        $id.buttonframe.ok config -highlightthickness 0\n"
+"        $id.buttonframe.cancel config -highlightthickness 0\n"
+"    }\n"
+"    focus $id.name_size.size\n"
+"    position_over_window $id $::focused_window\n"
+"}\n";

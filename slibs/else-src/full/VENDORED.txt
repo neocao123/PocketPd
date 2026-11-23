@@ -1,0 +1,30 @@
+ELSE - full vendored source tree (PocketPd "else" core rebuild, W2.2)
+
+Source: github.com/porres/pd-else, master snapshot @ commit
+082af31e3b81ef80e06f309b9bfa99b588f98e7f (2026-11-21, the same snapshot
+the ../ subset was vendored from; upstream labels it 1.0-0 RC-15).
+Tarball: /c/Temp/else-full-082af31.tar.gz (codeload), extracted verbatim.
+
+Contents: Control/ (146 .c), Audio/ (387 .c incl. vendored FluidLite under
+sfont~ and the aubio headers beat~ uses), Shared/ (11 .c), Extra/ (20).
+
+Local edits (kept minimal, mirrored from the ../ subset - see NOTICE.txt):
+- Control/retrieve.c: class_new(s, ...) literalized to
+  class_new(gensym("retrieve"), ...) for the core_classes manifest scan.
+Three macOS dylib symlinks under Shared/aubio/build and one FluidLite
+example symlink did not survive tar on Windows; they are build artifacts,
+not compiled sources.
+
+License: GPL-3 like the parent directory (see ../LICENSE.txt).
+
+Built by build_slibs.py entry ("else", ...) into
+app/src/main/assets/slibs/<abi>/else/else_core.so, replacing the vintage
+hand-integrated core whose sources are lost (PD_VERSIONS.md section 4.3).
+Excluded from compilation (documented justification, per the
+"fix-don't-remove" rule - these are upstream GUI-bridge objects that need
+the pd GUI layer libpd does not run; the bare names must keep resolving to
+the app-native widgets / existing providers):
+- Control/keyboard.c, Control/pad.c, Control/button.c,
+  Control/popmenu.c  (PocketPd ships these as app-native touch widgets)
+- knob.c stays OUT too (elsex already compiles it - identical RC15 source;
+  one provider is enough, bare name resolves via elsex per PRIORITY).

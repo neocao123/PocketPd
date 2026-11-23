@@ -7,6 +7,53 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.2 (versionCode 306) — 2026-11-24 【0.57 分支 round 3:ELSE RC15 全量核替换 vintage else_core】
+
+**W2.2（MIGRATION_057.md §7）:源码失传的 vintage else_core.so 替换为
+上游 ELSE RC15 全量构建。** 用户对 0.18.1 的冒烟确认了缺口（blip~ /
+vsaw~ 报错，superosc~.pd 引用 vsaw~ 被连带打断）——本轮正是修这个。
+
+- **vendored**:`slibs/else-src/full/` = porres/pd-else master 快照
+  @`082af31e`（2026-11-21,与 elsex 子集同源,上游标 RC-15）,Control 146 +
+  Audio 387（含 FluidLite/libogg/libvorbis/aubio/opus/llink 等 vendored
+  依赖树）+ Shared 11 + Extra；VENDORED.txt 记录来源、编辑与排除理由。
+  0.17.134 时代的子集目录原样保留（elsex 继续用它）。
+- **build_slibs.py 新机制**:`excl_dirs`（按路径子串排除 vendor 树;
+  注意 Windows os.walk 是反斜杠——子串必须两种斜杠风格都写）、
+  `excl_main`（凡定义 main() 的 CLI demo/test 一律跳过——pd 对象从不
+  定义 main;检查前先剥 `#if 0` 和 `_V_SELFTEST` 死代码块,否则误杀
+  laplace.c/sharedbook.c 这类守卫测试文件）、`extra_flags`（opus
+  standalone 开关 `-DOPUS_BUILD -DVAR_ARRAYS`）、`.cpp` 入选
+  （link.cpp/udp）、include-wrapper 跳过加尺寸护栏（fluid_defsfont.c
+  1700 行真代码因 `#include "stb_vorbis.c"` 被误判纯包装——保留本体,
+  stb_vorbis.c 显式排除）。
+- **编译目标 API 21→26**（slibs ABIS）:bionic `getifaddrs` 需 ≥24,
+  ELSE 的 Shared/link link.cpp 要用;app minSdk 本来就是 26。
+- **else 核链接**:C++ TU（plaits~/circuit~/link.cpp）→ libc++.a 静态
+  链入 blob（creb/pocketpd 先例）;`sys_putmidibyte` 垫片与 elsex 共享;
+  `else.c` master 打补丁摘掉 pdlua 的 `lua_setup()` 调用（pdlua 子库
+  未 vendored,[else] 信息类本体保留）;opus 头目录置于 include 序列最前
+  （opus 自带 kiss_fft.h 必须压过 Shared/kiss_fft）。
+- **排除清单（全部有据,见 VENDORED.txt）**:keyboard/pad/button/popmenu
+  （app 原生触屏控件）、knob（elsex 已提供同名类）、play.file~/sfload/
+  sfinfo/streamout~/streamin~（ffmpeg/sfizz/vorbis 外部依赖树不构建）、
+  opus 架构 SIMD 路径（NE10/SSE4.1）+ CLI demo/test、silk/fixed
+  （定点构建专属,float 构建上游就不编）。
+- **覆盖核对（修复而不删的兑现）**:vintage 217 类 **217/217 可解析**
+  ——216 个由新核编译注册（含 27 个上游 class_addcreator 别名名:
+  f2s~/rec~/t2/dir/window 等,早前的 28 缺口扫描漏了 addcreator 形式）,
+  blip~ 走它的 vanilla 组合抽象（else/blip~.pd,本来就存在）;
+  superosc~.pd 的 vsaw~ 引用由新核注册的 vsaw~ 解决。
+- **验收**:构建 0 失败;audit_blobs 两 ABI **零未解析**;manifest
+  1436 → 2039;else_core.so 3.7MB（arm64）;aapt = 306/0.18.2;GM800
+  install -r + dumpsys 复核;Slibs.VERSION 136→137。
+- **已知边界（诚实清单）**:①gran~/presets/output~/midi.in 等 27 个
+  名字从 vintage 编译类变为**抽象实现**——行为可能与 vintage 编译版
+  有出入（抽象是 vanilla 组合,原生 mc/信号性能不等价）;②新核是 RC15
+  语义,极少数 vintage 参数习惯可能有别——发现即报,单独修;③elsex 与
+  新 else 核存在 52 类重叠（优先级解析,else 胜出）——elsex 退役是
+  🄰 决策,本轮不动。
+
 ## 0.18.1 (versionCode 305) — 2026-11-23 【0.57 分支 round 2:slibs 全量重编 0.57 头】
 
 **W2（MIGRATION_057.md §7）:13 库矩阵 + 自研库全部改用 pd 0.57.0test1

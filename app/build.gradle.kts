@@ -11,8 +11,36 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 305
-    versionName = "0.18.1" // ---- 0.57 BRANCH round 2 (W2 slibs matrix):
+    versionCode = 306
+    versionName = "0.18.2" // ---- 0.57 BRANCH round 3 (W2.2): vintage
+    // else_core.so (sources lost, dead on 0.57 since 0.18.1) REPLACED by
+    // the full ELSE RC15 build. Vendored porres/pd-else master snapshot
+    // @082af31e (2026-11-21, RC-15) under slibs/else-src/full/ (subset tree
+    // kept for elsex); new ("else",...) build_slibs entry compiles ~392
+    // objects into else_core.so incl. plaits~/circuit~/sfont~(+SF3 via
+    // vendored FluidLite/libogg/libvorbis)/pdlink(+opus)/beat~(+aubio).
+    // Build-system additions: excl_dirs (vendor-tree exclusion by path
+    // substring; Windows backslash paths!), excl_main (skip files defining
+    // main() - CLI demos/tests vendored upstream; dead-code stripper for
+    // #if 0 and _V_SELFTEST guards), extra_flags (opus standalone switches
+    // -DOPUS_BUILD -DVAR_ARRAYS), .cpp accepted, include-wrapper skip now
+    // size-guarded (fluid_defsfont.c), slibs compile target API 21->26
+    // (bionic getifaddrs for link.cpp; app minSdk is 26), libc++
+    // static-linked into the else blob (C++ TUs), sys_putmidibyte shim
+    // shared with elsex, else.c master patched to drop the non-vendored
+    // pdlua lua_setup call. Exclusions (justified, VENDORED.txt):
+    // keyboard/pad/button/popmenu/knob (app-native widgets / elsex
+    // provides), play.file~/sfload/sfinfo/streamout~/streamin~ (ffmpeg/
+    // sfizz/vorbis external deps), opus arch SIMD + demo/test mains,
+    // silk/fixed (fixed-point only). Coverage: vintage 217 else classes ->
+    // 217/217 resolvable (216 compiled by the new core incl. the 27
+    // addcreator-alias names, blip~ via its vanilla abstraction); manifest
+    // 1436 -> 2039; audit_blobs ZERO unresolved both ABIs; user smoke of
+    // 0.18.1 confirmed blip~/vsaw~ dead + superosc~ dependency chain -
+    // vsaw~ now compiled, superosc~.pd's vsaw~ reference resolves.
+    // Slibs.VERSION 136 -> 137 (re-extract).
+    //
+    // ---- 0.18.1 (0.57 history) round 2 (W2 slibs matrix):
     // ALL slib cores rebuilt against the pd 0.57.0test1 headers (the exact
     // tree the runtime libpd.so ships from - pure-data@43a5b8922a35),
     // per-object .so layout unchanged, Slibs.VERSION 135->136 forces

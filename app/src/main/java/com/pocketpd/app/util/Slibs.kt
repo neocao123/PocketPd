@@ -25,12 +25,11 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 136: 0.57 branch
-     *  (0.18.1) - all cores rebuilt against pd 0.57.0test1 headers (the
-     *  runtime libpd.so's own tree); elsex pd55-header special case and the
-     *  0.17.137 mc shims dropped (5 symbols natively exported now),
-     *  sic.c COSTABSIZE/cos_table compat patch added. */
-    private const val VERSION = 136
+    /** Bump to re-extract after an assets/slibs update. 137: 0.57 branch
+     *  (0.18.2) - vintage else_core.so REPLACED by the full ELSE RC15
+     *  build (slibs/else-src/full, ~390 objects, native mc API, vendored
+     *  opus/aubio/FluidLite/SF3 chain); manifest 1436 -> 2039. */
+    private const val VERSION = 137
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2
