@@ -25,8 +25,13 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 140: 0.57 branch
-     *  (0.18.8 revert) - RC15 tempo.pd restored - else/tempo.pd swapped to the plugdata-bundled ELSE
+    /** Bump to re-extract after an assets/slibs update. 141: 0.57 branch
+     *  (0.18.13) - cyclone swapped 0.43.4 miXed -> porres 0.9-5: 256 classes
+     *  (was 230), 209 setups in core_wrap, boot-nag strip, 12 non-alphanumeric
+     *  objects now registered via cyclone_lib.c, vanilla-clash names
+     *  cyclone/xxx + capitalized with bare line~/pow~/clip compat creators,
+     *  help/ refreshed to the 0.9-5 help_files (193 patches).
+     *  140: 0.57 branch (0.18.8 revert) - RC15 tempo.pd restored - else/tempo.pd swapped to the plugdata-bundled ELSE
      *  revision (else/lb wrapper, -hz/-mul/-seed flags, unit select).
      *  138: 0.57 branch (0.18.4) - core_wrap setup-call list now accepts
      *  BOTH pd setup spellings: classes with non-identifier names
@@ -34,7 +39,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 140
+    private const val VERSION = 141
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

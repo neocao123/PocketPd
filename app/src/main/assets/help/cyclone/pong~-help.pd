@@ -1,73 +1,75 @@
-#N canvas 0 26 541 463 10;
-#X text 25 -55 fold or wrap a signal within a given range;
-#X text 305 104 lo val;
-#X text 360 104 hi val;
-#X floatatom 361 121 0 0 0 0 - - -;
-#X floatatom 305 121 0 0 0 0 - - -;
-#X floatatom 236 116 0 0 0 0 - - -;
-#X obj 236 137 phasor~ 4;
-#X text 86 117 lo val;
-#X text 162 112 hi val;
-#X obj 163 150 sig~ 0.25;
-#X floatatom 163 129 0 0 0 0 - - -;
-#X obj 86 155 sig~ -0.25;
-#X floatatom 86 134 0 0 0 0 - - -;
-#X floatatom 14 120 0 0 0 0 - - -;
-#X obj 14 141 phasor~ 4;
-#X text 28 -30 pong either folds or wraps its input within the range
-of a lo val and a hi val. The optional arguments are <mode> <lo val>
-<high val>. mode 0 is fold \, mode 1 is wrap. The default mode is fold.
-The default range is zero to one. If hi val is greater than lo val
-\, their behavior is swapped. All inlets accept both signals and floats.
-The mode <int> message may be used to switch between fold and wrap
-mode. It is useful for performing modulo arithmetic \, as well as foldover
-or wraparound distortion.;
-#X obj 29 252 Scope~ 130 130 256 3 128 -1 1 0 0 0 0 102 255 51 135
-135 135 0;
-#X obj 237 272 Scope~ 130 130 256 3 128 -1 1 0 0 0 0 102 255 51 135
-135 135 0;
-#X obj 256 222 Snapshot~ 100;
-#X obj 257 245 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
--262144 -1 -1 0 256;
-#X obj 45 207 Snapshot~ 100;
-#X obj 46 230 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
--262144 -1 -1 0 256;
-#X obj 30 179 pong~ 0 -0.25 0.25;
-#X obj 237 197 pong~ 1 -0.25 0.25;
-#X msg 425 147 mode 0;
-#X msg 424 174 mode 1;
-#X text 471 147 fold;
-#X text 472 173 wrap;
-#N canvas 247 115 494 388 META 0;
-#X text 12 195 HELP_PATCH_AUTHORS Christoph Kummerer. Revised by Jonathan
-Wilkes for Pd-extended 0.42 to conform to the PDDP template.;
-#X text 12 165 WEBSITE http://suita.chopin.edu.pl/~czaja/miXed/externs/cyclone.html
-;
-#X text 12 5 KEYWORDS signal max_compatible;
-#X text 12 45 DESCRIPTION fold or wrap a signal within a given range
-;
-#X text 12 85 INLET_1 signal;
-#X text 12 105 INLET_2 signal;
-#X text 12 125 OUTLET_0 signal;
-#X text 12 65 INLET_0 signal mode;
-#X text 12 25 LICENSE SIBSD;
-#X text 12 145 AUTHOR Krzysztof Czaja;
-#X restore 492 392 pd META;
-#X connect 3 0 23 2;
-#X connect 4 0 23 1;
-#X connect 5 0 6 0;
-#X connect 6 0 23 0;
-#X connect 9 0 22 2;
-#X connect 10 0 9 0;
-#X connect 11 0 22 1;
-#X connect 12 0 11 0;
-#X connect 13 0 14 0;
-#X connect 14 0 22 0;
-#X connect 18 0 19 0;
-#X connect 20 0 21 0;
-#X connect 22 0 16 0;
-#X connect 22 0 20 0;
-#X connect 23 0 17 0;
-#X connect 23 0 18 0;
-#X connect 24 0 23 0;
-#X connect 25 0 23 0;
+#N canvas 444 23 564 713 10;
+#X obj 5 684 cnv 15 552 21 empty empty empty 20 12 0 14 #e0e0e0 #202020 0;
+#X obj 5 535 cnv 3 550 3 empty empty outlets 8 12 0 13 #dcdcdc #000000 0;
+#X obj 5 572 cnv 3 550 3 empty empty arguments 8 12 0 13 #dcdcdc #000000 0;
+#X obj 91 406 cnv 17 3 72 empty empty 0 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 91 545 cnv 17 3 17 empty empty 0 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 91 507 cnv 17 3 17 empty empty 2 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 91 483 cnv 17 3 17 empty empty 1 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X text 154 545 signal;
+#X text 143 598 2) float;
+#X text 143 615 3) float;
+#X msg 146 211 mode \$1;
+#X floatatom 359 210 0 -100 100 0 - - - 0;
+#X floatatom 282 189 0 -100 100 0 - - - 0;
+#X obj 285 164 hsl 128 15 -1 1 0 0 empty empty empty -2 -8 0 10 #dcdcdc #000000 #000000 0 1;
+#X text 117 484 float/signal;
+#X text 117 508 float/signal;
+#X text 116 406 float/signal;
+#X obj 146 130 vradio 15 1 0 4 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0;
+#X floatatom 146 193 3 0 0 0 - - - 0;
+#X text 68 130 mode 0: fold;
+#X text 68 145 mode 1: wrap;
+#X text 68 160 mode 2: clip;
+#X text 318 163 low range;
+#X obj 362 187 hsl 128 15 -1 1 0 0 empty empty empty -2 -8 0 10 #dcdcdc #000000 #000000 0 1;
+#X text 400 187 high range;
+#X obj 5 396 cnv 3 550 3 empty empty inlets 8 12 0 13 #dcdcdc #000000 0;
+#X obj 5 640 cnv 3 550 3 empty empty attributes 8 12 0 13 #dcdcdc #000000 0;
+#X text 161 645 @mode;
+#X text 155 662 @range;
+#X text 143 581 1) float;
+#X text 207 663 - followed by two numbers set low and high range.;
+#X text 117 424 mode <float>;
+#X text 204 545 - original \, clipped \, wrapped \, or folded signal;
+#X text 207 646 - <fold> \, <wrap> \, <clip> & <none>: sets the object mode;
+#X text 117 462 range <f \, f>;
+#X text 204 581 - mode: 0 (fold - default) \, 1 (wrap) \, 2 (clip) \, 3 (none);
+#X text 110 442 mode <symbol>;
+#X text 203 442 - sets mode to: <fold> \, <wrap> \, <clip> or <none>;
+#X text 206 598 - low range value (default 0);
+#X text 206 614 - high range value (default 1);
+#X text 68 175 mode 3: none;
+#X obj 206 236 cyclone/pong~ 1 -0.25 0.25;
+#X text 204 405 - value to be limited into a given range;
+#X text 204 424 - limit mode: 0 (fold) \, 1 (wrap) \, 2 (clip) & 3 (none);
+#X text 204 463 - sets range's low and high values;
+#X text 206 484 - sets low range;
+#X text 203 508 - sets high range;
+#X obj 499 69 cyclone/dsponoff~;
+#X obj 3 4 ./header pong~;
+#X text 23 62 Signal range limiter (fold \, wrap & clip);
+#X text 48 89 Use [pong~] to fold \, wrap or clip its input signal within a given low-high range. Wrap mode is useful for modulo arithmetic., f 65;
+#X floatatom 206 168 5 0 0 0 - - - 16;
+#X obj 206 204 sig~;
+#X obj 206 259 cyclone/snapshot~ 1;
+#X floatatom 206 282 5 0 0 0 - - - 16;
+#X text 76 332 see also:;
+#X obj 372 354 open-else;
+#X text 435 317 click;
+#X msg 372 306 fold~;
+#X msg 382 327 wrap2~;
+#X text 152 323 Plugdata users or those with ELSE can also use [else/fold~] and [else/wrap2~] as alternatives, f 33;
+#X connect 10 0 41 0;
+#X connect 11 0 41 2;
+#X connect 12 0 41 1;
+#X connect 13 0 12 0;
+#X connect 17 0 18 0;
+#X connect 18 0 10 0;
+#X connect 23 0 11 0;
+#X connect 41 0 53 0;
+#X connect 51 0 52 0;
+#X connect 52 0 41 0;
+#X connect 53 0 54 0;
+#X connect 58 0 56 0;
+#X connect 59 0 56 0;

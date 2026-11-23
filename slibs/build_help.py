@@ -17,6 +17,8 @@ import os, re, shutil, sys
 SRC = "C:/Users/Administrator/AppData/Local/Temp/srcrepo"
 EX = SRC + "/pd-extended/externals"
 PD = "C:/Users/Administrator/AppData/Local/Temp/pdsrc/pd-0.51-4/doc/5.reference"
+# cyclone 0.9-5 (0.18.13): porres moved help into documentation/help_files
+CYC = SRC + "/pd-cyclone-0.9-5"
 PROJ = "C:/Projects/26PDAndroid/app/src/main/assets/help"
 
 HELP_RE = re.compile(r"(-help\.pd$)|(^(help|doc)-.*\.pd$)", re.I)
@@ -24,7 +26,7 @@ HELP_RE = re.compile(r"(-help\.pd$)|(^(help|doc)-.*\.pd$)", re.I)
 # (destination lib, source dir, help-only)
 TREES = [
     ("vanilla", PD, False),
-    ("cyclone", EX + "/miXed/doc/help/cyclone", False),
+    ("cyclone", CYC + "/documentation/help_files", False),
     ("zexy", EX + "/zexy/reference", False),
     ("zexy", EX + "/zexy/abs", True),
     ("iemlib", EX + "/iemlib/iemabs", True),
@@ -38,14 +40,19 @@ TREES = [
 ]
 
 def main():
-    if os.path.isdir(PROJ):
+    only = sys.argv[1] if len(sys.argv) > 1 else None
+    if not only and os.path.isdir(PROJ):
         shutil.rmtree(PROJ)
     total = 0
     for lib, src, helponly in TREES:
+        if only and only != lib:
+            continue
         if not os.path.isdir(src):
             print("MISSING source: %s" % src)
             continue
         dst = os.path.join(PROJ, lib)
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)  # only-mode refresh: stale help must go too
         os.makedirs(dst, exist_ok=True)
         n = 0
         for f in sorted(os.listdir(src)):

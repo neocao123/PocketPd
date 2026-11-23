@@ -7,6 +7,90 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.13 (versionCode 317) — 2026-11-24 【0.57 分支 round 4:cyclone 0.43.4 → 0.9-5 换版重编（迁移 §7 W2.3）】
+
+**任务一换版轮第一击。** 源码 = porres/pd-cyclone tag `0.9-5`（2026-02-21
+发布，要求 pd 0.56-5），克隆于 `%TEMP%/srcrepo/pd-cyclone-0.9-5`，替换
+pd-extended 0.43.4 miXed 快照。新布局：`cyclone_objects/binaries/
+{control,audio}` 对象源 + 12 个非字母对象直接住在 `cyclone_lib.c` 的
+cyclone_setup 里（`[cyclone]` 横幅对象 + `!- !-~ !/ !/~ ==~ !=~ <~ <=~
+>~ >=~ %~ +=~`）；`shared/{common,control,signal}` 取代 miXed/shared
+四件套（unstable/ 并入 control/）。
+
+**构建机制（build_slibs.py）**：
+- setup 收集器接受 `CYCLONE_OBJ_API`/`CYCLONE_API` 前缀（0.17.81 zexy
+  同款——不加则 190 个 setup 全部漏抓）；
+- **setup 收集器现在只认定义不认原型**：`cyclone_lib.c` 里
+  `#if CYCLONE_SINGLE_LIBRARY` 门内的 `void setup_single_lib();` 原型被
+  旧模式当定义收进 core_wrap，blob 带着未解析引用（audit_blobs 抓住）；
+- `src_files` 支持显式单文件（cyclone_lib.c 在 binaries/ 顶层——把整个
+  目录当 src 会重复收集 control/+audio/）；
+- `strip_boot_pderror`：0.9-5 在 ~30 个类的 *_setup 里写弃用告警
+  （pd_error 于类注册时执行 = 每次开机打 ~30 行），内存内剥离
+  （实例级报错不动）；
+- `scope_dialog.c` 排除（纯 Tcl sys_gui 文本，被 scope.c 函数内
+  #include 两次，独立编译必炸）；
+- atodb/dbtoa 不再排除：0.9-5 把 control 版 convert() 改 static、信号版
+  干脆没有 convert，四个对象（atodb atodb~ dbtoa dbtoa~）全部上岗；
+- `buffer~.pd` 抽象随船（0.9-5 唯一抽象；裸名归 ELSE，此处服务
+  cyclone/buffer~ 拼写）；abstractions 路径支持绝对；
+- `cycle.c` 补丁：`sys_geteventno` → `sched_geteventno`（0.57.0test1
+  改名，m_pd.h 无兼容宏——0.9-5 只要求 0.56-5）；
+- **EXTRA_C["cyclone"] 整体退役**：purr-data gui_*/glist_grabx/
+  canvas_apply_setundo 垫片是 0.43.4 快照的病，0.9-5 把这类调用全部关进
+  `#ifdef PDL2ORK`（不定义即 vanilla 分支）。
+
+**符号核对的教训（记录进脚本注释）**：`%TEMP%/pdaar` 是一份**陈旧的
+libpd 构建**（1,013,000 字节，缺 pdgui_vmess/pd_undo_set_objectstate/
+signal_setmultiout），差点引着本轮追查幻影 dlopen 失败；真身 = mavenLocal
+AAR（1,201,688 字节，658 个 T 符号，三件全导出）。**符号审计只许对着
+`C:/Temp/slibs-audit-<abi>`（audit_blobs 所用）或 .m2 AAR，禁 pdaar**。
+elsex 轮注释声称的"nm -D 已验证导出"本来就是对的。
+
+**bare 名兼容（修而不删）**：上游把与 vanilla 冲突的名字改拼写了
+（cyclone/line~ + `Line~`、cyclone/pow~ + `Pow~`、cyclone/clip + `Clip`、
+cyclone/snapshot~ + `Snapshot~`、cyclone/clip~ + `Clip~`、cyclone/append +
+`Append`）。0.43.4 基线里裸名解析到 cyclone（slibs 遮蔽 vanilla），为保
+住用户补丁行为，对 vanilla **没有**同名对象或语义不同的三个名字打回
+裸名 creator：`line~`（Max 语义斜坡 vs vanilla 线性斜坡）、`pow~`（vanilla
+0.57 无 pow~）、`clip`（vanilla 无控制 clip）；clip~/snapshot~/append 与
+vanilla 同义，交给 vanilla。
+
+**结果**：两 ABI 各 256 类 ok / 0 fail，core_wrap 挂 209 个 setup，
+audit_blobs 28/28 全绿。core_classes.txt 230 → 434 行（增量合并，含
+cyclone/ 前缀别名与大写变体）。
+
+**io 审计重做（0.17.142 方法论 + audit_io.py 接 0.9-5 树）**——源计数
+为准，PdObjectMeta 修正:
+- 真漂移（0.43.4→0.9-5 构造函数 io 变化）:Append/prepend `2/1→1/1`、
+  maximum/minimum `2/1→2/2`（加了 index 出口）、maximum~/minimum~
+  `1→2` 进（副参数升级为显式信号口）、onebang `2/1→2/2`、capture
+  `1/1→1/2`（加 count 出口）、sprintf 改 %-槽位 reg 规则（入口数 =
+  格式串 % 数，最少 1）、deltaclip~ `1→3`、kink~ `1→2`、slide~ `1→3`、
+  train~ `1→3` 进（+bang 出口保持 2）、trapezoid~ `1→3`、triangle~
+  `1→2`、minmax~ `1→2` 信号进、play~ `1/1→1/2`（+done bang 出口）、
+  ==~ 十兄弟 `1→2` 信号进（副参数升级为 float 初值信号口）、!- !/
+  信号口集修正、Clip~ 旧行 `1/1→3/1`、wave~ 静态行撤除（reg 规则接手）。
+- 新类行：cyclone `1/3`、cross~ `2/2`、degrade~ `3/1`、downsamp~ `2/1`、
+  equals~ 2/1、greaterthan~/greaterthaneq~/lessthan~/lessthaneq~/modulo~/
+  notequals~ 各 2/1、phaseshift~ `3/1`、scale `6/1`、scale~ `6/1`（全
+  信号进）、teeth~ `6/1`、thresh~ `3/1`、atodb/dbtoa `1/1`、atodb~/dbtoa~
+  `1/1`、bitsafe~ `1/1`、rdiv/rminus `2/1`、rdiv~/rminus~ `2/1` 信号、
+  acosh/asinh/atanh `1/1`、listfunnel `1/1`、bare clip `3/1`、bare line~
+  `2/2`、Pow~ `2/1`。
+- 新 variadic reg 规则：join（入口=首参 2..255）、pak（入口=实参数）、
+  unjoin（出口=首参+1）、selector~（1+N 信号进 1 信号出）、matrix~
+  (N×M + dumpout)、mtr（N 轨：1+N 进 1+N 出）、wave~（首 float 参=出口
+  数，3 全信号进）、sprintf（%-槽位）。
+- gate~ 既有 reg 规则与 0.9-5 语义**恰好吻合**（N 信号出口制，非 MSP
+  多入口制）——无需动。
+
+**help/**：cyclone help 换 0.9-5 `documentation/help_files`（193 补丁，
+旧 157；build_help.py 加单库参数与 only 模式清目录）。lint 9/193 报
+`#A` 数组数据行 = 上游自带波形表（合法 pd 语法），非 authored 错误。
+
+**验收**：aapt = 317/0.18.13；GM800 force-stop + install + dumpsys 复核。
+
 ## 0.18.12 (versionCode 316) — 2026-11-24 【0.57 分支 round 3k:补丁打开瞬间静音（AudioOpen.LOAD）】
 
 **用户报告："pd 文件打开一瞬间会有个破音……正常情况下这个过程 dsp 没在

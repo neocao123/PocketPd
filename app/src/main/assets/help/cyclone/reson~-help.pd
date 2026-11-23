@@ -1,50 +1,68 @@
-#N canvas 0 26 515 407 10;
-#X text 15 35 Bandpass filter controllable by center frequency and
-Q;
-#X obj 32 382 dac~;
-#X obj 32 343 *~ 0.2;
-#X floatatom 160 294 0 0 0 0 - - -;
-#X msg 133 227 200 \, 10000 4000;
-#X obj 31 210 noise~;
-#X text 36 226 input signal;
-#X text 133 211 center freq;
-#X text 88 250 gain;
-#X text 172 325 optional arguments set values of gain \, center frequency
-\, and Q (default 0 \, 0 \, 0.01);
-#X text 88 182 list sets gain \, cf \, q (works unless there are any
-signal inputs for filter parameters);
-#X text 42 316 filtered output;
-#X text 15 62 reson~ implements the following filter equation: y[n]
-= gain * (x[n] - r * x[n-2]) + c1 * y[n-1] + c2 * y[n-2] \, where r
-\, c1 \, and c2 are parameters calculated from the input center frequency
-and Q. Q is the filter bandwidth divided by center frequency. Inputs
-can be floats or signals. The specification is similar to the nres
-unit generator in cmusic.;
-#X obj 32 294 reson~ 1 200 23;
-#X obj 133 250 Line~ 200;
-#X floatatom 60 254 0 0 0 0 - - -;
-#X text 158 276 Q: Try range of 1-100;
-#N canvas 309 151 494 465 META 0;
-#X text 12 225 HELP_PATCH_AUTHORS Christoph Kummerer. Revised by Jonathan
-Wilkes for Pd-extended 0.42 to conform to the PDDP template.;
-#X text 12 195 WEBSITE http://suita.chopin.edu.pl/~czaja/miXed/externs/cyclone.html
-;
-#X text 12 5 KEYWORDS signal max_compatible filter;
-#X text 12 45 DESCRIPTION bandpass filter controllable by center frequency
-and Q;
-#X text 12 75 INLET_0 signal;
-#X text 12 95 INLET_1 signal;
-#X text 12 115 INLET_2 signal;
-#X text 12 135 INLET_3 signal;
-#X text 12 155 OUTLET_0 signal;
-#X text 12 175 AUTHOR Krzysztof Czaja;
-#X text 12 25 LICENSE SIBSD;
-#X restore 466 386 pd META;
-#X connect 2 0 1 0;
-#X connect 2 0 1 1;
-#X connect 3 0 13 3;
-#X connect 4 0 14 0;
-#X connect 5 0 13 0;
-#X connect 13 0 2 0;
-#X connect 14 0 13 2;
-#X connect 15 0 13 1;
+#N canvas 398 23 561 694 10;
+#X declare -stdpath ./;
+#X obj 5 663 cnv 15 552 21 empty empty empty 20 12 0 14 #e0e0e0 #202020 0;
+#X obj 5 436 cnv 3 550 3 empty empty inlets 8 12 0 13 #dcdcdc #000000 0;
+#X obj 5 564 cnv 3 550 3 empty empty outlets 8 12 0 13 #dcdcdc #000000 0;
+#X obj 5 597 cnv 3 550 3 empty empty arguments 8 12 0 13 #dcdcdc #000000 0;
+#X obj 103 446 cnv 17 3 45 empty empty 0 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 103 540 cnv 17 3 17 empty empty 3 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X text 168 445 signal;
+#X obj 103 496 cnv 17 3 17 empty empty 1 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 103 519 cnv 17 3 17 empty empty 2 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 103 573 cnv 17 3 17 empty empty 0 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X text 168 573 signal;
+#X text 156 606 1) float;
+#X text 156 623 2) float;
+#X text 156 639 3) float;
+#X text 229 606 - initial gain (default 0);
+#X text 229 639 - initial Q range (default 0.01);
+#X text 132 519 float/signal;
+#X text 132 540 float/signal;
+#X text 229 573 - filtered signal;
+#X text 132 498 float/signal;
+#X obj 275 170 osc~ 1;
+#X obj 225 143 hsl 128 15 0 2 0 0 empty empty empty -2 -8 0 10 #dcdcdc #000000 #000000 0 1;
+#X text 127 174 input;
+#X text 271 142 gain;
+#X text 365 225 resonance (Q);
+#X text 180 462 list;
+#X text 174 478 clear;
+#X obj 169 249 cyclone/reson~ 1 200 23, f 27;
+#X obj 169 174 noise~;
+#X text 229 462 - initial gain \, center frequency \, Q;
+#X text 229 445 - signal to be filtered;
+#X text 229 478 - clears the internal buffer's memory;
+#X text 228 497 - sets gain;
+#X text 227 519 - sets center frequency;
+#X text 228 540 - sets the resonance Q;
+#X text 229 623 - initial center frequency (default 0);
+#X text 74 89 [reson~] is a bandpass resonant filter. All parameters can be set as float or signals.;
+#X text 324 167 <= center frequency;
+#X obj 328 226 nbx 3 14 0 100 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#X obj 275 198 cyclone/scale~ -1 1 500 1500;
+#X obj 222 202 nbx 3 14 0 100 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#N canvas 957 289 409 160 formula 0;
+#X text 27 76 Since it is a recursive filter \, you may need to use the "clear" message if it blows up.;
+#X text 27 33 The equation of the filter is: y[n] = a0 * (x[n] - r * x[n-2]) + b1 * y[n-1] + b2 * y[n-2] - where r \, b1 \, and b2 are calculated from 'Q' and center frequency.;
+#X restore 468 299 pd formula;
+#X obj 169 287 output~;
+#X obj 2 2 ./header reson~;
+#X text 22 61 Bandpass resonant filter;
+#X obj 26 243 declare -stdpath ./;
+#X text 52 355 see also:;
+#X obj 447 400 open-else;
+#X obj 48 376 cyclone/svf~;
+#X obj 48 401 cyclone/lores~;
+#X obj 167 378 bp~;
+#X obj 167 401 vcf~;
+#X msg 447 378 bandpass~;
+#X text 444 357 click:;
+#X text 222 374 Plugdata users or those with ELSE can also use [else/bandpass~] an alternative, f 33;
+#X connect 20 0 39 0;
+#X connect 21 0 40 0;
+#X connect 27 0 42 0;
+#X connect 28 0 27 0;
+#X connect 38 0 27 3;
+#X connect 39 0 27 2;
+#X connect 40 0 27 1;
+#X connect 52 0 47 0;

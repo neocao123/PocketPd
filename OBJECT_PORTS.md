@@ -586,6 +586,22 @@
 | `cx.stddev` | 1 | 1 | - | - | 源码核对 |
 ### cyclone(161 行,0.17.142 源码核对重写;含 counter/mtr 备注行)
 
+> **0.18.13(0.9-5 换版)增补**——下表按 0.43.4 快照写成;porres 0.9-5
+> 的漂移以 PdObjectMeta.kt 为准(运行时真值),变更行:
+> Append/prepend 2/1→1/1、maximum/minimum 2/1→2/2、maximum~/minimum~
+> 1→2 信号进、onebang 2/1→2/2、capture 1/1→1/2、sprintf 改 %-槽位
+> reg 规则、deltaclip~ 1→3、kink~ 1→2、slide~ 1→3、train~ 1→3(出 2
+> 不变)、trapezoid~ 1→3、triangle~ 1→2、minmax~ 1→2 信号进、play~
+> 1/1→1/2、==~ 十兄弟 1→2 信号进、!- !/ 信号进集修正、Clip~ 1/1→3/1。
+> 新增行:cyclone 1/3、cross~ 2/2、degrade~ 3/1、downsamp~ 2/1、equals~/
+> greaterthan~/greaterthaneq~/lessthan~/lessthaneq~/modulo~/notequals~
+> 2/1(信号)、phaseshift~ 3/1、scale 6/1、scale~ 6/1、teeth~ 6/1、
+> thresh~ 3/1、atodb/dbtoa/atodb~/dbtoa~ 1/1、bitsafe~ 1/1、rdiv/rminus
+> 2/1、rdiv~/rminus~ 2/1、acosh/asinh/atanh 1/1、listfunnel 1/1、bare
+> clip 3/1、bare line~ 2/2、Pow~ 2/1。新 reg 规则:join/pak/unjoin/
+> selector~/matrix~/mtr/wave~/sprintf。gate~ 既有规则与 0.9-5 语义
+> 吻合不变。wave~ 改 reg(首 float 参 = 出口数)。
+
 | 对象 | 进 | 出 | 信号进 | 信号出 | 来源 |
 |---|---|---|---|---|---|
 | `Append` | 2 | 1 | - | - | 源码核对 |

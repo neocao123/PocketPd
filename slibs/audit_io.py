@@ -33,6 +33,9 @@ LIBS = {
     "midifile": ["mrpeach/midifile"],
     "binfile": ["mrpeach/binfile"],
     "tracker": [r"C:/Projects/26PDAndroid/slibs/tracker/src"],
+    # cyclone 0.9-5 (0.18.13 audit redo): binaries/ carries cyclone_lib.c at
+    # its top level; cfiles() yields plain file paths directly
+    "cyclone": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/pd-cyclone-0.9-5/cyclone_objects/binaries"],
 }
 
 IO_CALLS = ("inlet_new", "floatinlet_new", "symbolinlet_new", "pointerinlet_new",
@@ -52,6 +55,9 @@ def lib_dirs(lib):
 
 def cfiles(dirs):
     for d in dirs:
+        if os.path.isfile(d):
+            yield d
+            continue
         for root, _, files in os.walk(d):
             for f in sorted(files):
                 if f.endswith((".c", ".cc", ".cpp")):

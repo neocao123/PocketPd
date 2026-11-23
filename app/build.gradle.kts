@@ -11,8 +11,44 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 316
-    versionName = "0.18.12" // ---- 0.57 BRANCH round 3k: patch entry is
+    versionCode = 317
+    versionName = "0.18.13" // ---- 0.57 BRANCH round 4: cyclone swapped
+    // 0.43.4 miXed -> porres 0.9-5 (tag 0.9-5), rebuilt against the 0.57
+    // headers: 256 classes (was 230), 209 setups in core_wrap, both ABIs,
+    // audit_blobs clean. Round mechanics: CYCLONE_OBJ_API setup prefix added
+    // to the setup collector (0.17.81 zexy failure mode), setup collectors
+    // now require DEFINITIONS (cyclone_lib.c's #if'd setup_single_lib
+    // prototype used to leak a call into core_wrap), src_files support for
+    // cyclone_lib.c, strip_boot_pderror removes ~30 setup-time deprecation
+    // nags (pd_error at class registration = every boot), scope_dialog.c
+    // excluded (pure-Tcl text #included inside scope.c), atodb/dbtoa now
+    // SHIP (0.9-5 made control convert() static, signal variants don't
+    // define it), buffer~.pd abstraction shipped, help/ refreshed to the
+    // 0.9-5 help_files (193 patches, 9 lint #A-array notes = upstream
+    // waveform tables, not authoring errors). Vanilla-clash renames
+    // upstream: cyclone/line~ + Line~, cyclone/pow~ + Pow~, cyclone/clip +
+    // Clip, ... - bare line~/pow~/clip compat creators patched back in
+    // (0.43.4 baseline resolved them to cyclone). io audit redo
+    // (audit_io.py + source reads): real drift fixed in PdObjectMeta
+    // (Append/prepend 2/1->1/1, maximum/minimum 2/1->2/2, maximum~/
+    // minimum~ 1->2 sig in, onebang 2/1->2/2, capture 1/1->1/2, sprintf
+    // moved to a %-slot reg rule, deltaclip~/kink~/slide~/train~/
+    // trapezoid~/triangle~ gained signal param inlets, minmax~ 1->2 sig in,
+    // play~ +1 bang outlet, ==~ family +1 float-backed signal inlet, Peak/
+    // Trough rows already correct), new classes rowed (cyclone, cross~,
+    // degrade~, downsamp~, equals~, greaterthan~..., modulo~, notequals~,
+    // phaseshift~, scale/scale~, teeth~, thresh~, atodb/dbtoa x2, bitsafe~,
+    // rdiv/rminus x2, acosh/asinh/atanh, listfunnel, Pow~), variable-io
+    // reg rules added (join/pak/unjoin/selector~/matrix~/mtr/wave~/sprintf).
+    // Symbol-verification lesson recorded: %TEMP%/pdaar is a STALE libpd
+    // build - pdgui_vmess/pd_undo_set_objectstate/signal_setmultiout ARE
+    // exported by the real mavenLocal AAR (they nearly sent this round
+    // chasing phantom dlopen failures); audit against C:/Temp/slibs-audit
+    // or the .m2 AAR only. EXTRA_C["cyclone"] purr shims retired (0.9-5
+    // gates all PDL2ORK calls). sys_geteventno -> sched_geteventno patch
+    // (0.57 rename).
+    //
+    // ---- 0.18.12 (0.57 history) round 3k: patch entry is
     // SILENT (user report: a crackle at the instant of opening a .pd, which
     // "should have no sound since dsp isn't working"). Mechanism found: the
     // load sequence ran ensureAudioOn (dsp ON, empty graph) then openPatch

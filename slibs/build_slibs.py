@@ -10,6 +10,14 @@ import json, os, re, subprocess, sys, shutil
 
 SRCROOT = "C:/Users/Administrator/AppData/Local/Temp/srcrepo"
 EX = SRCROOT + "/pd-extended/externals"
+# cyclone 0.9-5 (0.18.13): porres/pd-cyclone tag 0.9-5 replaces the
+# pd-extended 0.43.4 miXed snapshot. NOTE: the %TEMP%/pdaar extraction is a
+# STALE libpd build - for runtime-symbol ground truth use the mavenLocal
+# AAR's jni/<abi>/libpd.so (or the C:/Temp/slibs-audit-<abi> APK extraction
+# audit_blobs.py reads): the real 0.57 libpd.so DOES export pdgui_vmess /
+# pd_undo_set_objectstate / signal_setmultiout; the stale pdaar blob does
+# not, and reading it sent one analysis pass chasing phantom dlopen fails.
+CYC = SRCROOT + "/pd-cyclone-0.9-5"
 # 0.57 branch (0.18.1): slibs compile against the pd 0.57.0test1 headers -
 # the EXACT tree the runtime libpd.so was built from (pd-for-android
 # submodule pure-data@43a5b8922a35, vendored under the pd-core jni dir).
@@ -36,62 +44,69 @@ LIBS = [
         src=[], support=[], inc=[],
         abstractions=["../../diy2"],
     )),
+    # cyclone 0.9-5 (0.18.13): porres/pd-cyclone tag 0.9-5 replaces the
+    # 0.43.4 miXed snapshot. Layout: cyclone_objects/binaries/{control,audio}
+    # object sources + the 12 non-alphanumeric objects registered inside
+    # cyclone_lib.c's cyclone_setup ([cyclone] + !- !-~ !/ !/~ ==~ !=~ <~ <=~
+    # >~ >=~ %~ +=~; cyclone_setup also prints the version banner at core
+    # load - kept, ELSE's banner boots the same way). shared/{common,control,
+    # signal} replaces the miXed/shared quartet (unstable/ folded into
+    # control/). Vanilla-clashing names were renamed upstream (cyclone/line~
+    # + Line~, cyclone/pow~ + Pow~, cyclone/clip + Clip, ...); the bare
+    # spellings the 0.43.4 baseline resolved to cyclone (slibs shadow
+    # vanilla) are restored as compat creators for the objects vanilla does
+    # NOT already own with different semantics (line~, pow~, clip).
     ("cyclone", dict(
-        src=["miXed/cyclone/hammer", "miXed/cyclone/sickle", "miXed/cyclone/shadow"],
-        support=["miXed/shared/common", "miXed/shared/hammer",
-                 "miXed/shared/sickle", "miXed/shared/unstable"],
-        inc=["miXed/shared", "miXed/shared/common", "miXed/shared/hammer",
-             "miXed/shared/sickle", "miXed/shared/unstable",
-             "miXed/cyclone/hammer", "miXed/cyclone/sickle"],
-        # hammer/ and sickle/ each ship atodb.c+dbtoa.c (control vs signal
-        # variants) that clash on global atodb_new/dbtoa_new/convert - the
-        # 10-03 baseline shipped NEITHER (not in the surviving 181-class
-        # core_classes.txt), so keep excluding them
-        excl=["cyclone.c", "standalone.c", "atodb.c", "dbtoa.c"],
-        # Android rebuild (0.17.81, purr-data vintage): Max-SDK leftovers.
-        # t_uint casts all feed %zx -> size_t is the exact type.  Scope's
-        # cursor constants per porres pd-cyclone (1 = width locked,
-        # 2 = height locked).
-        patches={"Scope.c": [('#include "unstable/forky.h"',
-                              '#include "unstable/forky.h"\n'
-                              '/* Android rebuild: Max SDK cursor constants;\n'
-                              ' * values per porres pd-cyclone (1 = width\n'
-                              ' * locked, 2 = height locked) */\n'
-                              '#define CURSOR_EDITMODE_RESIZE_Y 1\n'
-                              '#define CURSOR_EDITMODE_RESIZE_X 2')],
-                 # 0.57 rebuild (0.18.1): COSTABSIZE + cos_table left m_pd.h
-                 # after 0.51 (d_osc.c internals since 0.55). The runtime
-                 # libpd.so still allocates the 512-point back-compat table
-                 # (OLDTABSIZE branch of cos_maketable, lazily on first
-                 # cos~/osc~) and exports the symbol; sic.c guards NULL, so
-                 # declaring it restores the 0.51 shared-table reuse. Sizes
-                 # match: 0.57 OLDTABSIZE == sic.c's COSTABSIZE == 512.
-                 "sic.c": [('#include "m_pd.h"',
-                            '#include "m_pd.h"\n'
-                            '/* Android 0.57 rebuild: pre-0.55 m_pd.h API\n'
-                            ' * restored for the shared 512-pt cos table */\n'
-                            '#ifndef COSTABSIZE\n'
-                            '#define LOGCOSTABSIZE 9\n'
-                            '#define COSTABSIZE (1<<LOGCOSTABSIZE)\n'
-                            '#endif\n'
-                            'extern float *cos_table;')],
-                 "active.c": [("(t_uint)", "(size_t)")],
-                 "comment.c": [("(t_uint)", "(size_t)")],
-                 "pv.c": [("(t_uint)", "(size_t)")],
-                 "file.c": [("(t_uint)", "(size_t)"),
-                            ("sys_hostfontsize(glist_getfont(f->f_canvas))",
-                             "sys_hostfontsize(glist_getfont(f->f_canvas), 0)")],
-                 # atodb/dbtoa both export plain `convert` -> duplicate symbol
-                 # in the one core blob; make them file-local (no-op change).
-                # Leading-newline anchors keep the patches idempotent.
-                 "atodb.c": [("\nt_float convert(t_float f);",
-                              "\nstatic t_float convert(t_float f);"),
-                             ("\nt_float convert(t_float f)\n",
-                              "\nstatic t_float convert(t_float f)\n")],
-                 "dbtoa.c": [("\nt_float convert(t_float f);",
-                              "\nstatic t_float convert(t_float f);"),
-                             ("\nt_float convert(t_float f)\n",
-                              "\nstatic t_float convert(t_float f)\n")]},
+        src=[CYC + "/cyclone_objects/binaries/control",
+             CYC + "/cyclone_objects/binaries/audio"],
+        src_files=[CYC + "/cyclone_objects/binaries/cyclone_lib.c"],
+        support=[CYC + "/shared/common", CYC + "/shared/control",
+                 CYC + "/shared/signal"],
+        inc=[CYC + "/shared", CYC + "/shared/common",
+             CYC + "/shared/control", CYC + "/shared/signal",
+             CYC + "/cyclone_objects/binaries"],
+        # atodb/dbtoa no longer excluded: 0.9-5 made the control variants'
+        # convert() static and the signal variants don't define convert at
+        # all, so all four objects (atodb atodb~ dbtoa dbtoa~) ship now.
+        # scope_dialog.c is a pure-Tcl sys_gui() text included twice INSIDE
+        # scope.c's functions - never a standalone TU.
+        excl=["scope_dialog.c"],
+        # buffer~.pd: 0.9-5 ships exactly one abstraction (the compiled
+        # buffer~ of the 0.43.4 snapshot became a pd file); bare buffer~
+        # resolves to ELSE's (higher PRIORITY), this serves cyclone/buffer~
+        abstractions=[CYC + "/cyclone_objects/abstractions"],
+        strip_boot_pderror=True,
+        patches={
+            # 0.57.0test1 renamed sys_geteventno -> sched_geteventno
+            # (m_pd.h has no compat define; cyclone 0.9-5 targets 0.56-5)
+            "cycle.c": [("sys_geteventno()", "sched_geteventno()")],
+            # bare-name compat creators. Anchors include the unique
+            # cyclone/xxx class_new line (each file has TWO identical-setup
+            # bodies - bare + capitalized variants) and are idempotent:
+            # the inserted text breaks the contiguous old anchor.
+            "line.c": [('    line_class = class_new(gensym("cyclone/line~"),  // avoid name clash with vanilla\n        (t_newmethod)line_new, (t_method)line_free, sizeof(t_line), 0, A_DEFFLOAT, 0);\n    class_domainsignalin(line_class, -1); // bug?',
+                        '    line_class = class_new(gensym("cyclone/line~"),  // avoid name clash with vanilla\n'
+                        '        (t_newmethod)line_new, (t_method)line_free, sizeof(t_line), 0, A_DEFFLOAT, 0);\n'
+                        '    /* Android compat: the 0.43.4 baseline resolved bare [line~] to\n'
+                        '     * cyclone (slibs shadow vanilla) - restore the bare creator so\n'
+                        '     * Max-semantics ramp patches keep working on 0.9-5 */\n'
+                        '    class_addcreator((t_newmethod)line_new, gensym("line~"), A_DEFFLOAT, 0);\n'
+                        '    class_domainsignalin(line_class, -1); // bug?')],
+            "pow.c": [('    pow_class = class_new(gensym("cyclone/pow~"),\n        (t_newmethod)pow_new, 0, sizeof(t_pow), CLASS_DEFAULT, A_DEFFLOAT, 0);\n    class_addmethod(pow_class, nullfn, gensym("signal"), 0);',
+                       '    pow_class = class_new(gensym("cyclone/pow~"),\n'
+                       '        (t_newmethod)pow_new, 0, sizeof(t_pow), CLASS_DEFAULT, A_DEFFLOAT, 0);\n'
+                       '    /* Android compat: vanilla has no [pow~] through 0.57 and the\n'
+                       '     * 0.43.4 baseline resolved the bare name to cyclone - restore it */\n'
+                       '    class_addcreator((t_newmethod)pow_new, gensym("pow~"), A_DEFFLOAT, 0);\n'
+                       '    class_addmethod(pow_class, nullfn, gensym("signal"), 0);')],
+            "clip.c": [('    clip_class = class_new(gensym("cyclone/clip"), (t_newmethod)clip_new,\n        (t_method)clip_free, sizeof(t_clip), 0, A_GIMME, 0);\n    class_addfloat(clip_class, clip_float);',
+                        '    clip_class = class_new(gensym("cyclone/clip"), (t_newmethod)clip_new,\n'
+                        '        (t_method)clip_free, sizeof(t_clip), 0, A_GIMME, 0);\n'
+                        '    /* Android compat: vanilla has no control [clip]; the 0.43.4\n'
+                        '     * baseline resolved the bare name to cyclone - restore it */\n'
+                        '    class_addcreator((t_newmethod)clip_new, gensym("clip"), A_GIMME, 0);\n'
+                        '    class_addfloat(clip_class, clip_float);')],
+        },
     )),
     ("zexy", dict(
         src=["zexy/src"], support=[], inc=["zexy/src"],
@@ -315,41 +330,23 @@ LIBS = [
 # every creb module using it compiled an implicit function call instead.
 EXTRA_C = {
     "creb": "int IS_DENORMAL(double x){ return x > -1.2e-38 && x < 1.2e-38; }\n",
-    # purr-data cyclone calls the pd GUI-bridge (gui_* family) and two
-    # purr-data pd-fork internals (glist_grabx, canvas_apply_setundo)
-    # that the libpd runtime does not export - the 0.17.82 blobs
-    # compiled fine (call sites have no prototypes and -w hides that)
-    # but FAILED dlopen on device ("cannot locate symbol").  No-op
-    # shims compiled into the blob resolve them locally: GUI messages
-    # are dropped (headless anyway), comment.c's keyboard grab and
-    # the undo hook do nothing.
-    "cyclone": (
-        "#include \"m_pd.h\"\n"
-        "void gui_vmess(const char *cmd, const char *fmt, ...) "
-        "{ (void)cmd; (void)fmt; }\n"
-        "void gui_start_vmess(const char *cmd, const char *fmt, ...) "
-        "{ (void)cmd; (void)fmt; }\n"
-        "void gui_end_vmess(void) {}\n"
-        "void gui_start_array(void) {}\n"
-        "void gui_end_array(void) {}\n"
-        "void gui_s(const char *s) { (void)s; }\n"
-        "int glist_grabx(t_glist *g, t_gobj *gobj, void *motionfn, "
-        "void *keyfn, int xpos, int ypos, int flag) "
-        "{ (void)g; (void)gobj; (void)motionfn; (void)keyfn; "
-        "(void)xpos; (void)ypos; (void)flag; return 0; }\n"
-        "void canvas_apply_setundo(t_canvas *c) { (void)c; }\n"
-    ),
+    # cyclone 0.9-5 (0.18.13) needs NO compat C: the purr-data gui_*/
+    # glist_grabx/canvas_apply_setundo shims addressed the 0.43.4 snapshot
+    # where purr-data had hardcoded those calls into the vanilla paths -
+    # 0.9-5 gates every such call behind #ifdef PDL2ORK (never defined
+    # here), and pdgui_vmess/pd_undo_set_objectstate/signal_setmultiout in
+    # the vanilla branches are exported by the real 0.57 libpd.so.
 }
 # elsex shims, re-adjudicated for 0.57 (0.18.1): the 0.57 libpd.so now
 # EXPORTS pdgui_vmess / pdgui_stub_vnew / pdgui_stub_deleteforkey /
-# pd_undo_set_objectstate / signal_setmultiout (nm -D verified) - keeping
-# the 0.17.137 no-op shims would SHADOW the real implementations and pin
-# the mc classes to degraded mono forever, so they are dropped. Still
-# missing from libpd (0.51.3 AND 0.57): sys_putmidibyte - else's midi-OUT
-# classes feed it; the shim drops bytes, while the app's own
-# noteout/ctlin bridge is a separate listener path. cyclone's gui_* /
-# glist_grabx / canvas_apply_setundo purr-data internals remain
-# un-exported in 0.57 too, so EXTRA_C["cyclone"] stays as-is.
+# pd_undo_set_objectstate / signal_setmultiout (nm -D verified against the
+# mavenLocal AAR - the %TEMP%/pdaar extraction is a STALE libpd build that
+# lacks them; audit symbol questions against C:/Temp/slibs-audit-<abi> or
+# the .m2 AAR, never pdaar) - keeping the 0.17.137 no-op shims would
+# SHADOW the real implementations and pin the mc classes to degraded mono
+# forever, so they are dropped. Still missing from libpd (0.51.3 AND 0.57):
+# sys_putmidibyte - else's midi-OUT classes feed it; the shim drops bytes,
+# while the app's own noteout/ctlin bridge is a separate listener path.
 EXTRA_C["elsex"] = (
     "#include <m_pd.h>\n"
     "void sys_putmidibyte(int portno, int byte) {\n"
@@ -370,10 +367,27 @@ RE_ADDCREATOR = re.compile(
 # core_wrap called only 2 of ~102 zexy setups (pack/unpack, the two
 # plain-void files) and the library registered 2 classes on device
 # while all 107 setups merely sat exported-but-uncalled in the blob
-# (0.17.81-0.17.83).  Accept any mixture of extern/ZEXY_SETUP prefixes.
+# (0.17.81-0.17.83).  cyclone 0.9-5 prefixes its 190 setups with
+# CYCLONE_OBJ_API (empty on non-MSVC but literally in the source text) -
+# the suffix-only pattern would have missed all of them the same way.
+# Accept any mixture of extern/ZEXY_SETUP/CYCLONE_OBJ_API/CYCLONE_API.
+# The pattern must match DEFINITIONS only: cyclone 0.9-5 carries the
+# prototype 'void setup_single_lib();' inside #if CYCLONE_SINGLE_LIBRARY
+# (undefined here) - the old paren-only pattern collected it as a defined
+# setup, core_wrap emitted a call, and the blob shipped an unresolved
+# reference that dlopen would reject (audit_blobs caught it). A definition
+# has a body: params free of ;/{ then ')' then whitespace then '{'.
 RE_SETUP = re.compile(
-    r'^\s*(?:(?:extern|ZEXY_SETUP)\s+)*void\s+([A-Za-z_]\w*_setup)\s*\(', re.M)
-RE_SETUP_SYMBOL = re.compile(r'^\s*void\s+(setup_[A-Za-z0-9_]*)\s*\(', re.M)
+    r'^\s*(?:(?:extern|ZEXY_SETUP|CYCLONE_OBJ_API|CYCLONE_API)\s+)*void\s+([A-Za-z_]\w*_setup)\s*\([^;{]*\)\s*\{', re.M)
+# cyclone 0.9-5 setup-time deprecation nags: pd_error(<x>_class, "...deprecated...")
+# / "...please use [a] instead of [A]..." run ONCE PER CLASS REGISTRATION,
+# i.e. at every core load on our autoplay boot - ~30 console lines of nag
+# per start. Stripped in-memory (instances still get their own errors).
+RE_BOOTNAG = re.compile(
+    r'\n?\s*pd_error\s*\(\s*[A-Za-z_]\w*_class\s*,\s*"[^"]*(?:deprecated|please use)[^"]*"\s*\)\s*;')
+# setup_-PREFIXED definitions (hexmangled class names, setup_rand0x2ef):
+# same definition-only rule as RE_SETUP - prototypes must not match.
+RE_SETUP_SYMBOL = re.compile(r'^\s*void\s+(setup_[A-Za-z0-9_]*)\s*\([^;{]*\)\s*\{', re.M)
 RE_SETUP_CALLS = re.compile(r'\b([A-Za-z_]\w*_setup)\s*\(\s*\)\s*;')
 RE_INCLUDE_C = re.compile(r'^\s*#include\s*"[^"]+\.c"', re.M)
 ILLEGAL = set('\\/:*?"<>|')
@@ -449,10 +463,26 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
     RE_IFZERO = re.compile(
         r'#if\s+0\b.*?#endif|#ifdef\s+\w*SELFTEST\w*.*?#endif', re.S)
     patches = cfg.get("patches", {})
+    # strip_boot_pderror: cyclone 0.9-5 carries ~30 setup-time deprecation
+    # nags (pd_error at class registration = every core load, i.e. every
+    # boot). The flag strips them in-memory - the written-back patch sites
+    # stay minimal and instance-level pd_error calls are untouched.
+    strip_nag = cfg.get("strip_boot_pderror", False)
     objects, supports = [], []
 
     def srcdir(d):
         return d if os.path.isabs(d) else EX + "/" + d
+
+    def nagstrip(f, b):
+        # compile feeds the FILE to the compiler, so the strip must be
+        # written back (idempotent: stripped lines no longer match)
+        if not strip_nag:
+            return
+        text = open(f, encoding="utf-8", errors="replace").read()
+        stripped = RE_BOOTNAG.sub("", text)
+        if stripped != text:
+            open(f, "w", newline="").write(stripped)
+            print("  boot-nag stripped: %s" % b)
 
     for d in cfg["src"]:
         for f in collect(srcdir(d), EX):
@@ -467,6 +497,7 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
                     text = text.replace(old, new)
                     open(f, "w", newline="").write(text)
                     print("  patched: %s" % b)
+            nagstrip(f, b)
             if excl_main and RE_MAIN_DEF.search(RE_IFZERO.sub("", text)):
                 print("  main() skipped: %s" % b)
                 continue
@@ -481,6 +512,22 @@ def build_lib(name, cfg, abi, cc, outdir, workdir, manifest):
                 print("  include-wrapper skipped: %s" % b)
             else:
                 supports.append(f)
+    # src_files: single explicit files OUTSIDE the walked src dirs (cyclone
+    # 0.9-5's cyclone_lib.c sits at binaries/ level - adding the whole dir
+    # would re-collect control/+audio/ and duplicate every object TU)
+    for f in cfg.get("src_files", []):
+        b = os.path.basename(f)
+        text = open(f, encoding="utf-8", errors="replace").read()
+        for old, new in patches.get(b, []):
+            if old in text:
+                text = text.replace(old, new)
+                open(f, "w", newline="").write(text)
+                print("  patched: %s" % b)
+        nagstrip(f, b)
+        if "class_new" in text or RE_ADDCREATOR.search(text):
+            objects.append(f)
+        else:
+            print("  src_files entry has no classes, skipped: %s" % b)
     for d in cfg.get("support", []):
         # srcdir() honors absolute paths - elsex's support dir lives in the
         # workspace, and the old EX + "/" + d join silently produced a
@@ -719,7 +766,7 @@ def main():
             ok, fail = build_lib(name, cfg, abi, cc, outdir, workdir, man_lines)
             # ship plain abstractions alongside compiled objects
             for ad in cfg.get("abstractions", []):
-                adir = EX + "/" + ad
+                adir = ad if os.path.isabs(ad) else EX + "/" + ad
                 if os.path.isdir(adir):
                     os.makedirs(outdir, exist_ok=True)
                     for f in collect(adir, EX):

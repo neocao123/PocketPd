@@ -114,6 +114,40 @@ object PdObjectMeta {
         reg("Decode", "decode") { a -> d(3, num(a, 0, 1)) }
         reg("Funnel", "funnel") { a -> d(num(a, 0, 2), 1) }
         reg("Spray", "spray") { a -> d(1, num(a, 0, 2)) }
+        // cyclone 0.9-5 audit (0.18.13): variable-io classes of the new
+        // sources, creation-arg driven, counted from the constructors
+        // sprintf: one inlet per %-slot (slot 0 rides the main inlet),
+        // bare [sprintf] has no slots = 1 inlet; one anything outlet
+        // ("symout" attribute switches its type, not the count)
+        reg("sprintf") { a ->
+            d(a.sumOf { it.count { c -> c == '%' } }.coerceAtLeast(1), 1)
+        }
+        reg("join") { a -> d((a.getOrNull(0)?.toIntOrNull() ?: 2).coerceIn(2, 255), 1) }
+        reg("pak") { a -> d(a.size.coerceAtLeast(2).coerceAtMost(255), 1) }
+        reg("unjoin") { a -> d(1, num(a, 0, 2).coerceIn(2, 255) + 1) }
+        reg("selector~") { a ->
+            val n = num(a, 0, 1).coerceAtLeast(1)
+            ds(1 + n, 1, 1..n, 0..0)
+        }
+        // matrix~ rows cols: all-signal inlets, cols signal outlets + 1
+        // list dumpout
+        reg("matrix~") { a ->
+            val ni = num(a, 0, 1).coerceIn(1, 250)
+            val no = num(a, 1, 1).coerceIn(1, 499)
+            ds(ni, no + 1, 0 until ni, 0 until no)
+        }
+        // mtr: first arg = track count; main inlet + one inlet per track,
+        // one outlet per track + main list outlet
+        reg("mtr") { a ->
+            val n = num(a, 0, 1).coerceIn(1, 64)
+            d(1 + n, 1 + n)
+        }
+        // wave~: buffer name + optional float args; first float arg (after
+        // the name) = output count; main + start/end signal inlets
+        reg("wave~") { a ->
+            val n = num(a, 0, 1).coerceAtLeast(1).coerceAtMost(64)
+            ds(3, n, 0..2, 0 until n)
+        }
         // -- zexy -------------------------------------------------------------
         reg("relay") { a -> d(1, a.size.coerceAtLeast(1) + 1) }
         // 0.17.142 zexy audit: mux/multiplex expand via CREATION ARGS (one
@@ -706,8 +740,8 @@ object PdObjectMeta {
         // here; loop-driven (variable) io keeps its reg() rule or the
         // heuristic instead.
         // -- cyclone (bare names cyclone owns) --------------------------------
-        put("Append", d(2, 1)); put("Borax", d(3, 9)); put("Clip", d(3, 1))
-        put("Clip~", Def(1, 1, setOf(0), setOf(0))); put("Histo", d(2, 2))
+        put("Append", d(1, 1)); put("Borax", d(3, 9)); put("Clip", d(3, 1))
+        put("Histo", d(2, 2))
         put("Line~", Def(2, 2, setOf(0), setOf(0))); put("MouseState", d(1, 5))
         put("Peak", d(2, 3)); put("Scope~", Def(2, 0, setOf(0, 1), emptySet()))
         put("Snapshot~", Def(2, 1, setOf(0), emptySet())); put("Table", d(2, 2))
@@ -726,7 +760,7 @@ object PdObjectMeta {
         put("bitor~", Def(2, 1, setOf(0, 1), setOf(0)))
         put("bitshift~", Def(1, 1, setOf(0), setOf(0)))
         put("bitxor~", Def(2, 1, setOf(0, 1), setOf(0))); put("borax", d(3, 9))
-        put("buffir~", Def(3, 1, setOf(0, 1, 2), setOf(0))); put("capture", d(1, 1))
+        put("buffir~", Def(3, 1, setOf(0, 1, 2), setOf(0))); put("capture", d(1, 2))
         put("capture~", Def(1, 0, setOf(0), emptySet())); put("cartopol", d(2, 2))
         put("cartopol~", Def(2, 2, setOf(0, 1), setOf(0, 1)))
         put("change~", Def(1, 1, setOf(0), setOf(0)))
@@ -737,7 +771,7 @@ object PdObjectMeta {
         put("curve~", Def(3, 2, setOf(0), setOf(0)))
         put("cycle~", Def(2, 1, setOf(0, 1), setOf(0))); put("decide", d(2, 1))
         put("delay~", Def(2, 1, setOf(0), setOf(0)))
-        put("deltaclip~", Def(1, 1, setOf(0), setOf(0)))
+        put("deltaclip~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
         put("delta~", Def(1, 1, setOf(0), setOf(0))); put("drunk", d(3, 1))
         put("edge~", Def(1, 2, setOf(0), emptySet()))
         put("flush", d(2, 2)); put("forward", d(1, 0))
@@ -745,26 +779,26 @@ object PdObjectMeta {
         put("framedelta~", Def(1, 1, setOf(0), setOf(0))); put("fromsymbol", d(1, 1))
         put("funbuff", d(2, 3)); put("hammer", d(1, 1)); put("histo", d(2, 2))
         put("index~", Def(2, 1, setOf(0), setOf(0))); put("iter", d(1, 1))
-        put("kink~", Def(1, 1, setOf(0), setOf(0))); put("linedrive", d(2, 1))
+        put("kink~", Def(2, 1, setOf(0, 1), setOf(0))); put("linedrive", d(2, 1))
         put("lookup~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
-        put("lores~", Def(3, 1, setOf(0, 1, 2), setOf(0))); put("maximum", d(2, 1))
-        put("maximum~", Def(1, 1, setOf(0), setOf(0))); put("maxmode", d(1, 2))
+        put("lores~", Def(3, 1, setOf(0, 1, 2), setOf(0))); put("maximum", d(2, 2))
+        put("maximum~", Def(2, 1, setOf(0, 1), setOf(0))); put("maxmode", d(1, 2))
         put("mean", d(1, 2)); put("midiflush", d(1, 1)); put("midiformat", d(7, 1))
-        put("midiparse", d(1, 7)); put("minimum", d(2, 1))
-        put("minimum~", Def(1, 1, setOf(0), setOf(0)))
-        put("minmax~", Def(1, 4, setOf(0), setOf(0, 1))); put("mousefilter", d(1, 1))
+        put("midiparse", d(1, 7)); put("minimum", d(2, 2))
+        put("minimum~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("minmax~", Def(2, 4, setOf(0, 1), setOf(0, 1))); put("mousefilter", d(1, 1))
         put("mousestate", d(1, 5)); put("mstosamps~", Def(1, 2, setOf(0), setOf(0)))
-        put("next", d(1, 2)); put("offer", d(2, 1)); put("onebang", d(2, 1))
+        put("next", d(1, 2)); put("offer", d(2, 1)); put("onebang", d(2, 2))
         put("onepole~", Def(2, 1, setOf(0, 1), setOf(0)))
         put("overdrive~", Def(2, 1, setOf(0), setOf(0))); put("past", d(1, 1))
         put("peak", d(2, 3)); put("peakamp~", Def(2, 1, setOf(0), emptySet()))
         put("peek~", d(3, 1)); put("phasewrap~", Def(1, 1, setOf(0), setOf(0)))
         put("pink~", Def(1, 1, setOf(0), setOf(0)))
-        put("play~", Def(1, 1, setOf(0), setOf(0)))
+        put("play~", Def(1, 2, setOf(0), setOf(0)))
         put("poke~", Def(3, 0, setOf(0, 1), emptySet())); put("poltocar", d(2, 2))
         put("poltocar~", Def(2, 2, setOf(0, 1), setOf(0, 1)))
         put("pong~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
-        put("pow~", Def(2, 1, setOf(0, 1), setOf(0))); put("prepend", d(2, 1))
+        put("pow~", Def(2, 1, setOf(0, 1), setOf(0))); put("prepend", d(1, 1))
         put("prob", d(1, 2)); put("pv", d(1, 1))
         put("rampsmooth~", Def(3, 1, setOf(0), setOf(0)))
         put("rand~", Def(1, 1, setOf(0), setOf(0)))
@@ -776,31 +810,67 @@ object PdObjectMeta {
         put("sickle", d(1, 1)); put("sinh", d(1, 1))
         put("sinh~", Def(1, 1, setOf(0), setOf(0)))
         put("sinx~", Def(1, 1, setOf(0), setOf(0)))
-        put("slide~", Def(1, 1, setOf(0), setOf(0))); put("speedlim", d(2, 1))
+        put("slide~", Def(3, 1, setOf(0), setOf(0))); put("speedlim", d(2, 1))
         put("spell", d(1, 1)); put("spike~", Def(2, 1, setOf(0), emptySet()))
-        put("sprintf", d(2, 1)); put("substitute", d(2, 2))
+        put("substitute", d(2, 2))
         put("sustain", d(3, 2))
         put("svf~", Def(3, 4, setOf(0, 1, 2), setOf(0, 1, 2, 3)))
         put("tanx~", Def(1, 1, setOf(0), setOf(0))); put("testmess", d(1, 1))
         put("thresh", d(2, 1)); put("togedge", d(1, 2)); put("tosymbol", d(1, 1))
-        put("train~", Def(1, 2, setOf(0), setOf(0)))
-        put("trapezoid~", Def(1, 1, setOf(0), setOf(0)))
-        put("triangle~", Def(1, 1, setOf(0), setOf(0))); put("trough", d(2, 3))
+        put("train~", Def(3, 2, setOf(0, 1, 2), setOf(0)))
+        put("trapezoid~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
+        put("triangle~", Def(2, 1, setOf(0, 1), setOf(0))); put("trough", d(2, 3))
         put("universal", d(1, 0)); put("urn", d(2, 2))
         put("vectral~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
-        put("wave~", Def(3, 1, setOf(0, 1, 2), setOf(0))); put("xbendin", d(1, 2))
+        put("xbendin", d(1, 2))
         put("xbendin2", d(1, 3)); put("xbendout", d(2, 1)); put("xbendout2", d(3, 1))
         put("xnotein", d(1, 4)); put("xnoteout", d(4, 1))
         put("zerox~", Def(1, 2, setOf(0), setOf(0, 1)))
-        put("!-", Def(2, 1, setOf(0), emptySet())); put("!-~", Def(1, 1, setOf(0), setOf(0)))
-        put("!/", Def(2, 1, setOf(0), emptySet())); put("!/~", Def(1, 1, setOf(0), setOf(0)))
-        put("!=~", Def(1, 1, setOf(0), setOf(0))); put("%~", Def(1, 1, setOf(0), setOf(0)))
-        put("+=~", Def(1, 1, setOf(0), setOf(0))); put("<=~", Def(1, 1, setOf(0), setOf(0)))
-        put("<~", Def(1, 1, setOf(0), setOf(0))); put("==~", Def(1, 1, setOf(0), setOf(0)))
-        put(">=~", Def(1, 1, setOf(0), setOf(0))); put(">~", Def(1, 1, setOf(0), setOf(0)))
+        put("!-", Def(2, 1, emptySet(), emptySet())); put("!-~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("!/", Def(2, 1, emptySet(), emptySet())); put("!/~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("!=~", Def(2, 1, setOf(0, 1), setOf(0))); put("%~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("+=~", Def(2, 1, setOf(0, 1), setOf(0))); put("<=~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("<~", Def(2, 1, setOf(0, 1), setOf(0))); put("==~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put(">=~", Def(2, 1, setOf(0, 1), setOf(0))); put(">~", Def(2, 1, setOf(0, 1), setOf(0)))
         put("loadmess", d(1, 1)); put("pong", d(3, 1))
         put("round", d(2, 1)); put("round~", Def(2, 1, setOf(1), setOf(0)))
         put("trunc~", Def(2, 1, setOf(1), setOf(0)))
+        // -- cyclone 0.9-5 additions (0.18.13 audit redo) -----------------------
+        // [cyclone] banner/version object: message in, 3 list/anything outs
+        put("cyclone", d(1, 3))
+        // bare spellings the compat creators restored (cyclone wins the
+        // bare name as on the 0.43.4 baseline; see build_slibs patches)
+        put("clip", d(3, 1)); put("line~", Def(2, 2, setOf(0), setOf(0)))
+        // control math/trig/convert additions
+        put("acosh", d(1, 1)); put("asinh", d(1, 1)); put("atanh", d(1, 1))
+        put("atodb", d(1, 1)); put("dbtoa", d(1, 1)); put("rdiv", d(2, 1))
+        put("rminus", d(2, 1)); put("scale", d(6, 1)); put("listfunnel", d(1, 1))
+        // signal additions (constructors: main signal inlet + signal-capable
+        // float inlets, one signal outlet unless noted)
+        put("atodb~", Def(1, 1, setOf(0), setOf(0)))
+        put("dbtoa~", Def(1, 1, setOf(0), setOf(0)))
+        put("bitsafe~", Def(1, 1, setOf(0), setOf(0)))
+        put("cross~", Def(2, 2, setOf(0, 1), setOf(0, 1)))
+        put("degrade~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
+        put("downsamp~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("equals~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("greaterthan~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("greaterthaneq~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("lessthan~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("lessthaneq~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("modulo~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("notequals~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("phaseshift~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
+        put("plusequals~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("rdiv~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("rminus~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("scale~", Def(6, 1, setOf(0, 1, 2, 3, 4, 5), setOf(0)))
+        put("teeth~", Def(6, 1, setOf(0, 1, 2, 3, 4, 5), setOf(0)))
+        put("thresh~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
+        // capitalized Max-compat spellings 0.9-5 registers alongside the
+        // cyclone/ forms (same constructors as their lowercase twins)
+        put("Pow~", Def(2, 1, setOf(0, 1), setOf(0)))
+        put("Clip~", Def(3, 1, setOf(0, 1, 2), setOf(0)))
         // -- cxc ---------------------------------------------------------------
         put("ENV", d(1, 1)); put("ascseq", d(2, 1)); put("ascwave", d(4, 1))
         put("bfilt", d(2, 1)); put("bfilt2", d(2, 1)); put("cxavgdev", d(1, 1))

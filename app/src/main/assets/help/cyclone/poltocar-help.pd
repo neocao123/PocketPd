@@ -1,49 +1,48 @@
-#N canvas 0 26 427 421 10;
-#X obj 4 4 cnv 15 400 40 empty empty empty 20 12 0 14 -262130 -66577
-0;
-#X text 27 383 docs based on the MAX/MSP reference (c) cycling'74;
-#X text 26 397 ___________________________________________________
-;
-#X floatatom 107 117 5 0 0 0 amplitude-> - -;
-#X floatatom 158 116 5 0 0 1 <-phase - -;
-#X floatatom 107 197 5 0 0 0 real-> - -;
-#X floatatom 158 197 5 0 0 1 <-imaginary - -;
-#X text 121 39 see also;
-#X obj 41 21 poltocar;
-#X obj 187 34 cartopol;
-#X text 114 15 polar to cartesian conversion;
-#X obj 107 172 poltocar;
-#X obj 111 292 hsl 128 15 -1 1 0 0 empty empty x-axis 133 7 1 10 -262144
--1 -1 0 1;
-#X obj 167 233 vsl 15 128 -1 1 0 0 empty empty y-axis -6 -9 1 10 -262144
--1 -1 0 1;
-#X obj 158 134 t b f;
-#X obj 16 92 hsl 128 15 -1 1 0 0 empty empty amplitude 6 7 1 10 -261681
--1 -1 0 1;
-#X obj 162 92 hsl 128 15 0 6.28318 0 0 empty empty phase 7 7 1 10 -225280
--1 -1 0 1;
-#X text 296 90 (0 to 2pi);
-#N canvas 247 115 494 389 META 0;
-#X text 12 195 HELP_PATCH_AUTHORS Christoph Kummerer. Revised by Jonathan
-Wilkes for Pd-extended 0.42 to conform to the PDDP template.;
-#X text 12 165 WEBSITE http://suita.chopin.edu.pl/~czaja/miXed/externs/cyclone.html
-;
-#X text 12 5 KEYWORDS control conversion max_compatible;
-#X text 12 45 DESCRIPTION polar to cartesian conversion;
-#X text 12 65 INLET_0 float;
-#X text 12 85 INLET_1 float;
-#X text 12 105 OUTLET_0 float;
-#X text 12 125 OUTLET_1 float;
-#X text 12 25 LICENSE SIBSD;
-#X text 12 145 AUTHOR Krzysztof Czaja;
-#X restore 376 400 pd META;
-#X connect 3 0 11 0;
-#X connect 4 0 14 0;
-#X connect 5 0 13 0;
-#X connect 6 0 12 0;
-#X connect 11 0 5 0;
-#X connect 11 1 6 0;
-#X connect 14 0 3 0;
-#X connect 14 1 11 1;
-#X connect 15 0 3 0;
-#X connect 16 0 4 0;
+#N canvas 349 90 566 581 10;
+#X obj 3 376 cnv 3 550 3 empty empty inlets 8 12 0 13 #dcdcdc #000000 0;
+#X obj 3 454 cnv 3 550 3 empty empty outlets 8 12 0 13 #dcdcdc #000000 0;
+#X obj 3 518 cnv 3 550 3 empty empty arguments 8 12 0 13 #dcdcdc #000000 0;
+#X obj 102 385 cnv 17 3 35 empty empty 0 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 102 429 cnv 17 3 17 empty empty 1 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 102 488 cnv 17 3 17 empty empty 1 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 102 465 cnv 17 3 17 empty empty 0 5 9 0 16 #dcdcdc #9c9c9c 0;
+#X obj 3 573 cnv 3 550 3 empty empty empty 0 0 0 4 #fcfcfc #000000 0;
+#X obj 3 553 cnv 15 552 21 empty empty empty 20 12 0 14 #e0e0e0 #202020 0;
+#X text 130 528 (none);
+#X text 136 403 float;
+#X text 136 431 float;
+#X text 136 466 float;
+#X text 136 489 float;
+#X text 117 152 Amplitude;
+#X text 323 153 Phase;
+#X obj 182 269 nbx 8 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#X obj 275 268 nbx 8 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#X text 147 267 Real;
+#X text 360 268 Imaginary;
+#X obj 182 152 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#X obj 263 152 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10 #dcdcdc #000000 #000000 0 256;
+#X text 142 386 bang;
+#X text 190 386 - converts the last received coordinates pair;
+#X obj 206 194 t bang float;
+#X obj 182 226 cyclone/poltocar;
+#X text 190 403 - amplitude from the polar coordinates, f 43;
+#X text 191 431 - phase (in radians) from the polar coordinates;
+#X text 191 466 - real part of the cartesian form;
+#X text 191 489 - imaginary part of the cartesian form, f 51;
+#X obj 2 3 ./header poltocar;
+#X text 23 61 Polar to cartesian conversion;
+#X text 19 328 see also:;
+#X obj 445 342 open-else;
+#X text 448 298 click:;
+#X obj 87 319 cyclone/poltocar~;
+#X obj 87 339 cyclone/cartopol;
+#X text 86 88 [poltocar] converts polar coordinates (amplitude / phase) to cartesian coordinates (real / imaginary). This is the same as ELSE's [cartopol] object (see below).;
+#X msg 445 321 poltocar;
+#X text 215 319 Plugdata users or those with ELSE can also use [else/poltocar] as an alternative., f 33;
+#X connect 20 0 25 0;
+#X connect 21 0 24 0;
+#X connect 24 0 25 0;
+#X connect 24 1 25 1;
+#X connect 25 0 16 0;
+#X connect 25 1 17 0;
+#X connect 38 0 33 0;

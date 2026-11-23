@@ -1,11 +1,11 @@
 # MIGRATION_057.md — pd 0.57 迁移准备调查（v2：CHANGELOG 全文通读后按弧线重写）
 
-## ★ 当前进度与下一步（2026-11-24，compact 前存档）
+## ★ 当前进度与下一步（2026-11-24，round 4 后更新）
 
-**分支状态**：`0.57` 分支（commit `3e62b83`，已推 GitHub）。设备在装
-v316/0.18.12。0.51 主线冻结于 `freeze-0.51-base`（= 0.17.161/vc303）。
+**分支状态**：`0.57` 分支。设备在装 v317/0.18.13。0.51 主线冻结于
+`freeze-0.51-base`（= 0.17.161/vc303）。
 
-**已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.12）：
+**已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.13）：
 - **0.18.0/304**（round 1）：引擎置换——自建 AAR，pin
   libpd@e3cd52fd7517 → pure-data@43a5b8922a35 = pd 0.57.0test1，
   mavenLocal 消费；minSdk 26 靠 glob shim 保住安卓 8。
@@ -27,6 +27,17 @@ v316/0.18.12。0.51 主线冻结于 `freeze-0.51-base`（= 0.17.161/vc303）。
   打开补丁走新 `AudioOpen.LOAD`（tick 冲刷 setup 但 DSP 全程 off，
   打开零破音）。音频状态 = 模式驱动 + 图标为准；RUN 内音频键自由且
   不影响模式切换。
+- **0.18.13/317**（round 4，任务一第一轮）：cyclone 0.43.4 → **0.9-5**
+  （porres tag 0.9-5，`%TEMP%/srcrepo/pd-cyclone-0.9-5`）。256 类
+  （原 230）/209 setups，两 ABI，audit_blobs 全绿。机制增量：
+  CYCLONE_OBJ_API setup 前缀、setup 收集器只认定义（single_lib 原型
+  泄漏事故）、src_files、strip_boot_pderror（~30 条开机弃用告警）、
+  atodb/dbtoa 上岗、buffer~.pd 抽象、sys_geteventno→sched_geteventno
+  补丁、EXTRA_C purr 垫片退役、bare line~/pow~/clip 兼容 creator。
+  io 审计重做：PdObjectMeta 漂移修正 + 新类行 + 8 条 reg 规则；
+  OBJECT_PORTS.md cyclone 段增补；help/cyclone 刷新 193 补丁。
+  **教训：%TEMP%/pdaar 是陈旧 libpd 构建，符号审计禁用它**
+  （pdgui_vmess/pd_undo/signal_setmultiout 在真 AAR 里都导出）。
 
 **用户已确认**：tempo 在 help 外正常工作 ✓；打开补丁静默 ✓；工作流
 往返正常（本轮待最终确认）。tempo-help 内的 `bang → sel` 报错 =
@@ -35,10 +46,12 @@ help 自身接线的显示噪音（桌面 pd 同样会报），非故障。
 ### 下一步任务（两组，按序）
 
 **任务一：换版重编轮（MIGRATION §7 W2.3–W2.5/W2.4，逐库独立轮）**
-1. cyclone 0.43.4 → **0.9-5**（porres/pd-cyclone）：源码替换 +
-   patches 字典按新源码重写 + audit 重做（0.17.142 方法论）；
+1. ~~cyclone 0.43.4 → **0.9-5**~~ ✅ 0.18.13/317 完成；
 2. fftease 2.5.2 → **3.0.1**（顺带找回 7 个 3.0-only 对象：
-   cross~/enrich~/loopsea~/pileup~/pvwarpb~/schmear~/residency_buffer~）；
+   cross~/enrich~/loopsea~/pileup~/pvwarpb~/schmear~/residency_buffer~
+   ——注意：cyclone 0.9-5 也有一个新 `cross~`（信号交叉fade），与
+   fftease 的 cross~（FFT 域）同名不同物，PRIORITY 冲突报告会列出，
+   bare 名归 cyclone（PRIORITY 先 cyclone 后 fftease）；
 3. zexy / iemlib 抓当前版（git.iem.at 有反爬墙，手动过）；
 4. mrpeach 重编（预期漂移小）。
 每库一轮：换源 → 试编 → 修补（修而不删）→ Slibs.VERSION bump →
