@@ -11,8 +11,19 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 312
-    versionName = "0.18.8" // ---- 0.57 BRANCH round 3g: revert the
+    versionCode = 313
+    versionName = "0.18.9" // ---- 0.57 BRANCH round 3h: EDIT mutations
+    // defer the session rebuild (user directive: per-edit core restarts
+    // popped and churned pd on every keystroke/drag). Edits mark
+    // sessionDirty; the rebuild happens once at RUN entry (toggleMode's
+    // reopenSessionForRun already ran unconditionally there and now
+    // consumes the flag). The debounced sessionSync handler survives but
+    // only marks dirty. ensureLiveSession's once-per-patch lazy open is
+    // untouched. Prior rounds this session: 0.18.5 probes, 0.18.6 raw-
+    // atoms args payload, 0.18.7 plugdata tempo experiment (reverted),
+    // 0.18.8 revert + escape-hypothesis adjudication.
+    //
+    // ---- 0.18.8 (0.57 history) round 3g: revert the ---- 0.57 BRANCH round 3g: revert the
     // plugdata tempo.pd experiment (user verdict: library version
     // unsuitable) - content equals 0.18.6. Slibs.VERSION 139 -> 140
     // (re-extract restores the RC15 tempo.pd). Escape-hypothesis

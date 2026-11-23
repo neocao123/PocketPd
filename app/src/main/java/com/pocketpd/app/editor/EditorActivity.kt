@@ -139,13 +139,16 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
     private var patchFile: File? = null
     private var inRunMode = false
 
-    /** Debounced live-session rebuilds while editing (see onContentMutated). */
+    /** EDIT mutations defer the session rebuild (0.18.8 user directive:
+     *  per-edit core restarts popped and churned the whole pd graph on
+     *  every keystroke/drag). Edits only mark the session dirty; the
+     *  rebuild happens once, at RUN entry (toggleMode). */
+    private var sessionDirty = false
+
+    /** Debounced dirty-marking while editing (see onContentMutated). */
     private lateinit var sessionSync: android.os.Handler
     private val sessionSyncRunner = Runnable {
-        // keepAudioSilent: an edit-mode mutation must not flip the user's
-        // dsp switch on (0.17.109) — the rebuilt session stays frozen until
-        // they press the dsp key, then compiles whole
-        if (canvas.mode == PatchCanvasView.Mode.EDIT) reopenSessionForRun(keepAudioSilent = true)
+        if (canvas.mode == PatchCanvasView.Mode.EDIT) sessionDirty = true
     }
 
 
@@ -315,9 +318,10 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             com.pocketpd.app.ui.ScanlineDrawable.overlay(this)
         canvas = findViewById(R.id.canvas)
         // keep the live pd session equal to the edited doc: every mutation
-        // (add/delete/wire/edit/undo) re-arms a debounced rebuild while
-        // editing — a session opened at first drop is otherwise a stale
-        // snapshot whose missing objects/cords make patches look dead
+        // (add/delete/wire/edit/undo) marks the session dirty while editing
+        // (0.18.8: the rebuild itself is deferred to RUN entry — per-edit
+        // core restarts popped; the stale-until-RUN session is the accepted
+        // trade)
         sessionSync = android.os.Handler(android.os.Looper.getMainLooper())
         canvas.onContentMutated = {
             sessionSync.removeCallbacks(sessionSyncRunner)
@@ -1375,6 +1379,7 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             PdEngine.bindObjects(doc)
             // pd-side create failures surface only after this open
             canvas.invalidate()
+            sessionDirty = false
         } catch (t: Throwable) {
             PdEngine.log("run open failed: ${t.message}")
         }

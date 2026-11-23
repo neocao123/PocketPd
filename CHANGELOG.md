@@ -7,6 +7,24 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.9 (versionCode 313) — 2026-11-24 【0.57 分支 round 3h:EDIT 改动不再重启 pd 核心】
+
+**用户指令："每次 edit 改动先不重启核心，直到 run 的时候才去做。"**
+（动机：编辑态的防抖 SYNC 重建虽然压着 DSP，但整颗 pd 图重载本身就是
+每次改动"初始杂音"的来源——tempo 修复确认后用户随即提出此工作流改变。）
+
+- **`sessionSyncRunner`**（编辑改动的 400ms 防抖回调）：`reopenSessionForRun(SYNC)` → **只置
+  `sessionDirty = true`**，不碰 pd；
+- **RUN 入口**（toggleMode）：既有的无条件 `reopenSessionForRun()` 正好
+  兜住延迟重建——进 RUN 一次性重建（AudioOpen.RUN），完成后
+  `sessionDirty` 复位；
+- **语义变化（如实交底）**：编辑期间 pd 运行的是**上一次构建的旧会话**，
+  新增/删除的对象与连线要等进 RUN 才生效——旧设计的 400ms 防抖重建就是
+  为了让编辑期点按不落在过期快照上（0.17.9 注释），此权衡按用户指令接受；
+- `ensureLiveSession`（每补丁一次的懒打开）不动。
+
+**验收**：aapt = 313/0.18.9；GM800 install -r + dumpsys 复核。
+
 ## 0.18.8 (versionCode 312) — 2026-11-24 【0.57 分支 round 3g:回退 plugdata tempo 实验 + 转义符假设验证】
 
 **内容 = 0.18.6**（git checkout 恢复 RC15 tempo.pd；0.18.7 的 plugdata
