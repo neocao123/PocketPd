@@ -630,9 +630,14 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             "$names @(${g.x},${g.y}) ${c?.width}x${c?.height} gop=${c?.gop}"
         })
         for (e in errors) PdEngine.log("parse: $e")
-        // auto-DSP on patch entry (user request): the patch is open and
-        // audible without touching the toolbar key
-        ensureAudioOn()
+        // 0.18.10 user directive supersedes the old auto-DSP-on-entry: the
+        // entry mode is EDIT, so the patch loads SILENT (the early
+        // ensureAudioOn above stays — it flushed the slib setups ahead of
+        // the parse, the boot-race countermeasure; objects compiled during
+        // it recompile at the RUN entry rebuild anyway). Icon reflects the
+        // off state.
+        PdEngine.stopAudio()
+        updateAudioIcon()
     }
 
     // ------------------------------------------------------------- toolbar
@@ -1341,6 +1346,8 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             PdEngine.resetEuclidStates()
             // run = the patch plays: bring the engine up with it
             ensureAudioOn()
+            // 0.18.10: the mode key drives the icon too — RUN = dsp ON
+            updateAudioIcon()
         } else {
             // 0.18.9 user directive: EDIT = dsp off outright. The deferred
             // rebuild means pd runs the last-built session while editing
@@ -1348,6 +1355,7 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             // the noise sources alive. RUN entry brings it back
             // (ensureAudioOn above).
             PdEngine.stopAudio()
+            // 0.18.10: EDIT = dsp OFF, icon follows
             updateAudioIcon()
             addBarScroll.visibility = View.VISIBLE
         }

@@ -11,8 +11,17 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 314
-    versionName = "0.18.10" // ---- 0.57 BRANCH round 3i: EDIT entry = dsp
+    versionCode = 315
+    versionName = "0.18.11" // ---- 0.57 BRANCH round 3j: audio state is
+    // mode-driven with icon truth (user bug report): patch entry loads
+    // SILENT (loadPatch end: stopAudio + icon off; the early pre-parse
+    // ensureAudioOn stays - boot-race slib-setup flush), RUN = dsp ON +
+    // icon ON (updateAudioIcon added after ensureAudioOn), EDIT = dsp OFF
+    // + icon OFF; the audio key inside RUN still toggles freely and never
+    // influences the next mode transition (each transition forces state).
+    // Supersedes the 0.17.x auto-DSP-on-entry request for this workflow.
+    //
+    // ---- 0.18.10 (0.57 history) round 3i: EDIT entry = dsp ---- 0.57 BRANCH round 3i: EDIT entry = dsp
     // off outright (user directive: "反正每次都重置所幸在edit状态就直接
     // dsp off吧") - toggleMode's EDIT branch now calls PdEngine.stopAudio +
     // icon update; RUN entry already re-arms via ensureAudioOn. Prior:
