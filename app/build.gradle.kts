@@ -11,8 +11,21 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 308
-    versionName = "0.18.4" // ---- 0.57 BRANCH round 3c: hexmangled setup
+    versionCode = 309
+    versionName = "0.18.5" // ---- 0.57 BRANCH round 3d: DIAGNOSTICS for the
+    // else/-prefixed inline skip (user report: tempo-help still broken on
+    // 0.18.4 - device console shows "bad arguments for message 'tempo' to
+    // object 'metro'" + "select: no method for 'bang'" every tick, meaning
+    // tempo.pd loaded NATIVELY (its [pd args] subpatch then hits the
+    // 0.15.29 subpatch-loadbang gap and its config never applies) instead
+    // of being inlined with args->initmess conversion. Two probes: (1)
+    // Abstractions.parseInfo logs the file+exception instead of silently
+    // nulling resolve(); (2) the inline gate logs every lib-prefixed box
+    // it leaves native, with resolve/pdClass/gop/budget factors. Also
+    // answers why swap2/makenote2 stayed native in the 0.18.3/0.18.4
+    // session dumps.
+    //
+    // ---- 0.18.4 (0.57 history) round 3c: hexmangled setup ---- 0.57 BRANCH round 3c: hexmangled setup
     // names now called. USER DIAGNOSIS (they pinned it before I could):
     // rand.f/rand.i/rand.u fail to create, inside else/tempo (arp chain).
     // Root cause: pd hexmangles non-identifier class names - rand.f's

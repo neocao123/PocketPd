@@ -1499,6 +1499,23 @@ object PdEngine {
                 ) {
                     inlineBudget--
                     inlineAbstraction(session, box)
+                } else if (box.className().startsWith("else/") ||
+                    box.className().startsWith("cyclone/") ||
+                    box.className().startsWith("zexy/")
+                ) {
+                    // 0.18.5 diagnostic: lib-prefixed boxes the pipeline left
+                    // native. A lib-prefixed name either resolves as a pd
+                    // binary class (symlink farm - fine) or falls to pd's file
+                    // loader, where subpatch-level loadbang gaps (0.15.29)
+                    // break [args]-carrying abstractions like else/tempo.
+                    // Log which factor blocked the inline.
+                    android.util.Log.w(
+                        "PocketPd.Pd",
+                        "inline skipped: ${box.className()} " +
+                            "resolve=${Abstractions.resolve(box.className()) != null} " +
+                            "pdClass=${box.className() in PdObjectMeta.pdClasses} " +
+                            "gop=${box.gop != null} budget=$inlineBudget",
+                    )
                 }
             }
             pass = session.objects().filter { it.id !in processed }

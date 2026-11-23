@@ -108,6 +108,15 @@ object Abstractions {
             objects = doc.objects(),
             connections = doc.connections,
         )
+    }.onFailure {
+        // 0.18.5 diagnostic: a parse throw here silently nulls resolve(),
+        // which the inline gate reads as "not an abstraction" - the box
+        // then stays native and pd's own file lookup loads it (0.18.3's
+        // else/tempo mystery). Name the file and the exception.
+        android.util.Log.w(
+            "PocketPd.Pd",
+            "abstraction parse FAILED: $file: ${it.message}",
+        )
     }.getOrNull()
 
     private fun topLevelCoords(file: File): GraphCoords? {
