@@ -7,6 +7,46 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.1 (versionCode 305) — 2026-11-23 【0.57 分支 round 2:slibs 全量重编 0.57 头】
+
+**W2（MIGRATION_057.md §7）:13 库矩阵 + 自研库全部改用 pd 0.57.0test1
+头重编**(源码不换版——cyclone 0.9-5 / ELSE 新版 / fftease 3.0.1 留给
+后续轮)。round 1 的 vanilla 冒烟已由用户验收("工作正常")。
+
+- **build_slibs.py 三处**:
+  1. `PDSRC` → pd-for-android 内 vendored 的 pure-data@43a5b8922a35/src
+     (与运行时 libpd.so 同一棵头树,0.51-4 路径留注释归档);
+  2. elsex 的 `inc_first=else-src/pd55` 特例**撤销**——0.57 头原生带
+     mc API,elsex 与运行时同一 m_pd.h(PD_VERSIONS §四矛盾 1 随之终裁);
+  3. **0.17.137 垫片重审**(nm -D 对照新 libpd.so):
+     - **撤 5 个**(0.57 已原生导出,留着反而遮蔽真实现):
+       `pdgui_vmess` / `pdgui_stub_vnew` / `pdgui_stub_deleteforkey` /
+       `pd_undo_set_objectstate` / `signal_setmultiout`——elsex mc 类
+       从此走真多声道 API,不再永久单声道降级;
+     - **留 sys_putmidibyte 垫片**(0.57 仍不导出,else 的 midi-OUT 类
+       依赖)与 cyclone 的 purr-data 内部符号垫片(gui_* 六件套 /
+       glist_grabx / canvas_apply_setundo,0.57 照旧不导出)。
+- **新漂移修补(修而不删)**:cyclone `sic.c` ——`COSTABSIZE`+`cos_table`
+  在 0.55+ 从 m_pd.h 除名(d_osc.c 内部化),但运行时仍惰性分配并导出
+  512 点 OLDTABSIZE 兼容表、sic.c 自带 NULL 防御;补丁恢复声明,共享表
+  复用与 0.51 语义一致(尺寸同为 512,已核对 d_osc.c)。
+- **结果:28/28 库-ABI 行全过,零编译失败**(cyclone 216、zexy 79、
+  iemlib 99、fftease 33、bsaylor 4、creb 46、cxc 32、osc/midifile/
+  binfile 6、tracker 3、pocketpd 10、elsex 52——两 ABI 对称)。自研
+  tracker/pocketpd 对 0.57 头零漂移。`Slibs.VERSION` 135→136(强制
+  设备重提取);manifest 1436 行重生成;audit_blobs 对新 APK 基准重跑。
+- **已知缺口(如实交付,下一轮修)**:vintage `else_core.so`(0.17.134
+  之前手工集成的老快照,源码失传)在 0.57 上 **dlopen 失败**——4 个
+  符号不再导出(glist_findrtext / rtext_height / rtext_width /
+  sys_get_audio_params,0.51.3 均导出),且其 t_signal 偏移是 0.51-4
+  时代的,垫片救不了。修复 = **W2.2:ELSE RC15 全量源码重建 else 核**
+  (下一轮,见 MIGRATION_057.md)。本轮内 vintage else 编译类
+  (blip~ / gran~ / presets / output~ / midi.in 等约百个)不可用;else/
+  目录的抽象文件本体未动。其余全部库(含带真 mc API 的 elsex)照常。
+- **验收**:aapt = vc305 / 0.18.1;APK 内 28 个 slib 核(arm64+x86_64)
+  均为本次产物(elsex_core.so 字节数与构建输出一致);GM800
+  `install -r` + dumpsys 复核 305/0.18.1。
+
 ## 0.18.0 (versionCode 304) — 2026-11-23 【0.57 分支 round 1:引擎置换】
 
 **W0 地基（MIGRATION_057.md §7）:只换内核,库矩阵不动——vanilla 冒烟轮。**

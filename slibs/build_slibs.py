@@ -10,7 +10,13 @@ import json, os, re, subprocess, sys, shutil
 
 SRCROOT = "C:/Users/Administrator/AppData/Local/Temp/srcrepo"
 EX = SRCROOT + "/pd-extended/externals"
-PDSRC = "C:/Users/Administrator/AppData/Local/Temp/pdsrc/pd-0.51-4/src"
+# 0.57 branch (0.18.1): slibs compile against the pd 0.57.0test1 headers -
+# the EXACT tree the runtime libpd.so was built from (pd-for-android
+# submodule pure-data@43a5b8922a35, vendored under the pd-core jni dir).
+# Pre-0.18.1 this pointed at the pd-0.51-4 tree in %TEMP%/pdsrc; that path
+# is kept below as a comment for the 0.51 line (freeze-0.51-base).
+# PDSRC_051 = "C:/Users/Administrator/AppData/Local/Temp/pdsrc/pd-0.51-4/src"
+PDSRC = "C:/Projects/pd-for-android/PdCore/pd-core/src/main/jni/libpd/pure-data/src"
 AAR = "C:/Users/Administrator/AppData/Local/Temp/pdaar/jni"
 PROJ = "C:/Projects/26PDAndroid"
 NDK = "C:/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/windows-x86_64/bin"
@@ -53,6 +59,22 @@ LIBS = [
                               ' * locked, 2 = height locked) */\n'
                               '#define CURSOR_EDITMODE_RESIZE_Y 1\n'
                               '#define CURSOR_EDITMODE_RESIZE_X 2')],
+                 # 0.57 rebuild (0.18.1): COSTABSIZE + cos_table left m_pd.h
+                 # after 0.51 (d_osc.c internals since 0.55). The runtime
+                 # libpd.so still allocates the 512-point back-compat table
+                 # (OLDTABSIZE branch of cos_maketable, lazily on first
+                 # cos~/osc~) and exports the symbol; sic.c guards NULL, so
+                 # declaring it restores the 0.51 shared-table reuse. Sizes
+                 # match: 0.57 OLDTABSIZE == sic.c's COSTABSIZE == 512.
+                 "sic.c": [('#include "m_pd.h"',
+                            '#include "m_pd.h"\n'
+                            '/* Android 0.57 rebuild: pre-0.55 m_pd.h API\n'
+                            ' * restored for the shared 512-pt cos table */\n'
+                            '#ifndef COSTABSIZE\n'
+                            '#define LOGCOSTABSIZE 9\n'
+                            '#define COSTABSIZE (1<<LOGCOSTABSIZE)\n'
+                            '#endif\n'
+                            'extern float *cos_table;')],
                  "active.c": [("(t_uint)", "(size_t)")],
                  "comment.c": [("(t_uint)", "(size_t)")],
                  "pv.c": [("(t_uint)", "(size_t)")],
@@ -181,11 +203,13 @@ LIBS = [
              "C:/Projects/26PDAndroid/slibs/else-src/Audio"],
         support=["C:/Projects/26PDAndroid/slibs/else-src/Shared"],
         inc=["C:/Projects/26PDAndroid/slibs/else-src/Shared"],
-        # else upstream master targets pd 0.54/0.55 (multichannel signal
-        # API: s_nchans/s_length/CLASS_MULTICHANNEL); the whole lib compiles
-        # against the runtime's own pd 0.55 m_pd.h (offset-verified against
-        # ugen_connect in the shipped libpd.so), not the 0.51-4 build header
-        inc_first=["C:/Projects/26PDAndroid/slibs/else-src/pd55"],
+        # 0.57 branch (0.18.1): inc_first=["else-src/pd55"] REMOVED - the
+        # 0.57 headers in PDSRC carry the multichannel API natively
+        # (s_nchans/s_length/CLASS_MULTICHANNEL/signal_setmultiout), so
+        # elsex compiles against the same m_pd.h as the runtime libpd.so.
+        # The 0.17.134-0.17.160-era pd55-header special case is dead on
+        # this branch (the "offset-verified s_nchans@24" claim it was built
+        # on is re-adjudicated in PD_VERSIONS.md 五A-1).
         # knob.c reads THISGUI->i_foregroundcolor - a pd 0.56-dev GUI theme
         # field the 0.55 runtime lacks. It only feeds the Tcl widget colors,
         # which headless libpd drops anyway: pin the color constant.
@@ -228,34 +252,18 @@ EXTRA_C = {
         "void canvas_apply_setundo(t_canvas *c) { (void)c; }\n"
     ),
 }
-# elsex: the shipped libpd.so lacks the GUI-bridge, undo, multichannel and
-# MIDI-output core symbols else's classes call (nm-diffed blob U vs libpd
-# -D, 0.17.137). Shims compiled into the blob, cyclone's gui_* precedent:
-# pdgui_* messages are dropped (headless anyway), the undo hook does
-# nothing, signal_setmultiout leaves t_signal at 1 channel so the mc
-# classes degrade to mono safely (they all loop over s_nchans), and
-# sys_putmidibyte drops bytes - else's midi-OUT classes feed THIS, while
-# the app's own noteout/ctlin bridge is a separate listener path.
+# elsex shims, re-adjudicated for 0.57 (0.18.1): the 0.57 libpd.so now
+# EXPORTS pdgui_vmess / pdgui_stub_vnew / pdgui_stub_deleteforkey /
+# pd_undo_set_objectstate / signal_setmultiout (nm -D verified) - keeping
+# the 0.17.137 no-op shims would SHADOW the real implementations and pin
+# the mc classes to degraded mono forever, so they are dropped. Still
+# missing from libpd (0.51.3 AND 0.57): sys_putmidibyte - else's midi-OUT
+# classes feed it; the shim drops bytes, while the app's own
+# noteout/ctlin bridge is a separate listener path. cyclone's gui_* /
+# glist_grabx / canvas_apply_setundo purr-data internals remain
+# un-exported in 0.57 too, so EXTRA_C["cyclone"] stays as-is.
 EXTRA_C["elsex"] = (
     "#include <m_pd.h>\n"
-    "#include <s_stuff.h>\n"
-    "void pdgui_vmess(const char *destination, const char *fmt, ...) {\n"
-    "    (void)destination; (void)fmt;\n"
-    "}\n"
-    "void pdgui_stub_vnew(t_pd *owner, const char *destination, void *key,\n"
-    "                     const char *fmt, ...) {\n"
-    "    (void)owner; (void)destination; (void)key; (void)fmt;\n"
-    "}\n"
-    "void pdgui_stub_deleteforkey(void *key) { (void)key; }\n"
-    "void pd_undo_set_objectstate(t_canvas *canvas, t_pd *x, t_symbol *s,\n"
-    "                             int undo_argc, t_atom *undo_argv,\n"
-    "                             int redo_argc, t_atom *redo_argv) {\n"
-    "    (void)canvas; (void)x; (void)s;\n"
-    "    (void)undo_argc; (void)undo_argv; (void)redo_argc; (void)redo_argv;\n"
-    "}\n"
-    "void signal_setmultiout(t_signal **sig, int nchans) {\n"
-    "    (void)sig; (void)nchans;\n"
-    "}\n"
     "void sys_putmidibyte(int portno, int byte) {\n"
     "    (void)portno; (void)byte;\n"
     "}\n"

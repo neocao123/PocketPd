@@ -11,8 +11,34 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 304
-    versionName = "0.18.0" // ---- 0.57 BRANCH round 1 (W0 地基): ENGINE SWAP.
+    versionCode = 305
+    versionName = "0.18.1" // ---- 0.57 BRANCH round 2 (W2 slibs matrix):
+    // ALL slib cores rebuilt against the pd 0.57.0test1 headers (the exact
+    // tree the runtime libpd.so ships from - pure-data@43a5b8922a35),
+    // per-object .so layout unchanged, Slibs.VERSION 135->136 forces
+    // re-extract. build_slibs.py: PDSRC now points at the 0.57 tree; the
+    // elsex pd55-header inc_first special case removed; the 0.17.137 mc
+    // shims dropped where 0.57 libpd.so now natively exports the symbols
+    // (pdgui_vmess/pdgui_stub_vnew/pdgui_stub_deleteforkey/
+    // pd_undo_set_objectstate/signal_setmultiout - keeping them would
+    // shadow the real mc/GUI implementations and pin elsex to degraded
+    // mono); sys_putmidibyte shim KEPT (still un-exported in 0.57),
+    // cyclone purr-data gui_*/glist_grabx/canvas_apply_setundo shims KEPT
+    // (still un-exported). New drift patch: cyclone sic.c
+    // (COSTABSIZE+cos_table left m_pd.h after 0.51; runtime still
+    // allocates+exports the 512-pt OLDTABSIZE compat table lazily - declared
+    // back, NULL-guarded by sic.c itself). Result: 28/28 lib-ABI rows OK,
+    // zero compile failures; audit_blobs clean vs the 0.57 APK baseline
+    // EXCEPT the vintage else_core.so (sources lost, PD_VERSIONS section 4.3):
+    // 4 symbols no longer exported in 0.57 (glist_findrtext/rtext_height/
+    // rtext_width/sys_get_audio_params) -> its dlopen fails on 0.57 AND its
+    // t_signal offsets are stale - unfixable without sources, replacement =
+    // full ELSE RC15 rebuild (next round, MIGRATION W2.2). KNOWN interim:
+    // vintage else compiled classes (blip~/gran~/presets/output~/...) are
+    // unavailable this round; all other libraries (incl. elsex with native
+    // mc API) are live.
+    //
+    // ---- 0.18.0 (0.57 history) round 1: ENGINE SWAP.
     // Replaced libpd 1.2.1-rc6 (pd 0.51.3, Maven, last formal release 2021)
     // with a self-built AAR from pd-for-android master pinned at
     // libpd@e3cd52fd7517 -> pure-data@43a5b8922a35 = pd 0.57.0test1
