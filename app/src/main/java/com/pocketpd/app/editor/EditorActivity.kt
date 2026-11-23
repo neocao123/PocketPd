@@ -1342,6 +1342,13 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             // run = the patch plays: bring the engine up with it
             ensureAudioOn()
         } else {
+            // 0.18.9 user directive: EDIT = dsp off outright. The deferred
+            // rebuild means pd runs the last-built session while editing
+            // anyway — leaving the graph sounding through edits only kept
+            // the noise sources alive. RUN entry brings it back
+            // (ensureAudioOn above).
+            PdEngine.stopAudio()
+            updateAudioIcon()
             addBarScroll.visibility = View.VISIBLE
         }
     }

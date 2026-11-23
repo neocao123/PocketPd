@@ -11,8 +11,15 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 313
-    versionName = "0.18.9" // ---- 0.57 BRANCH round 3h: EDIT mutations
+    versionCode = 314
+    versionName = "0.18.10" // ---- 0.57 BRANCH round 3i: EDIT entry = dsp
+    // off outright (user directive: "反正每次都重置所幸在edit状态就直接
+    // dsp off吧") - toggleMode's EDIT branch now calls PdEngine.stopAudio +
+    // icon update; RUN entry already re-arms via ensureAudioOn. Prior:
+    // 0.18.9 deferred edit rebuilds (sessionDirty), 0.18.8 reverted the
+    // plugdata tempo experiment + adjudicated the escape hypothesis.
+    //
+    // ---- 0.18.8 (0.57 history) round 3g: revert the ---- 0.57 BRANCH round 3h: EDIT mutations
     // defer the session rebuild (user directive: per-edit core restarts
     // popped and churned pd on every keystroke/drag). Edits mark
     // sessionDirty; the rebuild happens once at RUN entry (toggleMode's

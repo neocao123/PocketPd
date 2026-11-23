@@ -7,6 +7,19 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.10 (versionCode 314) — 2026-11-24 【0.57 分支 round 3i:EDIT 入口 = DSP 直接关闭】
+
+**用户指令（0.18.9 后追加）："反正每次都重置，所幸在 edit 状态就直接
+dsp off 吧。"** toggleMode 的 EDIT 分支现在显式 `PdEngine.stopAudio()`
+（0.57 原生音频路径 = pauseAudio，声音源彻底静默）+ 音频图标刷新；
+RUN 入口的 `ensureAudioOn()` 照常把引擎拉回来。LOCK 是 RUN 变体，不受影响。
+
+设计含义：编辑态从"压着 DSP 重建"（0.17.110 SYNC）进一步变为"编辑态
+整颗引擎静默 + 改动只标脏 + 进 RUN 重建并开机"——三态中 SYNC 的
+"dsp 状态保留"语义在本工作流下被用户指令取代。
+
+**验收**：aapt = 314/0.18.10；GM800 install -r + dumpsys 复核。
+
 ## 0.18.9 (versionCode 313) — 2026-11-24 【0.57 分支 round 3h:EDIT 改动不再重启 pd 核心】
 
 **用户指令："每次 edit 改动先不重启核心，直到 run 的时候才去做。"**
