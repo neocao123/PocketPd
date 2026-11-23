@@ -1,0 +1,18 @@
+#N canvas 600 60 593 365 12;
+#X floatatom 172 228 5 -80 80 0 - - -;
+#X text 47 104 [pvcompand~] either expands or compresses the differences
+between the amplitudes of the spectral frames. The threshold is interpreted
+as dB and useful ranges are from about -60 to +60. Positive values
+increase the "peakiness" of the sound and negative values tend to whiten
+the spectrum., f 70;
+#X obj 49 258 fftease/pvcompand~;
+#X obj 49 199 ./sfplay~;
+#X obj 49 299 ./gain.dsp~;
+#X obj 46 26 ./icon;
+#X text 295 62 - Spectral compander;
+#X text 215 228 threshold factor (dB);
+#X obj 276 28 cnv 15 100 30 empty empty fftease/pvcompand~ 20 12 0
+24 -262144 -1 0;
+#X connect 0 0 2 1;
+#X connect 2 0 4 0;
+#X connect 3 0 2 0;

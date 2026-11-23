@@ -2,7 +2,7 @@
 
 ## ★ 当前进度与下一步（2026-11-24，round 4 后更新）
 
-**分支状态**：`0.57` 分支。设备在装 v317/0.18.13。0.51 主线冻结于
+**分支状态**：`0.57` 分支。设备在装 v318/0.18.14。0.51 主线冻结于
 `freeze-0.51-base`（= 0.17.161/vc303）。
 
 **已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.13）：
@@ -47,11 +47,9 @@ help 自身接线的显示噪音（桌面 pd 同样会报），非故障。
 
 **任务一：换版重编轮（MIGRATION §7 W2.3–W2.5/W2.4，逐库独立轮）**
 1. ~~cyclone 0.43.4 → **0.9-5**~~ ✅ 0.18.13/317 完成；
-2. fftease 2.5.2 → **3.0.1**（顺带找回 7 个 3.0-only 对象：
-   cross~/enrich~/loopsea~/pileup~/pvwarpb~/schmear~/residency_buffer~
-   ——注意：cyclone 0.9-5 也有一个新 `cross~`（信号交叉fade），与
-   fftease 的 cross~（FFT 域）同名不同物，PRIORITY 冲突报告会列出，
-   bare 名归 cyclone（PRIORITY 先 cyclone 后 fftease）；
+2. ~~fftease 2.5.2 → **3.0.1**~~ ✅ 0.18.14/318 完成（6/7 找回，
+   loopsea~ 3.0.1 上游不存在；bare cross~ 归 cyclone，fftease 版走
+   fftease/cross~；源码仓 = ericlyon/pd-fftease）；
 3. zexy / iemlib 抓当前版（git.iem.at 有反爬墙，手动过）；
 4. mrpeach 重编（预期漂移小）。
 每库一轮：换源 → 试编 → 修补（修而不删）→ Slibs.VERSION bump →

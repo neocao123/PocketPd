@@ -36,7 +36,18 @@ TREES = [
     ("osc", EX + "/mrpeach/osc", True),
     ("midifile", EX + "/mrpeach/midifile", True),
     ("binfile", EX + "/mrpeach/binfile", True),
+    # fftease 3.0.1 (0.18.14): upstream helpfiles ship with the sources;
+    # pvgrain~-help.pd references Piano.aif (copied from sound/ after this
+    # tree runs - see the MEDIA post-pass below, only help dir is on the pd
+    # search path at open time)
+    ("fftease", SRC + "/fftease-3.0.1/fftease-helpfiles", True),
     ("diy2", SRC + "/diy2", True),
+]
+
+# (lib dir under PROJ, file relative to a source tree root, source tree) -
+# media referenced by help patches must live IN the help dir (AGENTS rule)
+HELP_MEDIA = [
+    ("fftease", "Piano.aif", SRC + "/fftease-3.0.1/sound/Piano.aif"),
 ]
 
 def main():
@@ -64,6 +75,14 @@ def main():
             n += 1
         total += n
         print("%-9s %4d patches" % (lib, n))
+    for lib, fname, srcpath in HELP_MEDIA:
+        if only and only != lib:
+            continue
+        dst = os.path.join(PROJ, lib, fname)
+        if os.path.isfile(srcpath):
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy2(srcpath, dst)
+            print("media: %s/%s" % (lib, fname))
     print("total: %d" % total)
 
 if __name__ == "__main__":

@@ -25,8 +25,14 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 141: 0.57 branch
-     *  (0.18.13) - cyclone swapped 0.43.4 miXed -> porres 0.9-5: 256 classes
+    /** Bump to re-extract after an assets/slibs update. 142: 0.57 branch
+     *  (0.18.14) - fftease swapped 2.5.2 Debian -> ericlyon/pd-fftease
+     *  v3.0.1: 37 real classes, 6 long-phantom 3.0-only objects now really
+     *  ship (cross~/enrich~/pileup~/pvwarpb~/schmear~/residency_buffer~;
+     *  loopsea~ does not exist in 3.0.1), pd-lib-builder test stubs
+     *  excluded, help/fftease shipped from upstream helpfiles (37 patches
+     *  + Piano.aif).
+     *  141: 0.57 branch (0.18.13) - cyclone swapped 0.43.4 miXed -> porres 0.9-5: 256 classes
      *  (was 230), 209 setups in core_wrap, boot-nag strip, 12 non-alphanumeric
      *  objects now registered via cyclone_lib.c, vanilla-clash names
      *  cyclone/xxx + capitalized with bare line~/pow~/clip compat creators,
@@ -39,7 +45,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 141
+    private const val VERSION = 142
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

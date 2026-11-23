@@ -36,6 +36,8 @@ LIBS = {
     # cyclone 0.9-5 (0.18.13 audit redo): binaries/ carries cyclone_lib.c at
     # its top level; cfiles() yields plain file paths directly
     "cyclone": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/pd-cyclone-0.9-5/cyclone_objects/binaries"],
+    # fftease 3.0.1 (0.18.14 audit): flat layout, excl pd-lib-builder tests
+    "fftease": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/fftease-3.0.1"],
 }
 
 IO_CALLS = ("inlet_new", "floatinlet_new", "symbolinlet_new", "pointerinlet_new",

@@ -936,6 +936,18 @@
 
 ### fftease(32 类,0.17.142 源码核对;PD 分支显式建口)
 
+> **0.18.14(3.0.1 换版)增补**——porres 时代 PD 分支普遍简化为**单信号
+> 出口**并给参数加显式信号入口,下表按 2.5.2 写成;0.9-x 后的真值以
+> PdObjectMeta.kt fftease 行区为准(0.18.14 按构造函数重写)。要点:
+> 大多数 `*/2` 出口 → `*/1`(信号);bthresher~ 3/2(副出口 list)、
+> dentist~/disarrain~ 1/3(2 信号 + list)、disarray~ 1/2、scrape~ 6/1
+> (全信号进)、pvtuner~ 4/1、reanimator~ 2/3、resent~ 1/2、residency~
+> 3/2、cavoc~/cavoc27~ 1/1;新行 enrich~ 3/1、pileup~ 1/1、schmear~ 1/1、
+> residency_buffer~ 3/3(2 信号 + float)、multyq~ 13 全信号进 1 出、
+> pvwarp~ 10/1、pvwarpb~ 4/1、fftease/cross~ 3/1(bare cross~ 归
+> cyclone);pvgrain~ 维持 1/1 但出口为 list(无信号出)。loopsea~ 在
+> 3.0.1 上游不存在;crossx~/presidency~ 为历史幻影名。
+
 | 对象 | 进 | 出 | 信号进 | 信号出 | 来源 |
 |---|---|---|---|---|---|
 | `bthresher~` | 3 | 3 | 0,1,2 | 0,1 | 源码核对 |

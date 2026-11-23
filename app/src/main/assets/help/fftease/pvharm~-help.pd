@@ -1,0 +1,56 @@
+#N canvas 600 60 648 398 12;
+#X obj 180 182 phasor~ 261;
+#X obj 180 209 -~ 0.5;
+#X floatatom 230 281 5 0 0 0 - pvharm-t1 -;
+#X floatatom 280 280 5 0 0 0 - pvharm-t2 -;
+#X obj 331 279 sig~ 0.001;
+#N canvas 405 302 269 190 init 0;
+#X obj 65 55 loadbang;
+#X msg 66 95 \; pvharm-t1 1.25 \; pvharm-t2 1.5 \; pvharm-basefreq
+261 \; pvharm-hifreq 4000 \; pvharm-osclim 300;
+#X connect 0 0 1 0;
+#X restore 385 347 pd init;
+#X obj 201 236 r pvharm-msgs;
+#N canvas 436 152 789 262 control 0;
+#X obj 73 216 s pvharm-msgs;
+#X msg 73 135 lowfreq \$1;
+#X floatatom 73 53 5 0 0 0 - - -;
+#X floatatom 230 79 5 0 0 0 - pvharm-hifreq -;
+#X msg 230 132 highfreq \$1;
+#X msg 419 176 osclimit \$1;
+#X floatatom 419 123 5 0 0 0 - pvharm-osclim -;
+#X text 371 90 limit the maximum number of active oscillators in the
+oscillator bank;
+#X text 228 62 highest frequency to synthesize;
+#X text 70 30 lowest frequency to synthesize;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 4 0;
+#X connect 4 0 0 0;
+#X connect 5 0 0 0;
+#X connect 6 0 5 0;
+#X restore 281 182 pd control;
+#X obj 180 313 fftease/pvharm~, f 22;
+#X text 39 98 [pvharm~] provides basic harmonizing with two transpositions
+of the input internally calculated and mixed to the output.;
+#X obj 180 344 ./gain.dsp~;
+#X obj 33 30 ./icon;
+#X text 275 64 - Harmonizer;
+#X obj 254 35 cnv 15 100 30 empty empty fftease/pvharm~ 20 12 0 24
+-262144 -1 0;
+#X text 277 262 transp2;
+#X text 215 264 transp1;
+#X obj 92 315 *~ 0.85;
+#X floatatom 180 142 5 100 10000 0 - pvharm-basefreq -;
+#X text 337 243 synthesis threshold for oscillator bank;
+#X text 17 316 add source;
+#X connect 0 0 1 0;
+#X connect 1 0 8 0;
+#X connect 1 0 16 0;
+#X connect 2 0 8 1;
+#X connect 3 0 8 2;
+#X connect 4 0 8 3;
+#X connect 6 0 8 0;
+#X connect 8 0 10 0;
+#X connect 16 0 10 0;
+#X connect 17 0 0 0;

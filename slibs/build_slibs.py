@@ -18,6 +18,9 @@ EX = SRCROOT + "/pd-extended/externals"
 # pd_undo_set_objectstate / signal_setmultiout; the stale pdaar blob does
 # not, and reading it sent one analysis pass chasing phantom dlopen fails.
 CYC = SRCROOT + "/pd-cyclone-0.9-5"
+# fftease 3.0.1 (0.18.14): ericlyon/pd-fftease tag v3.0.1 (repo moved from
+# the 2.5.2 Debian snapshot; "ericlyon/fftease" 404s - it is pd-fftease)
+FFTS = SRCROOT + "/fftease-3.0.1"
 # 0.57 branch (0.18.1): slibs compile against the pd 0.57.0test1 headers -
 # the EXACT tree the runtime libpd.so was built from (pd-for-android
 # submodule pure-data@43a5b8922a35, vendored under the pd-core jni dir).
@@ -139,29 +142,41 @@ LIBS = [
             "protect_against_open.c": [
                 ("#ifdef HAVE_G_CANVAS_H", "#if 1 /* Android rebuild */")]},
     )),
+    # fftease 3.0.1 (0.18.14): ericlyon/pd-fftease tag v3.0.1 replaces the
+    # Debian 2.5.2 snapshot (repo is pd-fftease; "ericlyon/fftease" 404s).
+    # FLAT layout: every source at top level; fftease_setup.c = library
+    # loader (master-dropped); fftease-helpfiles/, sound/, pd-lib-builder/,
+    # collect.pl, *.h filtered by the .c collector. loopsea~ does NOT exist
+    # in 3.0.1 - the migration notes' 7-object 3.0-only wishlist was
+    # aspirational; 6 of 7 ship (cross~/enrich~/pileup~/pvwarpb~/schmear~/
+    # residency_buffer~). bare cross~ goes to cyclone per PRIORITY (cyclone
+    # outranks fftease; different object: crossfade vs FFT-domain) - the
+    # fftease one stays reachable as fftease/cross~. pd-lib-builder/ carries
+    # the build system's own test stubs (multilibA/subdir/_template_...) -
+    # the collector walks subdirs, so exclude the tree or its classes get
+    # compiled and registered into the blob (0.18.14 first-pass bug).
     ("fftease", dict(
-        src=["../../fftease"], support=[], inc=["../../fftease"],
+        src=[FFTS], support=[], inc=[FFTS],
+        excl_dirs=["pd-lib-builder"],
         # dentist~/disarrain~/disarray~ each define non-static rand_index /
         # reset_shuffle (same C symbols, different types) -> duplicate
-        # symbols in the one core blob; make them file-local. Leading-newline
-        # anchors keep the patches idempotent.
+        # symbols in the one core blob; make them file-local. 3.0.1 spacing
+        # is "reset_shuffle (t_xxx *x)" (space before paren) for ALL THREE
+        # - the 2.5.2 anchors' paren-hugging/inside-space variants no longer
+        # match. Leading-newline anchors keep the patches idempotent.
         patches={
-            "dentist~.c": [("\nvoid reset_shuffle(t_dentist *x)",
-                            "\nstatic void reset_shuffle(t_dentist *x)"),
+            "dentist~.c": [("\nvoid reset_shuffle (t_dentist *x)",
+                            "\nstatic void reset_shuffle (t_dentist *x)"),
                            ("\nint rand_index(int max)",
                             "\nstatic int rand_index(int max)")],
-            "disarrain~.c": [("\nvoid reset_shuffle( t_disarrain *x )",
-                              "\nstatic void reset_shuffle( t_disarrain *x )"),
-                             ("\nvoid reset_shuffle (t_disarrain *x)",
+            "disarrain~.c": [("\nvoid reset_shuffle (t_disarrain *x)",
                               "\nstatic void reset_shuffle (t_disarrain *x)"),
                              ("\nint rand_index(int max)",
                               "\nstatic int rand_index(int max)")],
-            "disarray~.c": [("\nvoid reset_shuffle( t_disarray *x )",
-                             "\nstatic void reset_shuffle( t_disarray *x )"),
-                            ("\nvoid reset_shuffle (t_disarray *x)",
+            "disarray~.c": [("\nvoid reset_shuffle (t_disarray *x)",
                              "\nstatic void reset_shuffle (t_disarray *x)"),
-                            ("\nint rand_index( int max)",
-                             "\nstatic int rand_index( int max)")],
+                            ("\nint rand_index(int max)",
+                             "\nstatic int rand_index(int max)")],
         },
     )),
     ("bsaylor", dict(

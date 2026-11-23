@@ -1,0 +1,75 @@
+#N canvas 414 37 855 609 12;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X array analysis-array1 1.92375e+006 float 2;
+#X coords 0 32767 1.92375e+006 -32768 100 70 1 0 0;
+#X restore 589 306 graph;
+#X floatatom 280 313 5 0 0 0 - - -;
+#X floatatom 422 305 5 0 0 0 - - -;
+#X obj 425 274 hsl 128 15 0 1 0 0 empty empty position -2 -8 0 10 -262144
+-1 -1 0 1;
+#X msg 73 211 calcbuf 5000;
+#N canvas 158 177 450 300 showsync 0;
+#X obj 205 102 inlet~;
+#X obj 205 159 snapshot~;
+#X obj 325 121 metro 50;
+#X obj 325 89 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 325 22 loadbang;
+#X msg 325 57 1;
+#X obj 205 225 outlet;
+#X connect 0 0 1 0;
+#X connect 1 0 6 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 5 0;
+#X connect 5 0 3 0;
+#X restore 280 420 pd showsync;
+#X floatatom 280 445 5 0 0 0 - - -;
+#X obj 280 340 sig~ 0;
+#X obj 422 337 sig~ 0;
+#X text 527 377 warning: do not write into this array \, as you will
+create extremely loud glitches if you do so., f 38;
+#X obj 138 377 fftease/residency_buffer~ analysis-array1;
+#X obj 138 289 ./sfplay~;
+#X obj 138 493 ./gain.dsp~;
+#X obj 38 21 ./icon;
+#X text 413 47 - Spectral sample buffer;
+#X floatatom 422 439 12 0 0 0 - - -;
+#X obj 422 483 array size analysis-array1;
+#X text 178 199 Report the required size of storage buffer for a desired
+number of milliseconds. This will automatically resize the array in
+this patch. (DACs must be on first.), f 28;
+#X msg 12 343 acquire_sample;
+#X text 447 463 array size is set in samples here;
+#X text 280 294 speed;
+#X text 7 322 record sample;
+#X text 33 87 residency_buffer~ is like residency~ except that it uses
+a Pd array rather than an internal buffer. This makes it more complicated
+to work with \, but potentially more efficient than residency~. Any
+number of units may access the same array (or different ones). The
+array name is the obligatory first argument. Do NOT attempt to play
+the recorded buffer with tabread~ or other time-domain audio objects
+unless you have some idea of what you are doing (and turn the volume
+way down before attempting this). Multiple copies of this object accessing
+the same array is the killer app here., f 91;
+#X obj 390 20 cnv 15 100 30 empty empty fftease/residency_buffer~ 20
+12 0 24 -262144 -1 0;
+#X text 592 189 see also:;
+#X obj 571 213 cnv 15 100 20 empty empty fftease/residency~ 20 12 0
+14 -262144 -1 0;
+#X obj 571 238 cnv 15 100 20 empty empty fftease/resent~ 20 12 0 14
+-262144 -1 0;
+#X text 150 437 current phase in buffer (0 - 1);
+#X connect 1 0 7 0;
+#X connect 2 0 8 0;
+#X connect 3 0 2 0;
+#X connect 4 0 10 0;
+#X connect 5 0 6 0;
+#X connect 7 0 10 1;
+#X connect 8 0 10 2;
+#X connect 10 0 12 0;
+#X connect 10 1 5 0;
+#X connect 10 2 15 0;
+#X connect 11 0 10 0;
+#X connect 15 0 16 0;
+#X connect 18 0 10 0;

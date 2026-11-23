@@ -7,6 +7,52 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.14 (versionCode 318) — 2026-11-24 【0.57 分支 round 5:fftease 2.5.2 → 3.0.1 换版重编（迁移 §7 W2.4）】
+
+**任务一换版轮第二击。** 源码 = ericlyon/**pd-fftease** tag `v3.0.1`
+（迁移笔记里的 "ericlyon/fftease" 已 404——仓库名带 pd- 前缀），克隆于
+`%TEMP%/srcrepo/fftease-3.0.1`，替换 Debian 2.5.2 快照。**全平铺布局**：
+对象源/辅助源全在顶层，`fftease_setup.c` = 库加载器（master-drop 启发式
+自动丢弃），`fftease-helpfiles/`、`sound/`、`pd-lib-builder/`、
+`collect.pl` 由 .c 收集器自然过滤。
+
+**找回长幻影对象**：0.17.142 记录的"MSP-only 源缺席"名单里 **6/7 真实
+上岗**——cross~/enrich~/pileup~/pvwarpb~/schmear~/residency_buffer~；
+**loopsea~ 在 3.0.1 里根本不存在**（升级前清单是愿望清单）。bare
+`cross~` 归 cyclone 的交叉淡化（PRIORITY 不动），fftease 的 FFT 域版走
+`fftease/cross~`（PdObjectMeta 加前缀行——查表按 bare 回退，前缀行优先）。
+
+**事故与修复**：
+- `pd-lib-builder/tests/`（multilibA/subdir/_template_ 等 14 个构建系统
+  自测桩）被子目录收集器编进 blob——`excl_dirs` 排除 + 手工剥离本轮
+  污染的 core_classes.txt/manifest 行（本轮引入物，非历史手维护集）；
+- dentist~/disarrain~/disarray~ 的 reset_shuffle 重名符号补丁：3.0.1
+  三个文件统一成 `reset_shuffle (t_xxx *x)`（括号前带空格），2.5.2 的
+  两套锚点全部失配——按新形态重锚（rand_index 锚点恰好仍匹配）。
+
+**结果**：两 ABI 各 37 类 ok / 0 fail，audit_blobs 28/28 全绿；
+core_classes.txt 保持 41 行（37 真实 + 4 个历史幻影名，增量合并）。
+
+**io 审计**（audit_io 接 3.0.1 树 + 构造函数手读取证）：porres 时代 PD
+分支**普遍简化为单信号出口**、并给参数加了显式信号入口——fftease 行区
+按新源码重写：bthresher~ `3/3→3/2`（副出口改 list）、burrow~/centerring~/
+codepend~ `4/2→4/1`、cavoc~/cavoc27~ `1/2→1/1`、cross~ `2/2→3/1`、
+dentist~/disarrain~ `1/5→1/3`、disarray~ `1/3→1/2`、drown~/ether~/
+leaker~/mindwarp~/morphine~ `3/2→3/1`、pvcompand~/pvharm~/pvoc~ `→…/1`、
+pvtuner~ `3/2→4/1`、reanimator~ `2/4→2/3`、resent~ `1/4→1/2`、residency~
+`3/4→3/2`、scrape~ `2/2→6/1`（全信号进）、shapee~/taint~/thresher~/
+vacancy~/xsyn~/swinger~ 同型简化；新增行 enrich~ 3/1、pileup~ 1/1、
+schmear~ 1/1、residency_buffer~ `3/3`（2 信号出 + 1 float 出）、multyq~
+**13 全信号进**/pvwarp~ **10 进**/pvwarpb~ 4 进（"VARIABLE" 系固定循环
+12/9/3 假阳性）；pvgrain~ 维持 `1/1` 但出口是 **list**（无信号出——
+手读证据撤回过一次误改）；`fftease/cross~` 显式行。
+
+**help/**：fftease 首次随船 help——上游 `fftease-helpfiles/` 37 补丁 +
+`Piano.aif`（pvgrain~-help 引用；build_help.py 新增 HELP_MEDIA 后处理，
+媒体必须落 help 目录才在 pd 搜索路径上）。lint 1/37 `#A` = 上游数据表。
+
+**验收**：aapt = 318/0.18.14；GM800 force-stop + install + dumpsys 复核。
+
 ## 0.18.13 (versionCode 317) — 2026-11-24 【0.57 分支 round 4:cyclone 0.43.4 → 0.9-5 换版重编（迁移 §7 W2.3）】
 
 **任务一换版轮第一击。** 源码 = porres/pd-cyclone tag `0.9-5`（2026-02-21

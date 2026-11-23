@@ -11,8 +11,29 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 317
-    versionName = "0.18.13" // ---- 0.57 BRANCH round 4: cyclone swapped
+    versionCode = 318
+    versionName = "0.18.14" // ---- 0.57 BRANCH round 5: fftease swapped
+    // 2.5.2 Debian -> ericlyon/pd-fftease v3.0.1 (repo is pd-fftease;
+    // "ericlyon/fftease" 404s): flat layout, 37 real classes both ABIs,
+    // audit_blobs clean. 6 long-phantom objects from the 0.17.142
+    // MSP-only-sources list now really ship (cross~/enrich~/pileup~/
+    // pvwarpb~/schmear~/residency_buffer~); loopsea~ does NOT exist in
+    // 3.0.1 (the 7-object wishlist was aspirational). bare cross~ stays
+    // cyclone's per PRIORITY (crossfade vs FFT-domain, different objects);
+    // fftease's is reachable as fftease/cross~ (own PdObjectMeta row).
+    // pd-lib-builder/tests stubs (multilibA/subdir/_template_...) compiled
+    // into the first pass - excl_dirs added + junk core_classes/manifest
+    // lines stripped (this round's contamination, not historical). dentist~/
+    // disarrain~/disarray~ reset_shuffle patches re-anchored for 3.0.1
+    // spacing ("reset_shuffle (t_x *x)" space-before-paren in all three).
+    // io audit: porres-era PD branches simplified to ONE signal outlet for
+    // most objects + added signal param inlets - PdObjectMeta fftease block
+    // rewritten from constructors (30 rows updated, 8 added incl. multyq~
+    // 13 sig in / pvwarp~ 10 / pvwarpb~ 4; pvgrain~ kept 1 list-out, no
+    // sig out). help/fftease shipped from upstream helpfiles (37 patches +
+    // Piano.aif via the new HELP_MEDIA post-pass in build_help.py).
+    //
+    // ---- 0.18.13 (0.57 history) round 4: cyclone swapped
     // 0.43.4 miXed -> porres 0.9-5 (tag 0.9-5), rebuilt against the 0.57
     // headers: 256 classes (was 230), 209 setups in core_wrap, both ABIs,
     // audit_blobs clean. Round mechanics: CYCLONE_OBJ_API setup prefix added

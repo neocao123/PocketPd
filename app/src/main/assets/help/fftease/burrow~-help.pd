@@ -1,0 +1,81 @@
+#N canvas 451 35 796 659 12;
+#X msg 223 385 invert \$1;
+#X obj 223 358 tgl 17 0 empty empty empty 17 7 0 10 -228856 -1 -1 0
+1;
+#X obj 329 382 noise~;
+#X floatatom 381 382 5 0 0 0 - - -;
+#X text 204 308 source sound;
+#X msg 170 431 mute \$1;
+#X obj 119 31 ./icon;
+#X obj 298 598 ./gain.dsp~;
+#X text 436 63 - Cross filtering;
+#X obj 441 415 expr pow(10 \, $f1/20);
+#X obj 449 499 expr pow(10 \, $f1/20);
+#X obj 170 404 tgl 17 0 empty empty empty 17 7 0 10 -228856 -1 -1 0
+1;
+#X obj 298 560 fftease/burrow~ 2048 4;
+#X obj 348 420 bp~ 600 30;
+#X obj 298 308 noise~;
+#X msg 103 448 fftinfo;
+#X obj 384 356 hsl 128 15 100 1000 0 0 empty \$0-freq empty -2 -8 0
+10 -228856 -1 -1 7056 1;
+#X text 414 355 frequency;
+#X text 598 407 below (if inverted);
+#X text 115 91 [burrow~] filters the sound in the left input by utilizing
+a second signal input as a filter threshold reference. When the bins
+of second signal are above the threshold \, the same bins of the first
+signal are affected by the multiplier (so you can attenuate or boost
+them). Threshold inversion is available via the invert message. This
+way \, [burrow~] acts when the bins of the second sound are below the
+threshold., f 81;
+#X obj 441 393 nbx 5 14 -1e+037 1e+037 0 0 \$0-dummy \$0-threshold
+empty 0 -8 0 10 -228856 -1 -1 -45 256;
+#X obj 449 479 nbx 5 14 -1e+037 1e+037 0 0 \$0-dummy \$0-multiplier
+empty 0 -8 0 10 -228856 -1 -1 -35 256;
+#X floatatom 449 522 7 0 0 0 - - -;
+#X text 500 390 <= threshold (dB) - acts above or;
+#X text 510 476 <= multiplier factor (dB);
+#X floatatom 441 439 7 0 0 0 - - -;
+#X text 494 439 (linear);
+#X text 506 522 (linear);
+#X text 115 185 Here we have a noise input and a bandpass filtered
+noise as the filtering sound. With the initial settings (in dB) \,
+the input signal gets attenuated when the bins of the second input
+are above the threshold. This acts sort of like a notch filter. With
+the invert message on \, it's more like a bandpass. But if you have
+a positive dB multiplier \, it boosts the bins above the threshold
+(sort of like a peak filter) or boosts the bins below the threshold
+if inverted., f 81;
+#X text 65 432 Get FFT info, f 7;
+#X text 51 386 turn off the object \, saving CPU power, f 20;
+#X text 70 357 set to invert mode =>;
+#X text 461 559 <= arguments: window size and;
+#X text 482 574 overlap (default: 1024 \, 8);
+#X text 325 345 filter sound, f 6;
+#N canvas 650 70 277 215 init 0;
+#X msg 72 96 \; \$1-freq 600 \; \$1-threshold -45 \; \$1-multiplier
+-35;
+#X obj 72 69 f \$0;
+#X obj 72 41 loadbang;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X restore 225 583 pd init;
+#X obj 419 35 cnv 15 100 30 empty empty fftease/burrow~ 20 12 0 24
+-262144 -1 0;
+#X connect 0 0 12 0;
+#X connect 1 0 0 0;
+#X connect 2 0 13 0;
+#X connect 3 0 13 1;
+#X connect 5 0 12 0;
+#X connect 9 0 25 0;
+#X connect 10 0 22 0;
+#X connect 11 0 5 0;
+#X connect 12 0 7 0;
+#X connect 13 0 12 1;
+#X connect 14 0 12 0;
+#X connect 15 0 12 0;
+#X connect 16 0 3 0;
+#X connect 20 0 9 0;
+#X connect 21 0 10 0;
+#X connect 22 0 12 3;
+#X connect 25 0 12 2;
