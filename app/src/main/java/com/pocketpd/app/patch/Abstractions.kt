@@ -78,6 +78,18 @@ object Abstractions {
             if (dir == null || !dir.isDirectory) continue
             val f = File(dir, rel)
             if (f.isFile) return f
+            // 0.18.2: prefixed names (`else/count`) live next to the lib dir,
+            // not inside it — else/count.pd sits at <root>/else/count.pd while
+            // the search dir IS <root>/else. Try the parent for `lib/name`
+            // spellings so abstractions referencing `else/xxx` (arp.pd's
+            // else/count, else/swap2, else/makenote2, else/tempo) inline
+            // correctly now that the RC15 core stopped registering those as
+            // compiled classes (the 0.17.153 prefix-strip no longer fires
+            // for them: the bare names left the new core_classes.txt).
+            if (rel.contains('/')) {
+                val p = dir.parentFile?.let { pf -> File(pf, rel) }
+                if (p != null && p.isFile) return p
+            }
         }
         return null
     }

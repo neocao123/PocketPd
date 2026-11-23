@@ -7,6 +7,27 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.3 (versionCode 307) — 2026-11-24 【0.57 分支 round 3b:`else/` 前缀抽象引用复活】
+
+**用户 0.18.2 冒烟:arp 仍 couldn't-create。** 代码级根因:
+`Abstractions.locate` 把 `lib/name` 映射到 `<dir>/lib/name.pd`,但 else 库
+的搜索目录**本身就是** `<root>/else`——`else/count.pd` 在
+`<root>/else/count.pd`,旧映射找的是 `<root>/else/else/`。0.17.153 的
+前缀剥离一直掩盖着这条路径:它把 `else/count` 改写成裸 `count`,在
+0.51.3 上作为 vintage **编译类**直接注册解析。RC15 核把 count/swap2/
+makenote2 降为**纯抽象**(移出了新 core_classes.txt),剥离器按规则正确
+拒绝(裸名不在编译清单就不剥)→ 盒子保持 `else/count` → 旧映射找不到
+文件 → couldn't create。arp → count/swap2/makenote2 → delete/replace/
+pick 的整条链都死在同一处。
+
+**修复 = `locate()` 对带斜杠的名字额外尝试父目录**;0.17.149 的不动点
+内联循环随即把 `else/count`→count.pd(递归展开 else/delete/else/replace/
+else/pick)拉进会话,`[args]→initmess` 转换、$0 命名空间前缀等既有机制
+照常作用。前缀剥离规则(0.17.153)一字未动。
+
+验收:aapt = 307/0.18.3;装机 dumpsys 复核因 GM800 的 TLS adb 掉线
+**待设备重连补做**(APK 已构建,commit 先行)。
+
 ## 0.18.2 (versionCode 306) — 2026-11-24 【0.57 分支 round 3:ELSE RC15 全量核替换 vintage else_core】
 
 **W2.2（MIGRATION_057.md §7）:源码失传的 vintage else_core.so 替换为

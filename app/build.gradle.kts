@@ -11,8 +11,23 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 306
-    versionName = "0.18.2" // ---- 0.57 BRANCH round 3 (W2.2): vintage
+    versionCode = 307
+    versionName = "0.18.3" // ---- 0.57 BRANCH round 3b: else/ prefixed
+    // abstraction refs resolve again. User smoke of 0.18.2: arp still
+    // couldn't-create. Root cause (code-level): Abstractions.locate mapped
+    // `lib/name` to <dir>/lib/name.pd, but for the else lib the search dir
+    // IS <root>/else - so else/count.pd lives at <root>/else/count.pd and
+    // the old mapping looked in <root>/else/else/. The 0.17.153 prefix-strip
+    // used to paper over this by rewriting else/count -> bare count (resolved
+    // as a vintage COMPILED class), but the RC15 core registers those as
+    // abstractions-only now (count/swap2/makenote2 left core_classes.txt),
+    // so the strip correctly refused and the box died. Fix: locate() also
+    // tries the parent dir for slash-prefixed names; the 0.17.149 fixpoint
+    // inline loop then expands else/count -> count.pd (and recursively
+    // else/delete, else/replace, else/pick) inside the session, where
+    // args->initmess conversion and namespace prefixing already apply.
+    //
+    // ---- 0.18.2 (0.57 history) round 3 (W2.2): vintage
     // else_core.so (sources lost, dead on 0.57 since 0.18.1) REPLACED by
     // the full ELSE RC15 build. Vendored porres/pd-else master snapshot
     // @082af31e (2026-11-21, RC-15) under slibs/else-src/full/ (subset tree
