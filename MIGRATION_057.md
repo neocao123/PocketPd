@@ -1,5 +1,62 @@
 # MIGRATION_057.md — pd 0.57 迁移准备调查（v2：CHANGELOG 全文通读后按弧线重写）
 
+## ★ 当前进度与下一步（2026-11-24，compact 前存档）
+
+**分支状态**：`0.57` 分支（commit `3e62b83`，已推 GitHub）。设备在装
+v316/0.18.12。0.51 主线冻结于 `freeze-0.51-base`（= 0.17.161/vc303）。
+
+**已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.12）：
+- **0.18.0/304**（round 1）：引擎置换——自建 AAR，pin
+  libpd@e3cd52fd7517 → pure-data@43a5b8922a35 = pd 0.57.0test1，
+  mavenLocal 消费；minSdk 26 靠 glob shim 保住安卓 8。
+- **0.18.1/305**（round 2）：slibs 13 库全量重编 0.57 头，28/28 全绿。
+- **0.18.2/306**（round 3）：**RC15 全量 else 核**替换 vintage
+  else_core（源码失传）——392 对象，vintage 217 类 217/217 可解析，
+  vendored 于 `slibs/else-src/full/`（plugdata 用户可对照
+  `plugdata/Abstractions/else/`）。
+- **0.18.3/307**：`Abstractions.locate` 父目录回退——`else/count` 等
+  前缀抽象引用恢复内联。
+- **0.18.4/308**：core_wrap 接受 `setup_` 前缀式 setup（rand.f/rand.i/
+  rand.u 等点号类名此前从未注册——用户诊断命中）。
+- **0.18.5/309**：内联跳过探针（诊断轮）。
+- **0.18.6/310**：深度-2 `[args]` 转换 payload 改裸原子（去 `list` 头）。
+- **0.18.7/311 → 0.18.8/312**：plugdata tempo.pd 替换实验 → 用户判定
+  失败，整体回退（**不要再建议 plugdata tempo.pd**）。
+- **0.18.9–0.18.12/313–316**：工作流重建（用户指令）：EDIT 改动只标
+  `sessionDirty` 不重启 pd；EDIT 入口 dsp off；RUN 入口重建+开机；
+  打开补丁走新 `AudioOpen.LOAD`（tick 冲刷 setup 但 DSP 全程 off，
+  打开零破音）。音频状态 = 模式驱动 + 图标为准；RUN 内音频键自由且
+  不影响模式切换。
+
+**用户已确认**：tempo 在 help 外正常工作 ✓；打开补丁静默 ✓；工作流
+往返正常（本轮待最终确认）。tempo-help 内的 `bang → sel` 报错 =
+help 自身接线的显示噪音（桌面 pd 同样会报），非故障。
+
+### 下一步任务（两组，按序）
+
+**任务一：换版重编轮（MIGRATION §7 W2.3–W2.5/W2.4，逐库独立轮）**
+1. cyclone 0.43.4 → **0.9-5**（porres/pd-cyclone）：源码替换 +
+   patches 字典按新源码重写 + audit 重做（0.17.142 方法论）；
+2. fftease 2.5.2 → **3.0.1**（顺带找回 7 个 3.0-only 对象：
+   cross~/enrich~/loopsea~/pileup~/pvwarpb~/schmear~/residency_buffer~）；
+3. zexy / iemlib 抓当前版（git.iem.at 有反爬墙，手动过）；
+4. mrpeach 重编（预期漂移小）。
+每库一轮：换源 → 试编 → 修补（修而不删）→ Slibs.VERSION bump →
+装机 → CHANGELOG → commit。
+
+**任务二：🄰 决策点（须用户点头才动）**
+1. **elsex 退役**：52 类与新 else 核完全重复（同源 RC15）；唯一搬移项
+   = knob.c 从 elsex 挪进 else 核构建（else 核目前 excl knob）。
+   elsex 与 else 核是两份相同源码树：`slibs/else-src/{,full/}`。
+2. 其余 🄰：superosc~/f2s~ 回归上游 mc 版、graph~/spectrograph~/display
+   桩回归、timer 看门狗重做（0.57 上待实测）、creb/cxc/bsaylor 去留。
+
+**遗留已知项**：tempo-help 内 `-div` 实例降级（plugdata/新修订去掉了
+-div，RC15 tempo.pd 保留）；else/display 裸建时 `[send $1]` 报
+couldn't create（无参数原生加载的显示噪音，桌面同构）。
+
+
+
 > **状态：纯调查报告（2026-11-23）。不含任何已执行的代码/构建改动。**
 > 方法论（v2 修订，用户明令）：CHANGELOG 是项目地图——本次已**全文通读**
 > 6403 行 / 294 轮（0.6.2 → 0.17.161）。每项机制按**弧线**判读：引入轮 →
