@@ -7,6 +7,25 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.16 (versionCode 320) — 2026-11-24 【0.57 分支 round 7:iemlib 快照 → 1.17 master 重编】
+
+**任务一换版轮第四击。** 源码 = git.iem.at/pd/iemlib master Release
+1.17（代理直连，与 zexy 同路径）。类集与旧基线**完全一致**（100 名，零
+增零减——pd-extended 快照本就是合并布局的上游近版），audit_io 对构造
+函数逐类核对：**io 零漂移，PdObjectMeta 不动**。
+
+**补丁增删**：iem_pbank_csv.c 的 const 修复补丁**删除**（上游已自修，
+`'a'-'A'` 文本不复存在）；protect_against_open.c 的
+`t_widgetbehavior` 补丁保留（`#ifdef HAVE_G_CANVAS_H` 仍在）；
+iemlib{1,2}.c 排除项随旧布局消失而删。
+
+**抽象与 help**：abs/ 换上游 1.17 全量 **165 抽象**（旧基线只带
+pd-extended 的 iemabs 子集）；help/iemlib 从规范 `help/` 目录刷 75 补丁
+（lint 2 处 `#A` = 上游数组表）。
+
+**验收**：两 ABI ok=99 / core_wrap 75 setups / audit_blobs 全绿；
+aapt = 320/0.18.16；GM800 force-stop + install + dumpsys 复核。
+
 ## 0.18.15 (versionCode 319) — 2026-11-24 【0.57 分支 round 6:zexy 快照 → 2.4.4 master 重编】
 
 **任务一换版轮第三击。** 源码 = git.iem.at/pd/zexy master（2.4.4 线，

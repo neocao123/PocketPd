@@ -34,12 +34,12 @@
 #X text 147 202 1.arg: <float> a0;
 #X text 147 213 2.arg: <float> a1;
 #X text 147 224 3.arg: <float> b1;
-#X text 63 5 <float> control-IIR-filter 1.order;
 #X text 160 283 musil;
 #X text 190 283 @;
 #X text 196 283 iem.at;
-#X text 111 272 (c) Thomas Musil 2000 - 2005;
 #X text 159 305 Graz \, Austria;
+#X text 111 272 (c) Thomas Musil 2000 - 2018;
+#X text 63 5 1st order IIR-filter for float-messages;
 #X connect 1 0 5 0;
 #X connect 1 0 26 1;
 #X connect 3 0 13 0;

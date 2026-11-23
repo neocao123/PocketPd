@@ -4,7 +4,6 @@
 #X text 62 42 ~signal_in~;
 #X text 69 239 ~signal_out~;
 #X text 11 9 round~;
-#X text 62 9 signal-float-rounding to a signal-integer-number;
 #X obj 140 112 float24 12 582 912;
 #X obj 22 152 +~ 1.25829e+007;
 #X obj 22 178 -~ 1.25829e+007;
@@ -14,11 +13,13 @@
 #X text 150 273 musil;
 #X text 180 273 @;
 #X text 186 273 iem.at;
-#X text 101 262 (c) Thomas Musil 2000 - 2005;
 #X text 149 295 Graz \, Austria;
-#X connect 0 0 7 0;
-#X connect 6 0 7 1;
-#X connect 6 0 8 1;
-#X connect 7 0 8 0;
-#X connect 8 0 1 0;
-#X connect 9 0 6 0;
+#X text 101 262 (c) Thomas Musil 2000 - 2018;
+#X text 90 8 signal-float-rounding to;
+#X text 93 19 the nearest signal-integer-number;
+#X connect 0 0 6 0;
+#X connect 5 0 6 1;
+#X connect 5 0 7 1;
+#X connect 6 0 7 0;
+#X connect 7 0 1 0;
+#X connect 8 0 5 0;

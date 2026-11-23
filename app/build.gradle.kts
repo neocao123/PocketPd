@@ -11,8 +11,19 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 319
-    versionName = "0.18.15" // ---- 0.57 BRANCH round 6: zexy swapped
+    versionCode = 320
+    versionName = "0.18.16" // ---- 0.57 BRANCH round 7: iemlib swapped
+    // pd-extended snapshot -> git.iem.at/pd/iemlib master 1.17 (proxied
+    // clone). Class set IDENTICAL (100, no adds/losses - the pd-extended
+    // snapshot was already the merged-layout tree), zero io drift (audit_io
+    // vs PdObjectMeta: all rows match the constructors). iem_pbank_csv
+    // const patch dropped (fixed upstream, 'a'-'A' text no longer exists);
+    // protect_against_open.c keeps the real-t_widgetbehavior patch. abs/
+    // refreshed: 165 upstream abstractions ship now (old baseline shipped
+    // the pd-extended iemabs subset); help/iemlib from the canonical help/
+    // dir (75 patches; lint 2 #A notes = upstream array tables).
+    //
+    // ---- 0.18.15 (0.57 history) round 6: zexy swapped
     // pd-extended snapshot -> git.iem.at/pd/zexy master 2.4.4 (commit
     // 5521523; the anti-bot wall blocks browsers, NOT proxied git clones -
     // MIGRATION's "manual fetch" note obsolete). Shipped class set 107 ->

@@ -1,4 +1,4 @@
-#N canvas 158 62 453 365 10;
+#N canvas 158 62 469 365 10;
 #X obj 1 1 cnv 8 100 60 empty empty bng 20 20 1 18 -262144 -1109 0
 ;
 #X text 118 61 click properties to;
@@ -42,22 +42,22 @@
 #N canvas 425 170 699 530 edit 0;
 #X obj 39 197 f;
 #X msg 17 176 bang;
-#X floatatom 55 175 3 63 88 0 - - -;
-#X floatatom 90 197 3 0 37 0 - - -;
+#X floatatom 55 175 3 63 88 0 - - -, f 3;
+#X floatatom 90 197 3 0 37 0 - - -, f 3;
 #X obj 39 220 pack 0 0;
 #X text 117 197 y-label;
 #X text 83 175 x-label;
-#X floatatom 259 143 3 8 75 0 - - -;
+#X floatatom 259 143 3 8 75 0 - - -, f 3;
 #X text 286 143 size;
 #X obj 279 236 f;
 #X msg 257 215 bang;
-#X floatatom 295 214 3 -10 10 0 - - -;
-#X floatatom 330 236 3 -10 10 0 - - -;
+#X floatatom 295 214 3 -10 10 0 - - -, f 3;
+#X floatatom 330 236 3 -10 10 0 - - -, f 3;
 #X obj 279 259 pack 0 0;
 #X obj 304 348 f;
 #X msg 282 327 bang;
-#X floatatom 320 326 3 20 90 0 - - -;
-#X floatatom 355 348 3 150 200 0 - - -;
+#X floatatom 320 326 3 20 90 0 - - -, f 3;
+#X floatatom 355 348 3 150 200 0 - - -, f 3;
 #X obj 304 371 pack 0 0;
 #X text 323 214 x-delta;
 #X text 357 236 y-delta;
@@ -65,8 +65,8 @@
 #X text 382 348 y-position;
 #X obj 59 312 f;
 #X msg 37 291 bang;
-#X floatatom 75 290 3 0 2 0 - - -;
-#X floatatom 110 312 3 4 36 0 - - -;
+#X floatatom 75 290 3 0 2 0 - - -, f 3;
+#X floatatom 110 312 3 4 36 0 - - -, f 3;
 #X obj 59 335 pack 0 0;
 #X text 103 290 font;
 #X text 139 312 height;
@@ -86,8 +86,8 @@
 #X msg 512 435 \; foo5_rcv init 1;
 #X obj 493 260 f;
 #X msg 471 239 bang;
-#X floatatom 509 238 4 10 100 0 - - -;
-#X floatatom 544 261 5 100 3000 0 - - -;
+#X floatatom 509 238 4 10 100 0 - - -, f 4;
+#X floatatom 544 261 5 100 3000 0 - - -, f 5;
 #X obj 493 283 pack 0 0;
 #X msg 493 308 \; foo5_rcv flashtime \$1 \$2;
 #X text 548 237 interrupt-time;
@@ -98,9 +98,9 @@
 #X obj 47 114 pack 0 0 0;
 #X obj 47 86 f;
 #X msg 24 38 bang;
-#X floatatom 63 36 3 0 29 0 - - -;
-#X floatatom 79 56 3 0 29 0 - - -;
-#X floatatom 112 72 3 0 29 0 - - -;
+#X floatatom 63 36 3 0 29 0 - - -, f 3;
+#X floatatom 79 56 3 0 29 0 - - -, f 3;
+#X floatatom 112 72 3 0 29 0 - - -, f 3;
 #X text 91 36 background;
 #X text 106 56 front-color;
 #X text 140 73 label-color;
@@ -193,9 +193,9 @@
 #X connect 36 2 29 0;
 #X connect 36 3 35 0;
 #X restore 285 96 pd RGB_____________;
-#X floatatom 327 65 3 0 255 0 - - -;
-#X floatatom 370 65 3 0 255 0 - - -;
-#X floatatom 413 66 3 0 255 0 - - -;
+#X floatatom 327 65 3 0 255 0 - - -, f 3;
+#X floatatom 370 65 3 0 255 0 - - -, f 3;
+#X floatatom 413 66 3 0 255 0 - - -, f 3;
 #X text 34 10 preset-colors;
 #X text 296 7 RGB-colors;
 #X text 327 47 red;
@@ -244,15 +244,15 @@
 #X connect 70 0 68 2;
 #X connect 71 0 68 3;
 #X restore 297 144 pd edit;
-#X obj 248 31 bng 15 250 50 0 aaa aaa empty 20 8 0 8 -262144 -1 -1
+#X obj 248 31 bng 15 250 50 0 aa1 aa1 empty 20 8 0 8 -262144 -1 -1
 ;
-#X obj 178 11 x_all_guis aaa bbb ccc ddd eee fff ggg;
 #X text 203 307 IEM KUG;
 #X text 187 295 musil;
 #X text 217 295 @;
 #X text 223 295 iem.at;
-#X text 138 284 (c) Thomas Musil 2000 - 2005;
 #X text 186 317 Graz \, Austria;
+#X text 138 284 (c) Thomas Musil 2000 - 2018;
+#X obj 178 11 x_all_guis aa1 bb2 cc3 dd4 ee5 ff6 gg7 hh8 ii9;
 #X connect 4 0 3 0;
 #X connect 6 0 7 0;
 #X connect 7 0 5 0;

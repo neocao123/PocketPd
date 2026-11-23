@@ -25,8 +25,14 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 143: 0.57 branch
-     *  (0.18.15) - zexy swapped pd-extended snapshot -> git.iem.at master
+    /** Bump to re-extract after an assets/slibs update. 144: 0.57 branch
+     *  (0.18.16) - iemlib swapped pd-extended snapshot -> git.iem.at
+     *  master 1.17 (same proxied clone as zexy): class set identical
+     *  (100), zero io drift, iem_pbank_csv const patch dropped (fixed
+     *  upstream), abs/ refreshed to the 165 upstream abstractions (old
+     *  baseline shipped the pd-extended iemabs subset), help/iemlib from
+     *  the canonical help/ dir (81 patches).
+     *  143: 0.57 branch (0.18.15) - zexy swapped pd-extended snapshot -> git.iem.at master
      *  2.4.4 (5521523; anti-bot wall blocks browsers, not proxied git
      *  clones): +envvar, -abs~ (vanilla takes the name), lpt safe via
      *  upstream's own Z_WANT_LPT=0 stub branch, core_wrap setups now
@@ -52,7 +58,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 143
+    private const val VERSION = 144
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

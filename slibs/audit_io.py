@@ -24,7 +24,7 @@ ASSETS = r"C:/Projects/26PDAndroid/app/src/main/assets/slibs/arm64-v8a"
 META = r"C:/Projects/26PDAndroid/app/src/main/java/com/pocketpd/app/patch/PdObjectMeta.kt"
 
 LIBS = {
-    "iemlib": ["iemlib/src"],
+    "iemlib": [r"C:/Users/Administrator/AppData/Local/Temp/srcrepo/iemlib-current/src"],
     "creb": ["creb/modules", "creb/modules++"],
     "cxc": ["cxc"],
     "fftease": ["../../fftease"],

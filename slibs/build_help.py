@@ -31,7 +31,9 @@ TREES = [
     # abs/ NOT shipped (the build ships src only, parity with the old
     # baseline), so its help would document unavailable objects
     ("zexy", SRC + "/zexy-current/reference", False),
-    ("iemlib", EX + "/iemlib/iemabs", True),
+    # iemlib 1.17 (0.18.16): canonical help/ dir (81 *-help.pd; the old
+    # pd-extended iemabs mixed help into the abs tree)
+    ("iemlib", SRC + "/iemlib-current/help", True),
     ("bsaylor", EX + "/bsaylor", True),
     ("creb", EX + "/creb/doc", True),
     ("cxc", EX + "/cxc", True),

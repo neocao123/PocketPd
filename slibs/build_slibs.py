@@ -24,6 +24,8 @@ FFTS = SRCROOT + "/fftease-3.0.1"
 # zexy 2.4.4 master (0.18.15): git.iem.at/pd/zexy HEAD - the anti-bot wall
 # blocks BROWSERS, not git clones; proxied clone works
 ZEXY = SRCROOT + "/zexy-current"
+# iemlib 1.17 (0.18.16): git.iem.at/pd/iemlib HEAD, same proxied clone
+IEMLIB = SRCROOT + "/iemlib-current"
 # 0.57 branch (0.18.1): slibs compile against the pd 0.57.0test1 headers -
 # the EXACT tree the runtime libpd.so was built from (pd-for-android
 # submodule pure-data@43a5b8922a35, vendored under the pd-core jni dir).
@@ -134,21 +136,22 @@ LIBS = [
         extra_flags=["-DZ_WANT_LPT=0"],
     )),
     ("iemlib", dict(
-        # upstream master merged iemlib1/iemlib2 sources into one top-level
-        # src/ (old layout iemlib{1,2}/src kept only VC makefiles)
-        src=["iemlib/src"], support=[],
-        inc=["iemlib/src", "iemlib/include"],
+        # iemlib 1.17 (0.18.16): git.iem.at/pd/iemlib HEAD (proxied clone,
+        # the anti-bot wall is browser-only). src/ = the merged tree;
+        # iem_pbank_csv's const bug is FIXED upstream (the 'a'-'A' cast
+        # patch is gone), iemlib{1,2}.c loaders no longer exist.
+        src=[IEMLIB + "/src"], support=[],
+        inc=[IEMLIB + "/src", IEMLIB + "/include"],
         # aux is #included by iem_pbank_csv.c (needs its t_iem_pbank_csv);
         # a standalone support compile of it is meaningless and fails
-        excl=["iemlib1.c", "iemlib2.c", "iem_pbank_csv_aux.c"],
-        abstractions=["iemlib/iemabs"],
-        patches={"iem_pbank_csv.c": [
-            ("format->s_name[p] += 'a' - 'A';",
-             "((char *)format->s_name)[p] += 'a' - 'A';")],
-            # use pd's real t_widgetbehavior (the hand-rolled fallback
-            # struct types w_visfn as t_method and mismatches 0.51)
-            "protect_against_open.c": [
-                ("#ifdef HAVE_G_CANVAS_H", "#if 1 /* Android rebuild */")]},
+        excl=["iem_pbank_csv_aux.c"],
+        # upstream abs/ ships 165 abstractions + 134 *-help.pd (the shipper
+        # drops -help.pd); help/ carries the canonical 81 help patches
+        abstractions=[IEMLIB + "/abs"],
+        # use pd's real t_widgetbehavior (the hand-rolled fallback struct
+        # types w_visfn as t_method and mismatches pd)
+        patches={"protect_against_open.c": [
+            ("#ifdef HAVE_G_CANVAS_H", "#if 1 /* Android rebuild */")]},
     )),
     # fftease 3.0.1 (0.18.14): ericlyon/pd-fftease tag v3.0.1 replaces the
     # Debian 2.5.2 snapshot (repo is pd-fftease; "ericlyon/fftease" 404s).
