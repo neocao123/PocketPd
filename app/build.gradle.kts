@@ -11,8 +11,22 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 315
-    versionName = "0.18.11" // ---- 0.57 BRANCH round 3j: audio state is
+    versionCode = 316
+    versionName = "0.18.12" // ---- 0.57 BRANCH round 3k: patch entry is
+    // SILENT (user report: a crackle at the instant of opening a .pd, which
+    // "should have no sound since dsp isn't working"). Mechanism found: the
+    // load sequence ran ensureAudioOn (dsp ON, empty graph) then openPatch
+    // with AudioOpen.START (dsp still ON) - the freshly parsed graph
+    // RENDERED LIVE mid-load (loadbang sounds, partial chains) until
+    // loadPatch's closing stopAudio. Fix: new AudioOpen.LOAD - the audio
+    // THREAD keeps ticking (ticks flush the queued slib setups, the
+    // 0.17.45 boot-race wall) but computeAudio stays OFF through parse and
+    // post-open; the graph compiles at the RUN entry rebuild. Retry
+    // reopens now carry the original audio mode (a LOAD retry no longer
+    // flips audio on in EDIT). loadPatch passes LOAD; end-of-load
+    // stopAudio + icon off unchanged (0.18.11).
+    //
+    // ---- 0.18.11 (0.57 history) round 3j: audio state ---- 0.57 BRANCH round 3j: audio state is
     // mode-driven with icon truth (user bug report): patch entry loads
     // SILENT (loadPatch end: stopAudio + icon off; the early pre-parse
     // ensureAudioOn stays - boot-race slib-setup flush), RUN = dsp ON +

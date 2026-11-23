@@ -524,6 +524,14 @@ object PdEngine {
         /** Edit-mode session sync: NEVER touch the audio engine. Stopped
          *  stays stopped (silent editing); running gets a dsp-only cycle. */
         SYNC,
+        /** Patch ENTRY (0.18.11/12): audio THREAD runs (ticks flush the
+         *  queued slib setups ahead of the parse — the 0.17.45 boot-race
+         *  wall) but the DSP SWITCH STAYS OFF the whole time: the freshly
+         *  parsed graph never renders, so opening a patch is SILENT (the
+         *  0.18.10 EDIT-dsp-off workflow made any load-time render an
+         *  audible crackle). Objects compile at the next dsp-on edge — the
+         *  RUN entry rebuild re-runs the whole open anyway. */
+        LOAD,
     }
 
     /**
@@ -608,6 +616,14 @@ object PdEngine {
                 } else {
                     log("session rebuilt ($displayName), audio stays off")
                 }
+            AudioOpen.LOAD ->
+                // 0.18.11/12 patch ENTRY: the audio THREAD keeps ticking
+                // (flushing the queued slib setups) but the DSP SWITCH stays
+                // OFF the whole time — the freshly parsed graph never
+                // renders, so opening a patch is silent even for patches
+                // that make noise on loadbang. Objects compile at the next
+                // dsp-on edge (the RUN entry rebuild re-opens with audio).
+                log("patch entry: parsed with dsp off (silent load)")
         }
         if (patchHandle >= 0) {
             log("opened $displayName")
@@ -663,14 +679,14 @@ object PdEngine {
                 pollHandler.postDelayed({
                     if (patchFile == file) {
                         log("slibs settle: reopening $displayName")
-                        openPatch(file, displayName, 1)
+                        openPatch(file, displayName, 1, audio)
                     }
                 }, 4500)
             } else if (retry < 3 && failedClasses.any { it in PdObjectMeta.knownClasses }) {
                 pollHandler.postDelayed({
                     if (patchFile == file && failedClasses.any { it in PdObjectMeta.knownClasses }) {
                         log("slibs settle: reopening $displayName (classes missing)")
-                        openPatch(file, displayName, retry + 1)
+                        openPatch(file, displayName, retry + 1, audio)
                     }
                 }, 4500)
             }

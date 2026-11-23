@@ -608,7 +608,10 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
                 val sessionDoc = PdEngine.buildInteractiveSession(doc, errors)
                 val session = File(file.parentFile, ".session-${file.name}")
                 session.writeText(sessionDoc.toText())
-                PdEngine.openPatch(session, file.name)
+                // 0.18.11: LOAD = audio thread ticks (slib setup flush) with
+                // the DSP switch off — patch entry is SILENT; the graph
+                // compiles at the RUN entry rebuild.
+                PdEngine.openPatch(session, file.name, audio = PdEngine.AudioOpen.LOAD)
             } catch (t: Throwable) {
                 PdEngine.log("open patch failed: ${t.message}")
                 Toast.makeText(this, t.message ?: "error", Toast.LENGTH_LONG).show()

@@ -7,6 +7,24 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.12 (versionCode 316) — 2026-11-24 【0.57 分支 round 3k:补丁打开瞬间静音（AudioOpen.LOAD）】
+
+**用户报告："pd 文件打开一瞬间会有个破音……正常情况下这个过程 dsp 没在
+工作，不该有声音。"** 机制实测：加载序列 = `ensureAudioOn()`（线程 +
+**computeAudio(true)**）→ `openPatch(AudioOpen.START)`（dsp 依旧 ON）→
+解析建图 → 图**边建边实时渲染**（loadbang 声、半成品信号链）直到
+loadPatch 末尾的 stopAudio——破音 = 这段载入期渲染。
+
+**修复 = 新增 `AudioOpen.LOAD`**：音频**线程**照跑（tick 冲刷排队的
+slib setup——0.17.45 启动竞态墙只需要 tick，不需要 DSP 开关），但
+**computeAudio 全程 OFF**：解析期间新图不编译、不渲染 → 打开零出声；
+对象在下一个 dsp-on 边编译——RUN 入口重建本来就带完整重开 + 开机，
+无遗漏。loadPatch 改传 LOAD；openPatch 内部的 settle 重试现在**透传
+原 audio 模式**（LOAD 的重试不再在 EDIT 里翻出声音——旧代码重试默认
+START）。end-of-load 的 stopAudio + 图标 off 不变（0.18.11）。
+
+**验收**：aapt = 316/0.18.12；GM800 install -r + dumpsys 复核。
+
 ## 0.18.11 (versionCode 315) — 2026-11-24 【0.57 分支 round 3j:音频状态 = 模式驱动 + 图标为准】
 
 **用户 bug 报告逐条落地**：①补丁进入时默认 EDIT = **加载静默**
