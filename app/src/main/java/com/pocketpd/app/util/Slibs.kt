@@ -25,13 +25,16 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 138: 0.57 branch
-     *  (0.18.4) - core_wrap setup-call list now accepts BOTH pd setup
-     *  spellings: classes with non-identifier names (rand.f/rand.i/rand.u/
-     *  rand.seq etc - dots hexmangle) use setup_-PREFIXED symbols
-     *  (setup_rand0x2ef) that the old _setup-suffix filter silently
-     *  dropped from the call list; else wrap 289 setups (was ~150). */
-    private const val VERSION = 138
+    /** Bump to re-extract after an assets/slibs update. 140: 0.57 branch
+     *  (0.18.8 revert) - RC15 tempo.pd restored - else/tempo.pd swapped to the plugdata-bundled ELSE
+     *  revision (else/lb wrapper, -hz/-mul/-seed flags, unit select).
+     *  138: 0.57 branch (0.18.4) - core_wrap setup-call list now accepts
+     *  BOTH pd setup spellings: classes with non-identifier names
+     *  (rand.f/rand.i/rand.u/rand.seq etc - dots hexmangle) use
+     *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
+     *  _setup-suffix filter silently dropped from the call list; else wrap
+     *  289 setups (was ~150). */
+    private const val VERSION = 140
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

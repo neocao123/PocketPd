@@ -939,7 +939,15 @@ object PdEngine {
             (toks[4] == "args" || toks[4] == "else/args")
         ) {
             val resolved = substituteTokens(args, uid, emptyList(), false)
-            val body = if (resolved.isEmpty()) listOf("list") else listOf("list") + resolved
+            // 0.18.6: the payload is the RAW creation atoms, NOT a "list"-
+            // prefixed list. else's [pd args] blocks feed [break -]/[route],
+            // whose selector dispatch keys on the atoms themselves (else/
+            // tempo: "-on"/"-ms"/"-div" flag atoms) - a "list" first atom
+            // rerouted everything into the list branch, left $0-mode unset
+            // and every tempo instance ran at a garbage period (0.18.2-0.18.5
+            // tempo-help regression). Bare [args] with no creation args keeps
+            // the `initmess list` bang-equivalent.
+            val body = if (resolved.isEmpty()) listOf("list") else resolved
             val head = substituteTokens(toks.take(4), uid, emptyList(), false)
             return (head + listOf("initmess") + body).joinToString(" ") + ";"
         }

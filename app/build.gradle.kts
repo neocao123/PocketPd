@@ -11,8 +11,44 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 309
-    versionName = "0.18.5" // ---- 0.57 BRANCH round 3d: DIAGNOSTICS for the
+    versionCode = 312
+    versionName = "0.18.8" // ---- 0.57 BRANCH round 3g: revert the
+    // plugdata tempo.pd experiment (user verdict: library version
+    // unsuitable) - content equals 0.18.6. Slibs.VERSION 139 -> 140
+    // (re-extract restores the RC15 tempo.pd). Escape-hypothesis
+    // adjudicated NEGATIVE with source receipts: app round-trip preserves
+    // \, (splitStatements backslash guard + tokenizer keeps the escape +
+    // toText re-writes it; device session dump shows the expr line intact)
+    // and pd 0.57 m_binbuf.c:711-717 converts A_COMMA to a "," symbol
+    // argument (no message split) when the target is pd_objectmaker.
+    //
+    // ---- 0.18.7 (0.57 history) round 3f: plugdata tempo experiment ---- 0.57 BRANCH round 3f: else/tempo.pd
+    // swapped to the plugdata-bundled ELSE revision (user-provided file
+    // from C:/Users/Public/Documents/plugdata/Abstractions/else/) - newer
+    // upstream revision: else/lb wrapper (instead of loadbanger),
+    // -hz/-mul/-seed flags, select 1 0 2 unit dispatch, else/-prefixed
+    // inner deps (all provided: lb/args/swap2/rand.f/changed compiled or
+    // abstraction). RC15 tempo.pd replaced in both ABI asset dirs;
+    // tempo-help.pd KEPT (its -div instances degrade to default div - the
+    // plugdata revision dropped -div; -on/-ms/bpm demos unaffected).
+    // Slibs.VERSION 138 -> 139.
+    //
+    // ---- 0.18.6 (0.57 history) round 3e: subpatch args ---- 0.57 BRANCH round 3e: subpatch args
+    // conversion payload fix (user-diagnosed: tempo still dead after start).
+    // substituteLine's depth-2 [args] conversion emitted `initmess list
+    // <atoms>` - but else's [pd args] blocks feed [break -]/[route] which
+    // dispatch on the RAW atoms' selectors (-on/-ms/-div); the "list" first
+    // atom rerouted dispatch into the list branch, $0-mode stayed unset and
+    // every inlined else/tempo ran at a garbage period (tempo-help +
+    // everything containing else/tempo, incl. arp). Payload is now the raw
+    // creation atoms (`initmess 60 10 -on`); empty args keep the
+    // `initmess list` bang-equivalent. Device evidence (0.18.4 console):
+    // "bad arguments for message 'tempo' to object 'metro'" + 500ms
+    // "select: no method for 'bang'" + "$1/$2 out of range" (the latter
+    // from display.pd's [send $1] loading natively without a tag in
+    // tempo-help - cosmetic, the widget gets no feed there).
+    //
+    // ---- 0.18.5 (0.57 history) round 3d: DIAGNOSTICS for the ---- 0.57 BRANCH round 3d: DIAGNOSTICS for the
     // else/-prefixed inline skip (user report: tempo-help still broken on
     // 0.18.4 - device console shows "bad arguments for message 'tempo' to
     // object 'metro'" + "select: no method for 'bang'" every tick, meaning

@@ -7,6 +7,56 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.8 (versionCode 312) — 2026-11-24 【0.57 分支 round 3g:回退 plugdata tempo 实验 + 转义符假设验证】
+
+**内容 = 0.18.6**（git checkout 恢复 RC15 tempo.pd；0.18.7 的 plugdata
+版本实验按用户判定"库版本不合适"整体回退）。Slibs.VERSION 139→140
+（强制设备重提取，拿回 RC15 tempo.pd）。
+
+**用户转义符假设验证（否证，附源码证据）**：假设 = tempo.pd `[pd time]`
+里 expr 的 `\,` 转义在 app 解析/写回链路被剥掉反斜杠 → pd 在逗号处截断
+盒子 → 节拍计算死。逐层核查：
+1. **app 层**：`splitStatements` 反斜杠保护 ✓（`\,` 原样入 statement）；
+   `tokenize` 只剥 `\$`，`\,` 保留转义 ✓；toText 写回 `\,` ✓——设备
+   session dump 实测 `expr beat_1010 = if($f1 \, tempo_1010 ...)` 转义
+   完整在位；
+2. **pd 层（0.57 源码 m_binbuf.c:711-717）**：binbuf_eval 在
+   **target == pd_objectmaker 时，A_COMMA 转为符号参数 `,` 传递、不分割
+   消息**——对象行里的 `\,` 合法送达 expr 构造器，桌面/0.57/libpd 同构。
+结论：转义链路两端均干净，tempo 死因另有其人；当前最强线索 = 500ms
+洪流周期恰好等于 `-div 4` 实例（30bpm÷4）的**正确节拍周期**——metro
+可能在按设定打拍，报错（bang→sel）是 help 接线下游的噪音；待用户按
+实例逐个核对节拍后定案。
+
+## 0.18.7 (versionCode 311) — 2026-11-24 【0.57 分支 round 3f:tempo 换 plugdata 版实验——失败，即行回退】
+
+**用户提供 plugdata 捆绑的 ELSE tempo.pd（新修订：`else/lb` 包装、
+`-hz/-mul/-seed` 旗标、`select 1 0 2` 单位分发），替换 RC15 版试装。**
+依赖全部就位（lb/args/swap2/rand.f/changed 已注册或抽象在）。Slibs
+VERSION 138→139。
+
+**结果：用户实测仍不工作，判定"库版本不合适"，即行回退**（0.18.8）。
+两版 tempo.pd 的共同组件（else/lb、args、expr、metro tempo 消息）成为
+新的嫌疑收敛面。
+
+**附带发现**：`install -r` 在该 ROM 上**不终止运行中的 app**（pid 存活
+跨安装，旧代码继续响应）——此后每轮安装前显式 `am force-stop`。
+
+## 0.18.6 (versionCode 310) — 2026-11-24 【0.57 分支 round 3e:子画布 args 转换 payload 修复】
+
+**substituteLine 的深度-2 `[args]` 转换 payload 修正**：`initmess list
+<原子>` → `initmess <裸原子>`——else 的 `[pd args]` 块下游是
+`[break -]`/`[route]`，按**裸原子选择器**（`-on`/`-ms`/`-div`）分发，
+`list` 头导致 `-on` 永不匹配、`$0-mode` 永不置位。空参数保持
+`initmess list`（bang 等价）。会话 dump 实测 `initmess 60` 形式在位。
+
+## 0.18.5 (versionCode 309) — 2026-11-24 【0.57 分支 round 3d:内联跳过诊断探针】
+
+**Abstractions.parseInfo** 解析异常不再静默吞掉（报文件名+异常）；
+**内联门槛**对留在原生的 `else/…`/`cyclone/…`/`zexy/…` 盒子记录
+resolve/pdClass/gop/budget 四因素。附带发现：该 ROM 的 `install -r`
+不杀运行中进程——此后每轮安装前显式 force-stop。
+
 ## 0.18.4 (versionCode 308) — 2026-11-24 【0.57 分支 round 3c:十六进制转义 setup 名终于被调用】
 
 **用户诊断先行并一击命中:"rand.f 引发的问题,rand.i 和 rand.u 也有"**
