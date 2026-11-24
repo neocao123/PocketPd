@@ -1868,17 +1868,21 @@ object PdEngine {
         // are else widgets, invisible to the app.
         fun relayizeLoadbang(obj: PatchObject) {
             if (obj.className() == "loadbang") {
-                obj.args = mutableListOf("r", "pocketpd-loadbang")
+                obj.args.clear()
+                obj.args.add("r")
+                obj.args.add("pocketpd-loadbang")
                 obj.meta = PdObjectMeta.resolve(obj)
             }
             for (gw in obj.gop?.widgets ?: emptyList()) relayizeLoadbang(gw)
-            obj.subpatchLines = obj.subpatchLines?.map { line ->
-                val toks = line.trimEnd(';').trim().split(Regex("\\s+")).toMutableList()
-                if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" && toks[4] == "loadbang") {
-                    toks[4] = "r"
-                    toks.add(5, "pocketpd-loadbang")
-                    toks.joinToString(" ") + ";"
-                } else line
+            obj.subpatchLines?.let { lines ->
+                for ((i, line) in lines.withIndex()) {
+                    val toks = line.trimEnd(';').trim().split(Regex("\\s+")).toMutableList()
+                    if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" && toks[4] == "loadbang") {
+                        toks[4] = "r"
+                        toks.add(5, "pocketpd-loadbang")
+                        lines[i] = toks.joinToString(" ") + ";"
+                    }
+                }
             }
         }
         for (o in session.objects()) relayizeLoadbang(o)
