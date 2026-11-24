@@ -944,7 +944,7 @@ object PdEngine {
 
     /** `$0`/`$1…` argument substitution as pd performs it when instantiating. */
     private fun substituteLine(line: String, uid: String, args: List<String>): String {
-        val toks = line.trimEnd(';').trim().split(Regex("\\s+"))
+        val toks = line.trimEnd(';').trim().split(Regex("\\s+")).toMutableList()
         // [args] inside a subpatch block resolves the same way as depth-1
         // boxes (see inlineAbstraction) — one line swaps one line, so the
         // block's #X connect indices stay untouched. Single-group form: the
