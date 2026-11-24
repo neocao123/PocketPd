@@ -600,14 +600,12 @@ object PdEngine {
         // between app start and the first open, so re-assert it here (the
         // post-open re-set below cannot retroactively fire the swallowed
         // loadbangs; first-open loadbangs were dead until now)
-        // loadbang delivery is gated by the OPEN MODE (user model, 0.18.27):
-        // patch ENTRY opens into EDIT where "libpd 不应该工作" — the file's
-        // loadbang chains must NOT fire (they would run behind the UI's
-        // back and fight the widget-cache reset at RUN); the RUN reopen is
-        // where the file's loadbang chains deliver, once, into subscribed
-        // widgets. SYNC/START keep delivery (help-less one-shot opens).
-        if (audio == AudioOpen.LOAD) PdTweaks.setLoadbangEnabled(false)
-        else PdTweaks.setLoadbangEnabled(true)
+        // keep desktop loadbang semantics (sys_noloadbang = 0): the canvas
+        // loadbang feeds pd-side load-time classes (else/loadbanger,
+        // [initmess]); the session carries no vanilla [loadbang] objects
+        // (rewritten to [r pocketpd-loadbang] relays, 0.18.29) so nothing
+        // app-visible depends on the open-time delivery any more
+        PdTweaks.setLoadbangEnabled(true)
         dumpSessionForLogcat(file)
         patchHandle = synchronized(PdBase::class.java) { PdBase.openPatch(file.absolutePath) }
         patchFile = file
@@ -1854,6 +1852,36 @@ object PdEngine {
                 PatchConnection(newObjectId(), c.fromId, c.outlet, tap.first().id, 0)
             )
         }
+        // [loadbang] -> [r pocketpd-loadbang] (0.18.29): pd delivers the
+        // canvas loadbang DURING openPatch — openPatch closes the previous
+        // session first (closePatch unsubscribes every widget send symbol)
+        // and the caller's post-open bindObjects re-arms them only after
+        // openPatch returns, so loadbang-set widget values landed inside
+        // the unarmed window and never reached the UI (0.18.28 forensics:
+        // print fired at every reopen, the app trace never did; a 500ms
+        // pipe made delivery survive, proving the instant was the only
+        // problem). The session now carries [r pocketpd-loadbang]
+        // receivers; the app bangs the symbol once AFTER the open and the
+        // re-armed binds (see the callers), so the chains deliver exactly
+        // once, fully sequenced. else/loadbanger and [initmess] keep their
+        // pd-side canvas loadbang (sys_noloadbang stays 0) — their targets
+        // are else widgets, invisible to the app.
+        fun relayizeLoadbang(obj: PatchObject) {
+            if (obj.className() == "loadbang") {
+                obj.args = mutableListOf("r", "pocketpd-loadbang")
+                obj.meta = PdObjectMeta.resolve(obj)
+            }
+            for (gw in obj.gop?.widgets ?: emptyList()) relayizeLoadbang(gw)
+            obj.subpatchLines = obj.subpatchLines?.map { line ->
+                val toks = line.trimEnd(';').trim().split(Regex("\\s+")).toMutableList()
+                if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" && toks[4] == "loadbang") {
+                    toks[4] = "r"
+                    toks.add(5, "pocketpd-loadbang")
+                    toks.joinToString(" ") + ";"
+                } else line
+            }
+        }
+        for (o in session.objects()) relayizeLoadbang(o)
         return session
     }
 

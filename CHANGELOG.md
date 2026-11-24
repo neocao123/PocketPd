@@ -7,6 +7,28 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.29 (versionCode 333) — 2026-11-24 【0.57 分支 round 20:loadbang 顺序化交付（时序取证落地修复）】
+
+**诊断轮时间线破案**：RUN 重开里 pre-bind = `skip (held)`，post-bind =
+**fresh `pd_bind`**——同一轮里订阅从"持有"变"无"→ **openPatch 内部的
+closePatch**（重开必先关上一会话）**清空了 pd 侧全部符号绑定**；
+loadbang 恰在清空后、重挂前触发 → send 无收件人 → 丢失。print 是线连的
+照打 ✓；pipe-500 存活 = 只是时点问题 ✓（你的判断完全正确：两个该顺序
+执行的任务没按顺序来）。
+
+**顺序化修复（无新时序技巧，纯任务排序）**：
+1. buildInteractiveSession 末趟把所有原生 `[loadbang]`（文档盒/GOP
+   部件/[pd] 子补丁行/内联副本）改写为 `[r pocketpd-loadbang]` 接收器；
+2. `sys_noloadbang` 恒 0：pd 侧 load-time 类（else/loadbanger、
+   [initmess]——目标都是 else 部件，app 不可见）继续走画布 loadbang；
+3. reopenSessionForRun 在 post-open bindObjects **重挂完成后**，
+   `sendBang("pocketpd-loadbang")` 一次——链路在绑定完备后交付（即你
+   的 pipe-500 模式的制度化）；LOAD 入口不发 bang（EDIT 显示存储值）；
+4. v331 的 open 模式门控回退为恒开（会话里已无原生 [loadbang]）。
+
+**验收**：aapt = 333/0.18.29；复测：入口 num = 存储值，RUN 后 num = 100，
+display 同步；superosc~/arp 顺测。诊断插桩保留一轮，确认后拆除。
+
 ## 0.18.28 (versionCode 332) — 2026-11-24 【0.57 分支 round 19:诊断轮——loadbang→msg→num RUN 回归的时序取证】
 
 **你的 pipe-500 线索**：延迟交付存活、openPatch 期间的立即交付不浮现

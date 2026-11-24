@@ -11,8 +11,26 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 332
-    versionName = "0.18.28" // ---- 0.57 BRANCH round 19: DIAGNOSTIC build
+    versionCode = 333
+    versionName = "0.18.29" // ---- 0.57 BRANCH round 20: sequenced loadbang
+    // delivery (the 0.18.28 diagnostic timeline cracked it: subscribe
+    // 'held' pre-open, but post-open FRESH pd_bind - every openPatch
+    // clears the pd-side symbol binds via its internal closePatch, so the
+    // loadbang atom fired inside the open landed with NO binder and was
+    // dropped; the pipe-500 survival proved only the timing was wrong).
+    // Sequenced fix, no timing tricks: (1) buildInteractiveSession rewrites
+    // every vanilla [loadbang] (doc boxes, GOP widgets, [pd] subpatch
+    // lines, inlined copies) into [r pocketpd-loadbang] receivers;
+    // (2) sys_noloadbang stays 0 for the pd-side load-time classes
+    // (else/loadbanger, [initmess] - their targets are else widgets,
+    // invisible to the app); (3) after the post-open bindObjects re-arms
+    // the symbols, the app bangs pocketpd-loadbang ONCE - the chains
+    // deliver into fully-armed binds (the pipe-500 pattern, sequenced).
+    // LOAD entry never bangs: EDIT shows saved values. Diagnostic
+    // instrumentation (receiver-entry, subscribe, poll ticks) kept one
+    // more round for the verification, removed next.
+    //
+    // ---- 0.18.28 (0.57 history) round 19: DIAGNOSTIC build
     // for the loadbang->msg->numbox RUN-entry regression (the pipe-500
     // clue: delayed delivery works, immediate delivery during openPatch
     // never surfaces). Three temporary instrumentations, one retest gives

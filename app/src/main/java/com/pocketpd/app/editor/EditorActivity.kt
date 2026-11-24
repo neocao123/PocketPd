@@ -1415,6 +1415,12 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
                 audio = if (keepAudioSilent) PdEngine.AudioOpen.SYNC else PdEngine.AudioOpen.RUN,
             )
             PdEngine.bindObjects(doc)
+            // 0.18.29: the session's [loadbang] boxes are [r
+            // pocketpd-loadbang] relays — bang them now that the post-open
+            // bindObjects has re-armed the widget send/receive symbols
+            // (pd-side binds are cleared by every openPatch; the in-open
+            // loadbang delivery landed in that unarmed window)
+            PdEngine.sendBang("pocketpd-loadbang")
             // pd-side create failures surface only after this open
             canvas.invalidate()
             sessionDirty = false
