@@ -11,8 +11,17 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 331
-    versionName = "0.18.27" // ---- 0.57 BRANCH round 18: loadbang delivery
+    versionCode = 332
+    versionName = "0.18.28" // ---- 0.57 BRANCH round 19: DIAGNOSTIC build
+    // for the loadbang->msg->numbox RUN-entry regression (the pipe-500
+    // clue: delayed delivery works, immediate delivery during openPatch
+    // never surfaces). Three temporary instrumentations, one retest gives
+    // the full timeline: (1) receiver ENTRY trace for EVERY float (bound
+    // or not) - shows whether open-time atoms reach the Java receiver at
+    // all; (2) subscribe logs pd_bind vs already-held skips; (3) the
+    // poller logs its first 12 ticks after boot. Remove after the fix.
+    //
+    // ---- 0.18.27 (0.57 history) round 18: loadbang delivery
     // gated by the open mode (user model: "打开文件进 edit 模式 libpd 不
     // 应该工作"): AudioOpen.LOAD (patch ENTRY into EDIT) opens with
     // sys_noloadbang=1 - the file's loadbang chains do NOT fire, the UI

@@ -7,6 +7,19 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.28 (versionCode 332) — 2026-11-24 【0.57 分支 round 19:诊断轮——loadbang→msg→num RUN 回归的时序取证】
+
+**你的 pipe-500 线索**：延迟交付存活、openPatch 期间的立即交付不浮现
+——静态推演已到极限（订阅持久 ✓ pd 侧 loadbang 触发 ✓ print 100 ✓），
+需要一次带时序日志的复测定位"消息消失在哪一层"。三处临时插桩（修复后
+移除）：
+1. 接收器入口无条件追踪（含未绑定源）——open 期原子是否到达 Java 接收器；
+2. subscribe 打印 pd_bind vs 已持有跳过——暴露隐藏的退订/守卫路径；
+3. poller 打印开机后前 12 个 tick——消息队列排水窗口是否活着。
+
+**验收**：aapt = 332/0.18.28；一次复测（打开 pc_test → RUN → 点
+msg），日志给出完整时间线，下一轮精确修复。
+
 ## 0.18.27 (versionCode 331) — 2026-11-24 【0.57 分支 round 18:loadbang 按 open 模式门控（EDIT 不跑，RUN 才交付）】
 
 **你的第二条观察成为设计**："打开文件进 edit 模式，libpd 不应该工作"——
