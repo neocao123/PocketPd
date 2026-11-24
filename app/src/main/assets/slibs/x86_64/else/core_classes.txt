@@ -423,3 +423,4 @@ xgate2.mc~
 xselect.mc~
 xselect2.mc~
 plaits~
+knob

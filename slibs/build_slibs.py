@@ -273,8 +273,10 @@ LIBS = [
              "C:/Projects/26PDAndroid/slibs/else-src/full/Audio/sfont~/FluidLite/libvorbis-1.3.5/lib"],
         # upstream GUI-bridge objects excluded (see VENDORED.txt): bare
         # names keyboard/pad/button/popmenu are PocketPd app-native touch
-        # widgets; knob is already provided by elsex (identical RC15
-        # source) and bare-name priority resolves it there.
+        # widgets. knob COMPILED HERE since 0.18.18 (elsex retirement: the
+        # 52-class elsex core duplicated the full RC15 else core; its only
+        # live contribution was knob - identical source, color pins moved
+        # into this entry's patches).
         patches={"else.c": [
                      # [else] master: pdlua sublibrary not vendored -> drop
                      # the lua_setup call, keep the [else] info class
@@ -282,8 +284,20 @@ LIBS = [
                       "/* Android rebuild: pdlua sublibrary not vendored */\n"
                       "/* extern void lua_setup(); */"),
                      ("\n    lua_setup();\n}",
-                      "\n    /* lua_setup(): pdlua not vendored (Android) */\n}")]},
-        excl=["knob.c", "keyboard.c", "pad.c", "button.c", "popmenu.c",
+                      "\n    /* lua_setup(): pdlua not vendored (Android) */\n}")],
+                 # knob.c reads THISGUI->i_* - pd 0.56-dev GUI theme fields
+                 # the headless runtime never fills. They only feed the Tcl
+                 # widget colors, which libpd drops anyway: pin the constants
+                 # (same values the retired elsex build shipped).
+                 "knob.c": [("THISGUI->i_foregroundcolor",
+                             'gensym("#000000")'),
+                            ("THISGUI->i_backgroundcolor",
+                             'gensym("#ffffff")'),
+                            ("THISGUI->i_gopcolor",
+                             'gensym("#ffffff")'),
+                            ("THISGUI->i_selectcolor",
+                             'gensym("#0000ff")')]},
+        excl=["keyboard.c", "pad.c", "button.c", "popmenu.c",
               # external-dependency objects: play.file~ needs ffmpeg,
               # sfload/sfinfo need sfizz (sfz~'s vendored C++ engine),
               # streamout~/streamin~ need vorbis/ogg - none of those
@@ -337,30 +351,11 @@ LIBS = [
     # bridge). Shared/ keeps only the three implementation files these
     # classes link against (buffer.c magic.c random.c); everything else
     # there is header-only for us.
-    ("elsex", dict(
-        src=["C:/Projects/26PDAndroid/slibs/else-src/Control",
-             "C:/Projects/26PDAndroid/slibs/else-src/Audio"],
-        support=["C:/Projects/26PDAndroid/slibs/else-src/Shared"],
-        inc=["C:/Projects/26PDAndroid/slibs/else-src/Shared"],
-        # 0.57 branch (0.18.1): inc_first=["else-src/pd55"] REMOVED - the
-        # 0.57 headers in PDSRC carry the multichannel API natively
-        # (s_nchans/s_length/CLASS_MULTICHANNEL/signal_setmultiout), so
-        # elsex compiles against the same m_pd.h as the runtime libpd.so.
-        # The 0.17.134-0.17.160-era pd55-header special case is dead on
-        # this branch (the "offset-verified s_nchans@24" claim it was built
-        # on is re-adjudicated in PD_VERSIONS.md 五A-1).
-        # knob.c reads THISGUI->i_foregroundcolor - a pd 0.56-dev GUI theme
-        # field the 0.55 runtime lacks. It only feeds the Tcl widget colors,
-        # which headless libpd drops anyway: pin the color constant.
-        patches={"knob.c": [("THISGUI->i_foregroundcolor",
-                             'gensym("#000000")'),
-                            ("THISGUI->i_backgroundcolor",
-                             'gensym("#ffffff")'),
-                            ("THISGUI->i_gopcolor",
-                             'gensym("#ffffff")'),
-                            ("THISGUI->i_selectcolor",
-                             'gensym("#0000ff")')]},
-    )),
+    # elsex RETIRED (0.18.18, user-approved decision): its 52 classes
+    # duplicated the full RC15 else core byte-for-byte (same source, else
+    # wins the bare names by PRIORITY anyway); knob moved into the else
+    # build above. The subset source tree slibs/else-src/{Control,Audio,
+    # Shared} is archived to archive/elsex-subset-tree/.
 ]
 # compat glue: IS_DENORMAL is a macro only under pd>=0.54 headers; on 0.51
 # every creb module using it compiled an implicit function call instead.
@@ -373,26 +368,21 @@ EXTRA_C = {
     # here), and pdgui_vmess/pd_undo_set_objectstate/signal_setmultiout in
     # the vanilla branches are exported by the real 0.57 libpd.so.
 }
-# elsex shims, re-adjudicated for 0.57 (0.18.1): the 0.57 libpd.so now
-# EXPORTS pdgui_vmess / pdgui_stub_vnew / pdgui_stub_deleteforkey /
-# pd_undo_set_objectstate / signal_setmultiout (nm -D verified against the
-# mavenLocal AAR - the %TEMP%/pdaar extraction is a STALE libpd build that
-# lacks them; audit symbol questions against C:/Temp/slibs-audit-<abi> or
-# the .m2 AAR, never pdaar) - keeping the 0.17.137 no-op shims would
-# SHADOW the real implementations and pin the mc classes to degraded mono
-# forever, so they are dropped. Still missing from libpd (0.51.3 AND 0.57):
-# sys_putmidibyte - else's midi-OUT classes feed it; the shim drops bytes,
-# while the app's own noteout/ctlin bridge is a separate listener path.
-EXTRA_C["elsex"] = (
+# else midi-OUT shim (carried over from the retired elsex, 0.18.1
+# adjudication still valid): the 0.57 libpd.so now EXPORTS pdgui_vmess /
+# pdgui_stub_vnew / pdgui_stub_deleteforkey / pd_undo_set_objectstate /
+# signal_setmultiout (nm -D verified against the mavenLocal AAR - the
+# %TEMP%/pdaar extraction is a STALE libpd build that lacks them; audit
+# symbol questions against C:/Temp/slibs-audit-<abi> or the .m2 AAR, never
+# pdaar). Still missing from libpd (0.51.3 AND 0.57): sys_putmidibyte -
+# else's midi-OUT classes feed it; the shim drops bytes, while the app's
+# own noteout/ctlin bridge is a separate listener path.
+EXTRA_C["else"] = (
     "#include <m_pd.h>\n"
     "void sys_putmidibyte(int portno, int byte) {\n"
     "    (void)portno; (void)byte;\n"
     "}\n"
 )
-# else full core (0.18.2): same midi-out drop as elsex - libpd (0.51.3 AND
-# 0.57) does not export sys_putmidibyte; else's midi-OUT classes feed it,
-# the app's own noteout/ctlin bridge is a separate listener path.
-EXTRA_C["else"] = EXTRA_C["elsex"]
 
 
 RE_CLASS = re.compile(r'class_new\s*\(\s*gensym\s*\(\s*"([^"]+)"')

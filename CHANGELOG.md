@@ -7,6 +7,34 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.18 (versionCode 322) — 2026-11-24 【0.57 分支 round 9:elsex 退役（决策 1/7）+ 四项决策文档关闭】
+
+**任务二决策集开始执行。** 你逐一裁决的七项里，四项是纯文档关闭（随本
+轮记录）：**决策 2** timer 看门狗 = 正式放弃重做（0.17.160 起代码就不
+存在；0.57 上零冻结报告；0.17.159 设计稿留归档）；**决策 3** W1.5
+stopAudio dsp 语义 = 关闭（0.18.10-12 工作流已按你指令实现目标行为）；
+**决策 6** W3.7 graph~/spectrograph~/display 回归 = 关闭（**上游 RC15
+已删这三个 Tcl-GUI 对象**，我们的 vanilla 桩就是唯一实现）；**决策 7**
+creb/cxc/bsaylor = 保留现状（0.18.1 已重编验收，无上游可换版，出问题
+自打补丁）。
+
+**本轮代码改动 = 决策 1：elsex 退役。** 52 类与新 else 核完全同源重复
+（PRIORITY 下裸名本就归 else），唯一有效产出 = knob：
+- else 核收编 knob.c（full 树干净源 + 四条 THISGUI 颜色 pin 构建期补丁
+  ——子集树是把 pin 烧进文件的旧手工版，产物逐字节等效）；
+- LIBS 删 elsex 条目、PRIORITY 删 elsex（13 库）、EXTRA_C 链重组
+  （sys_putmidibyte shim 直挂 else）；
+- 两 ABI 的 elsex 资产目录与 manifest 行删除；子集树
+  `slibs/else-src/{Control,Audio,Shared}` 归档至
+  `archive/elsex-subset-tree/`（带 MANIFEST；`full/` 为唯一 RC15 源）；
+- 结果：else 395 类 / 289 setups，audit_blobs **26/26 全绿**（13 库 ×
+  两 ABI），开机少加载一个核心。
+
+**遗留追踪**：决策 4（clone 直拆退役 + A/B 实测）→ Round 10；决策 5
+（superosc~/f2s~ 旧版 ELSE mc 源码找回 + 0.57 mc API 移植）→ Round 11。
+
+**验收**：aapt = 322/0.18.18；GM800 force-stop + install + dumpsys 复核。
+
 ## 0.18.17 (versionCode 321) — 2026-11-24 【0.57 分支 round 8:mrpeach 三件套快照 → pd-externals 现版重编】
 
 **任务一换版轮收官。** osc/midifile/binfile 的上游已从 pd-extended SVN

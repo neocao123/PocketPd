@@ -25,7 +25,14 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 145: 0.57 branch
+    /** Bump to re-extract after an assets/slibs update. 146: 0.57 branch
+     *  (0.18.18) - ELSEX RETIRED (user-approved decision 1/7): the 52
+     *  classes duplicated the full RC15 else core (bare names already
+     *  resolved to else by PRIORITY); knob moved into the else build
+     *  (identical RC15 source + the THISGUI color pins as build patches =
+     *  byte-equivalent product); subset tree archived to
+     *  archive/elsex-subset-tree/; PRIORITY 13 libs.
+     *  145: 0.57 branch
      *  (0.18.17) - mrpeach trio (osc/midifile/binfile) swapped pd-extended
      *  0.43.4 snapshot -> github pd-externals current (the umbrella repo
      *  mrpeach carries them as SUBMODULES: pd-externals/{osc,binfile,
@@ -66,7 +73,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 145
+    private const val VERSION = 146
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2
@@ -81,12 +88,6 @@ object Slibs {
         // ELSE-compat UI widgets (graph~/spectrograph~/keyboard) ship as
         // vanilla-only abstractions under the same object names
         "else",
-        // incremental else classes (0.17.134): compiled from the vendored
-        // upstream-master subset (slibs/else-src) that the hand-integrated
-        // else_core.so never contained - mpe.in, ptouch.in/out, canvas.*,
-        // multichannel signal classes, ... No bare-name clash with the
-        // libraries above, so its spot in the order is only about load time
-        "elsex",
         "cyclone", "zexy", "iemlib", "fftease", "bsaylor",
         "creb", "cxc", "osc", "midifile", "binfile", "tracker",
         "pocketpd",

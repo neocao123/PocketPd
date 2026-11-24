@@ -11,8 +11,23 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 321
-    versionName = "0.18.17" // ---- 0.57 BRANCH round 8: mrpeach trio swapped
+    versionCode = 322
+    versionName = "0.18.18" // ---- 0.57 BRANCH round 9: elsex retired
+    // (user-approved decision 1/7 of the migration decision set): the 52
+    // classes duplicated the full RC15 else core - bare names already
+    // resolved to else by PRIORITY, so elsex's only live contribution was
+    // knob. knob.c moved into the else build: identical RC15 source from
+    // the full tree + the four THISGUI color pins as build patches (the
+    // retired subset tree had them baked into the file - same product).
+    // elsex LIBS entry + PRIORITY slot + both ABI asset dirs + manifest
+    // rows removed; subset tree slibs/else-src/{Control,Audio,Shared}
+    // archived to archive/elsex-subset-tree/ with MANIFEST (full/ stays as
+    // the sole RC15 source). else: 395 classes / 289 setups, audit_blobs
+    // 26/26 (13 libs). Same round closes decisions 2/3/6/7 as
+    // documentation-only (watchdog abandoned, W1.5 closed, W3.7 closed,
+    // creb/cxc/bsaylor retained).
+    //
+    // ---- 0.18.17 (0.57 history) round 8: mrpeach trio swapped
     // osc/midifile/binfile: pd-extended 0.43.4 snapshot -> github
     // pd-externals current. The umbrella repo pd-externals/mrpeach carries
     // them as SUBMODULES - sources live in pd-externals/{osc,binfile,

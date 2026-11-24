@@ -2,7 +2,7 @@
 
 ## ★ 当前进度与下一步（2026-11-24，round 4 后更新）
 
-**分支状态**：`0.57` 分支。设备在装 v321/0.18.17。0.51 主线冻结于
+**分支状态**：`0.57` 分支。设备在装 v322/0.18.18。0.51 主线冻结于
 `freeze-0.51-base`（= 0.17.161/vc303）。
 
 **已完成的轮次**（详见 CHANGELOG 0.18.0–0.18.13）：
@@ -61,12 +61,17 @@ help 自身接线的显示噪音（桌面 pd 同样会报），非故障。
 每库一轮：换源 → 试编 → 修补（修而不删）→ Slibs.VERSION bump →
 装机 → CHANGELOG → commit。
 
-**任务二：🄰 决策点（须用户点头才动）**
-1. **elsex 退役**：52 类与新 else 核完全重复（同源 RC15）；唯一搬移项
-   = knob.c 从 elsex 挪进 else 核构建（else 核目前 excl knob）。
-   elsex 与 else 核是两份相同源码树：`slibs/else-src/{,full/}`。
-2. 其余 🄰：superosc~/f2s~ 回归上游 mc 版、graph~/spectrograph~/display
-   桩回归、timer 看门狗重做（0.57 上待实测）、creb/cxc/bsaylor 去留。
+**任务二：七项裁决全部收齐（2026-11-24 你逐一批准），执行状态：**
+1. ~~elsex 退役~~ ✅ 0.18.18/322 完成（knob 等效搬入 else 核；子集树
+   归档 archive/elsex-subset-tree/）；
+2. timer 看门狗 ✅ 正式放弃重做（0.17.160 起代码不存在；0.57 零冻结）；
+3. W1.5 stopAudio dsp 语义 ✅ 关闭（0.18.10-12 工作流已覆盖）；
+4. [clone] 直拆退役 ✅ 批准——Round 10 执行（arp/superosc~ A/B 守门）；
+5. superosc~/f2s~ ✅ 批准 B——Round 11 执行（找回旧版 ELSE mc 源码，
+   按 0.57 mc API 调整；注意：RC15 已删这两个对象，须考古旧 release）；
+6. W3.7 graph~/spectrograph~/display 回归 ✅ 关闭（RC15 已删，桩 = 唯一
+   实现）；
+7. creb/cxc/bsaylor ✅ 保留现状（0.18.1 已重编验收）。
 
 **遗留已知项**：tempo-help 内 `-div` 实例降级（plugdata/新修订去掉了
 -div，RC15 tempo.pd 保留）；else/display 裸建时 `[send $1]` 报

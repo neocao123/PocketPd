@@ -449,26 +449,26 @@ static void knob_config_fg(t_knob *x){
     t_canvas *cv = glist_getcanvas(x->x_glist);
     char fg[32];
     if(x->x_theme)
-        snprintf(fg, sizeof(fg), "#%06X", THISGUI->i_foregroundcolor);
+        snprintf(fg, sizeof(fg), "#%06X", gensym("#000000"));
     else
         snprintf(fg, sizeof(fg), "%s", x->x_fg->s_name);
     pdgui_vmess(0, "crs rs", cv, "itemconfigure", x->x_tag_fg, "-fill", fg);
     pdgui_vmess(0, "crs rk", cv, "itemconfigure", x->x_tag_outline,
-        "-outline", THISGUI->i_foregroundcolor);
+        "-outline", gensym("#000000"));
     pdgui_vmess(0, "crs rsrs", cv, "itemconfigure", x->x_tag_wpr_c,
         "-outline", fg, "-fill", fg);
     pdgui_vmess(0, "crs rsrs", cv, "itemconfigure", x->x_tag_arc,
         "-outline", fg, "-fill", fg);
     pdgui_vmess(0, "crs rk rk", cv, "itemconfigure", x->x_tag_IO,
-        "-outline", THISGUI->i_foregroundcolor,
-        "-fill", THISGUI->i_foregroundcolor);
+        "-outline", gensym("#000000"),
+        "-fill", gensym("#000000"));
 }
 
 static void knob_config_mg(t_knob *x){
     t_canvas *cv = glist_getcanvas(x->x_glist);
     char mg[32];
     if(x->x_theme)
-        snprintf(mg, sizeof(mg), "#%06X", THISGUI->i_foregroundcolor);
+        snprintf(mg, sizeof(mg), "#%06X", gensym("#000000"));
     else
         snprintf(mg, sizeof(mg), "%s", x->x_mg->s_name);
     pdgui_vmess(0, "crs rsrs", cv, "itemconfigure",  x->x_tag_bg_arc,
@@ -481,7 +481,7 @@ static void knob_config_bg(t_knob *x){
     t_canvas *cv = glist_getcanvas(x->x_glist);
     char bg[32];
     if(x->x_theme)
-        snprintf(bg, sizeof(bg), "#%06X", THISGUI->i_backgroundcolor);
+        snprintf(bg, sizeof(bg), "#%06X", gensym("#ffffff"));
     else
         snprintf(bg, sizeof(bg), "%s", x->x_bg->s_name);
     pdgui_vmess(0, "crs rsrsrs", cv, "itemconfigure", x->x_tag_center_circle,
@@ -667,30 +667,30 @@ static void knob_select(t_gobj *z, t_glist *glist, int sel){
     x->x_select = sel;
     if(x->x_select){
         pdgui_vmess(0, "crs rk", cv, "itemconfigure",
-            x->x_tag_sel, "-outline", THISGUI->i_selectcolor);
+            x->x_tag_sel, "-outline", gensym("#0000ff"));
         pdgui_vmess(0, "crs rk",  cv, "itemconfigure",
-            x->x_tag_number, "-fill", THISGUI->i_selectcolor);
+            x->x_tag_number, "-fill", gensym("#0000ff"));
         pdgui_vmess(0, "crs rk",  cv, "itemconfigure",
-            x->x_tag_wiper, "-fill", THISGUI->i_selectcolor);
+            x->x_tag_wiper, "-fill", gensym("#0000ff"));
         pdgui_vmess(0, "crs rk",  cv, "itemconfigure",
-            x->x_tag_arc, "-fill", THISGUI->i_selectcolor);
+            x->x_tag_arc, "-fill", gensym("#0000ff"));
         pdgui_vmess(0, "crs rk rk",  cv, "itemconfigure",
-            x->x_tag_IO, "-outline", THISGUI->i_selectcolor,
-            "-fill", THISGUI->i_selectcolor);
+            x->x_tag_IO, "-outline", gensym("#0000ff"),
+            "-fill", gensym("#0000ff"));
         pdgui_vmess(0, "crs rk ri",  cv, "itemconfigure",
-            x->x_tag_outline, "-outline", THISGUI->i_selectcolor,
+            x->x_tag_outline, "-outline", gensym("#0000ff"),
             "-width", 2);
         if(x->x_edit && sh->h_pathname[0]){
             pdgui_vmess(0, "rr rk",  sh->h_pathname, "configure",
-                "-highlightbackground", THISGUI->i_selectcolor);
+                "-highlightbackground", gensym("#0000ff"));
             pdgui_vmess(0, "rr rk",  sh->h_pathname, "configure",
-                "-bg", THISGUI->i_selectcolor);
+                "-bg", gensym("#0000ff"));
         }
     }
     else{
         char fg[32];
         if(x->x_theme)
-            snprintf(fg, sizeof(fg), "#%06X", THISGUI->i_foregroundcolor);
+            snprintf(fg, sizeof(fg), "#%06X", gensym("#000000"));
         else
             snprintf(fg, sizeof(fg), "%s", x->x_fg->s_name);
         pdgui_vmess(0, "crs rs", cv, "itemconfigure",
@@ -698,20 +698,20 @@ static void knob_select(t_gobj *z, t_glist *glist, int sel){
         pdgui_vmess(0, "crs rs",  cv, "itemconfigure",
             x->x_tag_wiper, "-fill", fg);
         pdgui_vmess(0, "crs rk rk",  cv, "itemconfigure",
-            x->x_tag_IO, "-outline", THISGUI->i_foregroundcolor,
-            "-fill", THISGUI->i_foregroundcolor);
+            x->x_tag_IO, "-outline", gensym("#000000"),
+            "-fill", gensym("#000000"));
         pdgui_vmess(0, "crs rk ri",  cv, "itemconfigure",
-            x->x_tag_outline, "-outline", THISGUI->i_foregroundcolor,
+            x->x_tag_outline, "-outline", gensym("#000000"),
             "-width", 1);
         pdgui_vmess(0, "crs rs",  cv, "itemconfigure",
             x->x_tag_arc, "-fill", fg);
         pdgui_vmess(0, "crs rk", cv, "itemconfigure",
-            x->x_tag_sel, "-outline", THISGUI->i_foregroundcolor);
+            x->x_tag_sel, "-outline", gensym("#000000"));
         if(x->x_edit && sh->h_pathname[0]){
             pdgui_vmess(0, "rr rk",  sh->h_pathname, "configure",
-                "-highlightbackground", THISGUI->i_foregroundcolor);
+                "-highlightbackground", gensym("#000000"));
             pdgui_vmess(0, "rr rk",  sh->h_pathname, "configure",
-                "-bg", THISGUI->i_gopcolor);
+                "-bg", gensym("#ffffff"));
         }
     }
 }
@@ -724,9 +724,9 @@ static void knob_draw_handle(t_knob *x, int state){
         pdgui_vmess(0, "rs riri rkrkrk ri rr",
             "canvas", sh->h_pathname,
             "-width", HANDLE_SIZE, "-height", HANDLE_SIZE,
-            "-bg", THISGUI->i_gopcolor,
-            "-highlightcolor", THISGUI->i_foregroundcolor,
-            "-highlightbackground", THISGUI->i_foregroundcolor,
+            "-bg", gensym("#ffffff"),
+            "-highlightcolor", gensym("#000000"),
+            "-highlightbackground", gensym("#000000"),
             "-highlightthickness", 1,
             "-cursor", "bottom_right_corner");
         int x1, y1, x2, y2;
@@ -764,7 +764,7 @@ static void knob_draw_ticks(t_knob *x){
     t_canvas *cv = glist_getcanvas(x->x_glist);
     char fg[32];
     if(x->x_theme)
-        snprintf(fg, sizeof(fg), "#%06X", THISGUI->i_foregroundcolor);
+        snprintf(fg, sizeof(fg), "#%06X", gensym("#000000"));
     else
         snprintf(fg, sizeof(fg), "%s", x->x_fg->s_name);
     pdgui_vmess(0, "crs", cv, "delete", x->x_tag_ticks);
@@ -829,7 +829,7 @@ static void knob_draw_ticks(t_knob *x){
 static void knob_draw_new(t_knob *x, t_glist *glist){
     char fg[32];
     if(x->x_theme)
-        snprintf(fg, sizeof(fg), "#%06X", THISGUI->i_foregroundcolor);
+        snprintf(fg, sizeof(fg), "#%06X", gensym("#000000"));
     else
         snprintf(fg, sizeof(fg), "%s", x->x_fg->s_name);
     int x1 = text_xpix(&x->x_obj, glist);
@@ -1568,9 +1568,9 @@ static void knob_properties(t_gobj *z, t_glist *owner){
     t_symbol *n_mode = get_nmode(x);
     t_symbol *c_mode = get_cmode(x);
     char pd_bg[32];
-    snprintf(pd_bg, sizeof(pd_bg), "#%06X", THISGUI->i_backgroundcolor);
+    snprintf(pd_bg, sizeof(pd_bg), "#%06X", gensym("#ffffff"));
     char pd_fg[32];
-    snprintf(pd_fg, sizeof(pd_fg), "#%06X", THISGUI->i_foregroundcolor);
+    snprintf(pd_fg, sizeof(pd_fg), "#%06X", gensym("#000000"));
     pdgui_stub_vnew(&x->x_obj.ob_pd, "knob_dialog", x,
         "ii iff iif iii ii ffif iis siii ss ss sss ss ii",
         x->x_size, x->x_square, // ii
@@ -2184,11 +2184,11 @@ static void handle__click_callback(t_handle *sh, t_floatarg f, t_floatarg xarg, 
         pdgui_vmess(0, "crr iiii rk ri rs",
             cv, "create", "rectangle",
             x1, y1, x2, y2,
-            "-outline", THISGUI->i_selectcolor,
+            "-outline", gensym("#0000ff"),
             "-width", KNOB_SELBDWIDTH,
             "-tags", sh->h_outlinetag);
         pdgui_vmess(0, "rr rk",  sh->h_pathname, "configure",
-            "-highlightcolor", THISGUI->i_selectcolor);
+            "-highlightcolor", gensym("#0000ff"));
         sh->h_dragx = (int)xarg;
         sh->h_dragy = (int)yarg;
         sh->h_drag_delta = 0;
