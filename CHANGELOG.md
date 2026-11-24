@@ -7,6 +7,29 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.22 (versionCode 326) — 2026-11-24 【0.57 分支 round 13:子补丁行两处 parity 修复（复测续）】
+
+**复测仍报错 → 新 dump 取证**。0.18.21 的首组修复**已生效**（dump 里是
+正确的 `initmess list -size 10 0` ✓），但 superosc~ 的失败另有两处，都
+在 **[pd] 子补丁字符串路径**（substituteLine）上——它从来只做 $ 替换，
+缺了盒循环路径已有的两道规则：
+
+- **(A) else/-前缀剥离缺失**：rc14 superosc~ 的 [pd freq]/[pd select]/
+  [pd args-initialization] 三个子补丁带着 else/nchs~/else/select~/
+  else/default/else/route2/else/initmess——pd 既无这些别名也无对应 .pd
+  → 未知类 → ~10 个 couldn't create。修：substituteLine 套用与盒循环
+  相同的剥离规则（文件型名字如 else/insert 保留前缀走 .pd 内联）。
+- **(B) msg 美元转义被剥**：substituteTokens 无条件剥 `\$`——msg 内容的
+  `\$1` 转义**就是** A_DOLLAR 编码（发送时绑定入站原子），剥掉就成了
+  对无 env 会话根的加载期解析：initmess 链在 open 期间触发 resize/curve
+  → "$1: argument number out of range" ×2。修：literalDollars 保留上游
+  转义、对残余裸 $ 负向断言补转义（不双转义）——0.17.120 的转义规则
+  终于端到端成立。
+
+**验收**：aapt = 326/0.18.22；装机后请再次打开 test_0_57（预期
+couldn't create 与 $1 报错清零；mov.rms~ 连接失败行 = 解码器错配对的
+老毛病，若盒子上无红条即无实害）。
+
 ## 0.18.21 (versionCode 325) — 2026-11-24 【0.57 分支 round 12:[args] 首组 initmess 头修复（v324 用户报告的真因）】
 
 **你的报告**："clone 有很大问题，io 都不是 dsp 的，io 口注册都没完成。"

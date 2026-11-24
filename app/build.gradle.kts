@@ -11,8 +11,29 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 325
-    versionName = "0.18.21" // ---- 0.57 BRANCH round 12: [args] first-group
+    versionCode = 326
+    versionName = "0.18.22" // ---- 0.57 BRANCH round 13: subpatch-line
+    // parity fixes (follow-up to the 0.18.21 [args] fix - the user retest
+    // on test_0_57 still errored; fresh session dump forensics):
+    // (A) substituteLine (the [pd] subpatch string path) never stripped the
+    // else/-prefix for compiled classes - rc14 superosc~'s [pd freq]/
+    // [pd select]/[pd args-initialization] subpatches carry else/nchs~/
+    // else/select~/else/default/else/route2/else/initmess which pd does not
+    // know (no alias, no .pd) -> ~10 couldn't-create. The strip now applies
+    // with the same rule as the box loop (file-backed names like
+    // else/insert keep the prefix and inline through their .pd).
+    // (B) substituteTokens stripped pd's dollar ESCAPE ("\$1") from msg
+    // lines unconditionally - msg-content escapes ARE the A_DOLLAR encoding
+    // (bind the incoming atom at send time); stripped, they became
+    // load-time dollars against the env-less session root: "$1: argument
+    // number out of range" x2 (norm~ initmess chain firing resize/curve
+    // during the open). literalDollars now keeps the upstream escape and
+    // re-escapes remaining BARE dollars (negative lookbehind, no double
+    // escaping) - the 0.17.120 escaping rule finally holds end to end.
+    // The 0.18.21 first-group fix verified working in the fresh dump
+    // (`initmess list -size 10 0` correct).
+    //
+    // ---- 0.18.20 (0.57 history) round 11: superosc~/f2s~
     // initmiss head fix (user bug report on v324: "clone io 不是 dsp 的、
     // io 口注册没完成" — session dump forensics found the real cause was
     // NOT clone: the inline [args] converter's FIRST group replaced the box

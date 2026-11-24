@@ -951,6 +951,24 @@ object PdEngine {
         // abstraction's creation args as one list message (porres's init
         // subpatches read numeric args; flag breaking stays a depth-1 pass
         // nicety and undocumented edge).
+        // else/-prefix strip for COMPILED classes inside [pd] subpatch
+        // lines — the same rule the box loop applies (0.17.153), which the
+        // string path never had: rc14 superosc~'s [pd freq]/[pd select]/
+        // [pd args-initialization] carry else/nchs~/else/select~/
+        // else/default/else/route2/else/initmess, and pd knows none of those
+        // spellings (no alias, no .pd) — every one of them failed creation
+        // and broke the module (0.18.21). File-backed names (else/insert,
+        // else/norm~) keep the prefix and inline through their .pd.
+        if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" &&
+            toks[4].startsWith("else/")
+        ) {
+            val bare = toks[4].removePrefix("else/")
+            if (bare.isNotEmpty() &&
+                Abstractions.resolve(toks[4]) == null &&
+                Abstractions.resolve(bare) == null &&
+                bare in compiledClasses()
+            ) toks[4] = bare
+        }
         if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" &&
             (toks[4] == "args" || toks[4] == "else/args")
         ) {
@@ -1079,10 +1097,16 @@ object PdEngine {
         var inSend = false
         val out = ArrayList<String>(tokens.size)
         for (tok0 in tokens) {
-            // upstream .pd files escape dollars ("\$0") for pd's file parser;
-            // keeping the escape would turn substituted numbers back into
-            // symbols ("pack \1003 symbol" → "bad type"), so strip it
-            var t = tok0.replace("\\$", "$")
+            // upstream .pd files escape dollars ("\$0") for pd's file parser.
+            // OBJECT lines: substitutions below produce numbers, so the escape
+            // must go ("pack \1003 symbol" → "bad type"). MSG lines
+            // (literalDollars): the escape IS the encoding of an A_DOLLAR
+            // atom that binds the incoming atom at send time — stripping it
+            // turned the token into a LOAD-time dollar against the env-less
+            // session root ("$1: argument number out of range" while the
+            // initmess chain fired resize/curve during the open; 0.18.22
+            // re-escapes whatever dollars remain unsubstituted).
+            var t = if (literalDollars) tok0 else tok0.replace("\\$", "$")
             t = t.replace("$0", uid)
             // a dashed $N ("pd-$1-array-cnv", "$1-set bang") is ELSE's
             // spelling of the abstraction's $0 — bind it to the same uid so
@@ -1094,6 +1118,11 @@ object PdEngine {
                 else if (inSend) {
                     t = Regex("\\$[1-9]").replace(t, uid)
                 }
+                // re-escape remaining BARE dollars for the pd file encoding
+                // (the parse stored them unescaped — unescapeDollars at
+                // parse, re-escape at write, the 0.17.120 rule); tokens that
+                // kept their upstream backslash ("\$1") are already encoded
+                if (t.contains("$")) t = Regex("(?<!\\\\)\\$").replace(t, "\\\\$")
             } else {
                 Regex("\\$(\\d)").findAll(tok0).forEach { m ->
                     val n = m.groupValues[1].toInt()
