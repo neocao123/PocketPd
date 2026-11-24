@@ -7,6 +7,27 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.30 (versionCode 334) — 2026-11-24 【0.57 分支 round 21:诊断插桩拆除收尾轮】
+
+用户确认 0.18.29 顺序化 loadbang 修复生效（"之前的问题解决了"）。拆除
+0.18.28 的三处临时插桩：poller 前 12 tick 计数、接收器入口无条件
+`recv-float` 追踪、subscribe 的 `pd_bind`/`skip` 行；既有的 per-message
+dispatch 追踪不动。纯日志拆除，零行为变更。
+
+**验收**：aapt = 334/0.18.30。
+
+**同轮调查（不动代码）**：用户问 superosc~ 的 `clone -d` 是否只有它在用
+——不是。`-d`/`-do` 是 vanilla pd 0.55+ 原生 mc 旗标（g_clone.c 核实：
+`-d` = distribute-in + pack-out、`-do` = 只 pack-out、`-di` = 只
+distribute-in、`-x` = 抑制 voice 参数），shipped ELSE 抽象共 7 个使用：
+superosc~（`-d`，help 引用 0 个外部）、gatemin~（`-x -d`）、gaterelease~
+（`-x -d`）、f2s~（`-do -x`，12 个 help 用）、float2sig~（`-do -x`，
+33 个 help 用）、float2imp~（`-do`，6 个 help 用）、synth~（`-do`）。
+另有 12 个抽象用普通 clone（banks/grain 系/vocoder/presets/freeze~），
+不走 mc 旗标。superosc~ 是全家使用量最小者，plugdata 未收录该 mc 抽象集。
+**新发现**：synth~.pd 引用的 `synth.voice.template.pd` 未被 ship
+（0.51 时代它同样不可用——旧 clone 不解析 `-do`），挂起待裁决。
+
 ## 0.18.29 (versionCode 333) — 2026-11-24 【0.57 分支 round 20:loadbang 顺序化交付（时序取证落地修复）】
 
 **诊断轮时间线破案**：RUN 重开里 pre-bind = `skip (held)`，post-bind =

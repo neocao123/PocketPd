@@ -11,8 +11,15 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 333
-    versionName = "0.18.29" // ---- 0.57 BRANCH round 20: sequenced loadbang
+    versionCode = 334
+    versionName = "0.18.30" // ---- 0.57 BRANCH round 21: instrumentation
+    // teardown (user confirmed the 0.18.29 sequenced-loadbang fix works:
+    // "之前的问题解决了"). The 0.18.28 diagnostic lines are gone - the
+    // poll-tick counter, the unconditional recv-float entry trace, the
+    // subscribe pd_bind/skip line; the pre-existing per-message dispatch
+    // trace stays. No behavior change.
+    //
+    // ---- 0.18.29 (0.57 history) round 20: sequenced loadbang
     // delivery (the 0.18.28 diagnostic timeline cracked it: subscribe
     // 'held' pre-open, but post-open FRESH pd_bind - every openPatch
     // clears the pd-side symbol binds via its internal closePatch, so the
@@ -26,9 +33,7 @@ android {
     // invisible to the app); (3) after the post-open bindObjects re-arms
     // the symbols, the app bangs pocketpd-loadbang ONCE - the chains
     // deliver into fully-armed binds (the pipe-500 pattern, sequenced).
-    // LOAD entry never bangs: EDIT shows saved values. Diagnostic
-    // instrumentation (receiver-entry, subscribe, poll ticks) kept one
-    // more round for the verification, removed next.
+    // LOAD entry never bangs: EDIT shows saved values.
     //
     // ---- 0.18.28 (0.57 history) round 19: DIAGNOSTIC build
     // for the loadbang->msg->numbox RUN-entry regression (the pipe-500

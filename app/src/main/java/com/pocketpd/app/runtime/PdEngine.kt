@@ -448,7 +448,6 @@ object PdEngine {
      * flow must not depend on the audio state.
      */
     private val pollHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private var pollTick = 0
     private val pollRunner = object : Runnable {
         override fun run() {
             runCatching {
@@ -456,12 +455,6 @@ object PdEngine {
                     PdBase.pollPdMessageQueue()
                     PdBase.pollMidiQueue()
                 }
-            }
-            // 0.18.27 diagnostic: the loadbang atom queued during openPatch
-            // must surface through one of these ticks; the first ticks after
-            // an open are the interesting window
-            if (pollTick < 12) {
-                android.util.Log.i("PocketPd.Trace", "poll tick ${++pollTick} (handle=$patchHandle)")
             }
             pollHandler.postDelayed(this, 5)
         }
@@ -2368,7 +2361,6 @@ object PdEngine {
 
     private fun subscribe(symbol: String) {
         val fresh = subscribedSymbols.add(symbol)
-        android.util.Log.i("PocketPd.Trace", "subscribe '$symbol' -> ${if (fresh) "pd_bind" else "skip (held)"}")
         if (fresh) {
             synchronized(PdBase::class.java) { PdBase.subscribe(symbol) }
         }
@@ -2710,9 +2702,6 @@ object PdEngine {
         }
 
         override fun receiveFloat(source: String, x: Float) {
-            // 0.18.27 diagnostic: unconditional receiver-entry line - shows
-            // whether open-time loadbang atoms reach the Java receiver at all
-            android.util.Log.i("PocketPd.Trace", "recv-float src='$source' v=$x")
             if (source == "TTY") {
                 ttyOutListener?.invoke(arrayOf<Any>(x))
                 return
