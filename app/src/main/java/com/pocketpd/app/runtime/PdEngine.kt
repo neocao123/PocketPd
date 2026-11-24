@@ -1186,7 +1186,16 @@ object PdEngine {
                 var first = true
                 for (g in groups) {
                     if (first) {
+                        // the FIRST group must also carry the initmess head:
+                        // args[0] IS the class name, so replacing the args
+                        // with the bare group turned the box into the group's
+                        // first token - [args] with creation args "-size 10
+                        // 0" emitted `[list -size 10 0]` (unknown function,
+                        // creation failure; norm~.pd's bare [args] hit this
+                        // via rc14 superosc~'s `else/norm~ -size 10 0`,
+                        // 0.18.20). Extra groups below already had the head.
                         copy.args.clear()
+                        copy.args.add("initmess")
                         copy.args.addAll(g)
                         copy.meta = PdObjectMeta.resolve(copy)
                         first = false

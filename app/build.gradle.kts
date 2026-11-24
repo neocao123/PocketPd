@@ -11,8 +11,26 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 324
-    versionName = "0.18.20" // ---- 0.57 BRANCH round 11: superosc~/f2s~
+    versionCode = 325
+    versionName = "0.18.21" // ---- 0.57 BRANCH round 12: [args] first-group
+    // initmiss head fix (user bug report on v324: "clone io 不是 dsp 的、
+    // io 口注册没完成" — session dump forensics found the real cause was
+    // NOT clone: the inline [args] converter's FIRST group replaced the box
+    // args with the bare group, and args[0] IS the class name, so
+    // [args -size 10 0] emitted `[list -size 10 0]` (pd [list] unknown
+    // function = dead box) instead of `[initmess list -size 10 0]`. The
+    // extra groups already carried the initmess head; the first-group head
+    // was lost in the 0.17.145->0.18.6 payload edits. Trigger surface:
+    // every [args] sitting DIRECTLY on an abstraction's main canvas
+    // (norm~.pd's bare [args] via rc14 superosc~'s else/norm~ -size 10 0);
+    // tempo was never hit because its [args] lives in a [pd init] subpatch
+    // (substituteLine path, always correct). Dead norm~ cascaded into the
+    // downstream connection failures the user saw. Rounds 10/11 mechanics
+    // themselves (native clone pass-through, rc14 mc set) verified sound -
+    // the dump shows `clone -d else/superosc.unit 1` passing through
+    // untouched as designed.
+    //
+    // ---- 0.18.20 (0.57 history) round 11: superosc~/f2s~
     // upgraded to the rc14 mc abstractions (user-approved decision 5).
     // Archaeology finding: upstream rc14 ships these as pure pd
     // ABSTRACTIONS (the old compiled mc classes were long gone) - zero C

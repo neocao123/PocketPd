@@ -7,6 +7,36 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.21 (versionCode 325) — 2026-11-24 【0.57 分支 round 12:[args] 首组 initmess 头修复（v324 用户报告的真因）】
+
+**你的报告**："clone 有很大问题，io 都不是 dsp 的，io 口注册都没完成。"
+**会话 dump 取证（PocketPd.Session 通道）定位的真因不在 clone**：
+
+- 会话文本里出现 `#X obj 257 108 list -size 10 0;` 死对象 ×2——norm~.pd
+  的裸 `[args]`（位置 257 108 完全吻合）被内联转换器改写成了类名 `list`
+  的盒子；
+- **机制**：`[args]` 深度-1 转换的首组把盒子 args **直接替换**为组内容，
+  而 `args[0]` 就是类名 → `[args]` 带创建参数 `-size 10 0` 时首组 =
+  `["list","-size","10","0"]` → 生成 `[list -size 10 0]` → pd [list]
+  报 "unknown function" 创建失败 → gen-A norm~ 内部断链 → 你看到的下游
+  连接失败（解码器的名字配对把失败点显示成了 receive->mov.rms~）；
+- **触发面**：所有**直接躺在抽象主画布上**的 [args]（rc14 superosc~.pd
+  引用 `else/norm~ -size 10 0`，norm~.pd 的裸 [args] 中招）；tempo 从未
+  踩中是因为它的 [args] 在 [pd init] 子补丁里（substituteLine 路径一直
+  正确）；额外组（extra groups）本来就带 initmess 头 ✓；
+- **0.17.145→0.18.6 的 payload 编辑把首组的头丢了**（历史弧线）。
+
+**修复**：首组同样加 `initmess` 头（`[initmess list -size 10 0]` = 输出
+`list -size 10 0` 消息，与上游 [args] 无分隔符行为一致，喂 norm~ 的
+[break -] ✓）。
+
+**顺带澄清**：Round 10/11 的机制本身经 dump 验证**无恙**——
+`clone -d else/superosc.unit 1` 在会话里原样直通（设计如此）、rc14 五件
+套就位。你看到的惨状全部源于这一个死对象级联。
+
+**验收**：aapt = 325/0.18.21；装机后请重测 superosc~/arp（这轮的死对象
+消失后，若仍有 io 异常再抓新 dump）。
+
 ## 0.18.20 (versionCode 324) — 2026-11-24 【0.57 分支 round 11:superosc~/f2s~ 升级 rc14 mc 抽象（决策 5）】
 
 **考古改写了任务本身**：旧版 ELSE 的 mc "编译类"早已不存在——**rc14 起
