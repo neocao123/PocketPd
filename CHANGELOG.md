@@ -7,6 +7,30 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.33 (versionCode 337) — 2026-11-24 【0.57 分支 round 24:superosc~ 退役（用户决策 A）】
+
+用户拍板退役 superosc~（"退役清单轮"）。依据：全家 7 个 clone -d/-do
+抽象里使用量最小者（0 个外部 help 引用、plugdata 不收录、用户不用），
+且是残留 couldn't create 噪声的唯一活跃载体（15:03/16:32 两轮的
+mov.rms~×2 失败均在其内联链上；18:25 残留 1 条未实名）。退役内容：
+1. assets/slibs/{arm64-v8a,x86_64}/else/ 删除 superosc~.pd、
+   superosc.unit.pd；
+2. assets/help/else/superosc~-help.pd 删除（supersaw~-help 仅文字注释
+   提及，无对象盒，保留；All_objects.pd 无引用；examples/pocketpd 无
+   引用——退役引用面干净）；
+3. PdObjectMeta 端口行删除（含 0.18.20 注释改写为 f2s~ 专属+退役记录）；
+4. Slibs.VERSION 147→148（强制设备重提取，否则旧文件继续服务）。
+f2s~/float2sig~/gatemin~/gaterelease~/synth~（clone -d/-do 家族其余
+成员）保留——help demo 依赖 -do 系。历史注释（PdEngine 0.17.146 hunt
+等）按"修而不删"原则原样保留。
+**验收**：aapt = 337/0.18.33。
+**未解之谜随退役一并挂起**：mov.rms~ 已注册（master 调用清单 line 636
++ dynsym 394 setup + farm 427 链接 + 13/13 cores loaded）却间歇性创建
+失败（18:25 残留 1 条且 verbose(0) 原文行仍未到达 print hook——v336
+过滤器为什么没接住它待查）。superosc~ 退役后此谜影响面收缩至
+else/norm~（独立对象）。另挂起：else/args 前缀转换漏洞、`r -,` 垃圾桩、
+synth~ 缺 synth.voice.template.pd。
+
 ## 0.18.32 (versionCode 336) — 2026-11-24 【0.57 分支 round 23:盒子原文行找回（verbose 0-2 放行）】
 
 用户复测 v335，看到失败"名字"是 `_`——**是假的**：pd 0.57 的

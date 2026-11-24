@@ -25,7 +25,14 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 147: 0.57 branch
+    /** Bump to re-extract after an assets/slibs update. 148: 0.57 branch
+     *  (0.18.33) - SUPEROSC~ RETIRED (user-approved decision A): the rc14
+     *  mc abstraction (0.18.20) plus its superosc.unit - the least-used
+     *  clone -d abstraction (0 external help refs, plugdata doesn't ship
+     *  it) and the only active source of residual couldn't-create noise;
+     *  help patch removed, PdObjectMeta port row dropped. f2s~/float2sig~
+     *  (the -do family users that help demos lean on) stay.
+     *  147: 0.57 branch
      *  (0.18.20) - superosc~/f2s~ upgraded to the rc14 mc abstractions
      *  (user-approved decision 5): the 0.17.152 mono substitutes (vsaw~
      *  array / fixed ramp) replaced by upstream's real mc versions - clone
@@ -82,7 +89,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 147
+    private const val VERSION = 148
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

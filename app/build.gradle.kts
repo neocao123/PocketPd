@@ -11,8 +11,17 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 336
-    versionName = "0.18.32" // ---- 0.57 BRANCH round 23: verbose(0-2)
+    versionCode = 337
+    versionName = "0.18.33" // ---- 0.57 BRANCH round 24: superosc~ RETIRED
+    // (user-approved decision A): the rc14 mc abstraction + superosc.unit +
+    // help patch removed from both ABIs, PdObjectMeta port row dropped,
+    // Slibs.VERSION 148 forces device re-extraction. Least-used mc
+    // abstraction (0 external help refs, plugdata doesn't ship it, user
+    // doesn't use it) and the only active source of residual couldn't
+    // -create noise. f2s~/float2sig~/gatemin~/gaterelease~/synth~ (the
+    // rest of the clone -d/-do family) stay.
+    //
+    // ---- 0.18.32 (0.57 history) round 23: verbose(0-2)
     // passthrough (the failing-box text lines were being eaten): pd 0.57
     // routes EVERY logpost through the print hook as "verbose(N): text"
     // (s_print.c dologpost) - including the CRITICAL(0) failing-box text
