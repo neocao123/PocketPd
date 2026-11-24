@@ -25,7 +25,14 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 148: 0.57 branch
+    /** Bump to re-extract after an assets/slibs update. 149: 0.57 branch
+     *  (0.18.37) - synth.voice.template.pd shipped (extracted verbatim from
+     *  the 082af31 snapshot tarball, Abstractions/Extra/) - synth~'s
+     *  `clone -do synth.voice.template 1` target was never shipped, so
+     *  [synth~] died at creation on any version. Template deps audited
+     *  against the core: else/bl.saw~ + else/adsr~ + else/receiver + sender
+     *  all farm-resolvable (setup symbols exported), rest vanilla.
+     *  148: 0.57 branch
      *  (0.18.33) - SUPEROSC~ RETIRED (user-approved decision A): the rc14
      *  mc abstraction (0.18.20) plus its superosc.unit - the least-used
      *  clone -d abstraction (0 external help refs, plugdata doesn't ship
@@ -89,7 +96,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 148
+    private const val VERSION = 149
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

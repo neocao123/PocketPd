@@ -1,0 +1,1 @@
+provenance: extracted verbatim from /c/Temp/else-full-082af31.tar.gz (github porres/pd-else @ 082af31, RC-15) - Abstractions/Extra/synth.voice.template.pd; shipped to fix synth~'s clone -do target (0.18.37)

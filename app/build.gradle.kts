@@ -11,8 +11,20 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 340
-    versionName = "0.18.36" // ---- 0.57 BRANCH round 27: the 'r -,' relay
+    versionCode = 341
+    versionName = "0.18.37" // ---- 0.57 BRANCH round 28: synth~ fixed by
+    // shipping its missing clone target: synth.voice.template.pd extracted
+    // verbatim from the pinned 082af31 snapshot tarball (Abstractions/Extra/,
+    // the generation every shipped else abstraction came from) into both
+    // ABIs; Slibs.VERSION 149 re-extracts (the device farm symlink is
+    // created from core_classes.txt, which already had the row). Template
+    // deps audited against the core exports: else/bl.saw~, else/adsr~,
+    // else/receiver, sender all resolve; rest vanilla (mtof/switch~/
+    // unpack/route/pdcontrol/file/keyname are 0.57 built-ins). synth~.pd's
+    // own deps were already covered (insert/swap2/mono abstractions +
+    // slice/pack2/loadbanger/sum~ compiled).
+    //
+    // ---- 0.18.36 (0.57 history) round 27: the 'r -,' relay
     // root cause fixed (user's call): pd's own writer glues the font-message
     // comma right after a gatom's snd field ("... - - -, f 5") with no
     // space - pd's tokenizer splits '-,' into '-' + a comma atom, but our

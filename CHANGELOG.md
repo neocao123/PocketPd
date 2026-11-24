@@ -7,6 +7,26 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.37 (versionCode 341) — 2026-11-24 【0.57 分支 round 28:synth~ 修复——补发缺失的 clone 目标】
+
+synth~.pd 引用 `clone -do synth.voice.template 1`，但
+`synth.voice.template.pd` 从未 ship（0.51 时代旧 clone 不解析 `-do`，
+该类在旧内核上同样是死的；0.57 原生 clone 后缺文件即创建失败）。
+修复：从**本地留存的精确快照 tarball**
+`/c/Temp/else-full-082af31.tar.gz`（github porres/pd-else @ 082af31，
+RC-15，与全部 shipped 抽象同代）的 `Abstractions/Extra/` 原样抽出，
+ship 至双 ABI else/ 目录；Slibs.VERSION 149 触发重提取（farm 符号链接
+由设备端按 core_classes.txt 生成，该行早已在册）。
+**依赖审计**（模板由 pd 原生加载，拼写必须 farm 可解析）：
+`else/bl.saw~`（`setup_bl0x2esaw_tilde` ✓）、`else/adsr~`
+（`adsr_tilde_setup` ✓）、`else/receiver`（`receiver_setup` ✓）、
+`sender`（`sender_setup` ✓）——四种符号约定逐一对照 dynsym；其余
+mtof/switch~/unpack/route/t/print/*~ 为 vanilla，file/pdcontrol/keyname
+为 0.57 内建。synth~.pd 自身依赖（insert/swap2/mono 抽象 +
+slice/pack2/loadbanger/sum~ 编译类）先前已覆盖。lint 0 错误。
+来源记录：slibs/else-src/abstractions-082af31/（含 MANIFEST）。
+**验收**：aapt = 341/0.18.37。
+
 ## 0.18.36 (versionCode 340) — 2026-11-24 【0.57 分支 round 27:`r -,` 中继根因修复（用户下令"好好修"）】
 
 用户对 `r -` 的定性追问挖出真正根因：pd 自己的写盘器把 gatom 的字体
