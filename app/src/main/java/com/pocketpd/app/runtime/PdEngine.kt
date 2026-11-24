@@ -1066,9 +1066,27 @@ object PdEngine {
         // escape must go once substituted.
         val literal = toks.getOrNull(0) == "#X" && toks.getOrNull(1) == "msg"
         if (literal) {
+            // 0.18.40: SEND-FORM messages (a "\;" statement — targets named
+            // canvases) inside inlined abstraction guts materialize their
+            // send-time dollars from the abstraction's creation args.
+            // Upstream fires these rebuild-messages with the args-derived
+            // pack2 list riding the inlet, which the env-less session cannot
+            // reproduce: ELSE synth~'s "; pd-$0-clone clear , obj ... clone
+            // -do $1 $2 ..." fired by a bare bang expanded $1/$2 EMPTY,
+            // rebuilt an EMPTY clone and synth~ went silent with zero
+            // errors. Inlet-fed templates (norm~'s "size \$1") are NOT
+            // send-form and keep their verbatim inlet-time dollars — no
+            // 0.18.24 regression.
+            val sendForm = toks.any { it == "\\;" }
             val out = toks.map { tok ->
                 var t = tok.replace("$0", uid)
                 t = Regex("\\$[1-9](?=-)").replace(t, uid)
+                if (sendForm && args.isNotEmpty() && t.startsWith("\\$")) {
+                    val n = t.substring(2).toIntOrNull()
+                    if (n != null) {
+                        args.getOrNull(n - 1)?.let { v -> if (v.isNotEmpty()) t = v }
+                    }
+                }
                 t
             }.joinToString(" ")
             return out + ";"

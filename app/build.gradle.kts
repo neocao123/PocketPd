@@ -11,8 +11,21 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 343
-    versionName = "0.18.39" // ---- 0.57 BRANCH round 30: loader-path probe
+    versionCode = 344
+    versionName = "0.18.40" // ---- 0.57 BRANCH round 31: send-form message
+    // materialization (synth~ silence fix): messages with a "\;" statement
+    // inside inlined abstraction guts now bind their send-time dollars from
+    // the abstraction's creation args. Upstream fires these rebuild-messages
+    // with the args-derived pack2 list on the inlet, which the env-less
+    // session cannot reproduce - ELSE synth~'s "; pd-$0-clone clear , obj
+    // ... clone -do $1 $2 ..." fired by a bare bang expanded $1/$2 EMPTY,
+    // rebuilt an EMPTY clone and went silent with zero errors (user
+    // confirmed no sound; the verbose probe showed zero template lookups).
+    // Inlet-fed templates (norm~'s "size \$1") are NOT send-form and keep
+    // verbatim inlet-time dollars - no 0.18.24 regression. Probe
+    // (setVerbose) stays one more round.
+    //
+    // ---- 0.18.39 (0.57 history) round 30: loader-path probe
     // (diagnostic round): PdBase.setVerbose(true) at init - pd's loader
     // prints every lookup as "tried <path> and failed/succeeded" at
     // PD_VERBOSE (gated on sys_verbose, which libpd_set_verbose sets).

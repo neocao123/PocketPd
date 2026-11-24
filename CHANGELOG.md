@@ -7,6 +7,22 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.40 (versionCode 344) — 2026-11-24 【0.57 分支 round 31:发送型消息物化（synth~ 静音根因修复）】
+
+用户实测确认静音（keyboard 直发 `list[2]` 格式无误，非输入侧问题）。
+v343 探针 + 会话原文定位真根因：**ELSE synth~ 用"动态重建 clone"模式**
+——抽象内部一条发送型消息（`\;` 开头）在 loadbang 时向子画布发
+`clear` + `obj ... clone -do $1 $2` + 重建连线。上游桌面由 pack2 把
+**创建参数派生的列表**喂到消息 inlet，`$1/$2` 从 inlet 展开；我们的
+无 env 内联会话里触发 bang 展开为空 → `clone -do`（无目标）→ 合法空壳
+clone → 零报错零查找零声音（verbose 轨迹零模板查找实锤）。
+**修复**：substituteLine 的 msg 分支对**发送型**（含 `\;` 语句）消息，
+把 send-time `\$N` 按**抽象创建参数物化**（`$1`=synth.voice.template、
+`$2`=4 → 会话内重建成正确 clone；触发与否两条路径内容一致）。**入口
+模板类**（norm~ 的 `size \$1` 等）非发送型，保持原样——不回退
+0.18.24 修复。探针（setVerbose）保留一轮。
+**验收**：aapt = 344/0.18.40。
+
 ## 0.18.39 (versionCode 343) — 2026-11-24 【0.57 分支 round 30:loader 路径探针轮（诊断）】
 
 v342 重武装后 synth~ 模板内的 `else/adsr~`/`else/receiver` 依旧失败，且
