@@ -1338,11 +1338,15 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             if (subStack.isNotEmpty()) popAllSubpatches()
             canvas.clearSelection()
             canvas.tool = PatchCanvasView.Tool.PAN
-            reopenSessionForRun()
-            // every run starts from the stored widget values (tgl off,
-            // sliders at their saved position, euclid clocks at the ready
-            // notch) — same state a fresh open shows; pd boots its own
-            // objects from the same file args, so the two sides agree
+            // 0.18.26 (user diagnosis: "应该先 UI 重置 0，再去跑 dsp，而不是
+            // 反过来"): the widget-cache reset must precede the session
+            // reopen. The old order — reopen first, reset after — let the
+            // reset run AFTER pd's loadbang delivery and overwrite the
+            // loadbang-set values back to the stored ones (loadbang→msg→
+            // numbox showed 0 after RUN while pd held 100; a manual msg tap
+            // later still worked). Reset first, THEN reopen: pd 0.57
+            // delivers the canvas loadbang during openPatch, so the
+            // loadbang values land after the reset and stay.
             canvas.document?.objects()?.forEach { o ->
                 o.runtimeValue = PdObjectMeta.guiValue(o)
                 o.runtimeText = ""
@@ -1352,6 +1356,7 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
                 }
             }
             PdEngine.resetEuclidStates()
+            reopenSessionForRun()
             // run = the patch plays: bring the engine up with it
             ensureAudioOn()
             // 0.18.10: the mode key drives the icon too — RUN = dsp ON

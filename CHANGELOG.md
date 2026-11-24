@@ -7,6 +7,20 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.26 (versionCode 330) — 2026-11-24 【0.57 分支 round 17:RUN 入口顺序（你 v329 复测的诊断落地）】
+
+**你的 v329 复测**：入口 numbox=100 ✓（订阅窗口修复生效），但点 RUN 又
+变 0。诊断：**部件缓存重置（runtimeValue 归回存储值）发生在
+reopenSessionForRun 之后**——即 loadbang 交付之后——把 loadbang 刚设定
+的 100 又盖回存储值（pd 持有 100，app 画 0）。
+
+**修复（按你说的顺序）**：重置移到重开**之前**——先 UI 归零、再重开跑
+dsp：reset(0) → open → loadbang 送达 → atom 回调把 runtimeValue 提回
+100 → 画 100。重置的"清陈旧 EDIT 状态"用途不变，只是改在尊重 loadbang
+的顺序上执行。
+
+**验收**：aapt = 330/0.18.26；复测 RUN 后 numbox 应显示 loadbang 设定值。
+
 ## 0.18.25 (versionCode 329) — 2026-11-24 【0.57 分支 round 16:loadbang 交付与部件订阅窗口（你的决定性实验定位）】
 
 **你的实验**：`[loadbang] → [msg 100( → [numbox] → [print]`——RUN 后

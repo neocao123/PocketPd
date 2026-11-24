@@ -11,8 +11,20 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 329
-    versionName = "0.18.25" // ---- 0.57 BRANCH round 16: loadbang delivery
+    versionCode = 330
+    versionName = "0.18.26" // ---- 0.57 BRANCH round 17: RUN-entry order
+    // per the user's diagnosis of v329 ("应该先 UI 重置 0，再去跑 dsp，
+    // 而不是反过来"): v329 fixed the subscription window (entry showed 100)
+    // but RUN still zeroed the numbox — the widget-cache reset
+    // (runtimeValue = saved guiValue) ran AFTER reopenSessionForRun, i.e.
+    // AFTER pd's loadbang delivery, overwriting the loadbang-set values
+    // back to the stored ones (pd held 100, the app drew 0). The reset now
+    // precedes the reopen: reset(0) -> open -> loadbang delivers -> the
+    // atom callback raises runtimeValue to 100 -> drawn 100. The
+    // clear-stale-EDIT-state purpose of the reset is unchanged - it just
+    // runs in the loadbang-respecting order.
+    //
+    // ---- 0.18.25 (0.57 history) round 16: loadbang delivery
     // vs the widget-subscription window (user-decisive experiment:
     // loadbang-[msg 100(-[numbox]-[print] — after RUN: numbox shows 0 but
     // print shows 100, and a manual msg tap sets the numbox = pd-side
