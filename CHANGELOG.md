@@ -7,6 +7,33 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.19 (versionCode 323) — 2026-11-24 【0.57 分支 round 10:[clone] 升级到原版（决策 4）】
+
+**命名澄清（你指出的）**：这不是删功能——[clone] 是 vanilla 内置对象，
+原样保留且能力变强；被移除的是 **app 侧绕行代码**（0.17.148 的
+voice==1 内联分支，~65 行）。准确说法 = **升级到原版 clone**。
+
+**背景**：0.51.3 内核的 clone 不认 `-d/-x/-di/-do` 旗标（ELSE
+superosc~ 内部用 `clone -d <name> 1`，直接报错建不出）→ 0.17.147/148
+在会话构建器里加了单声部内联绕行。**0.57 的 clone 原生解析全部旗标**
+——绕行的存在理由消失。
+
+**改动**：
+- PdEngine 删 `parseCloneArgs`/`CloneInfo` 及内联分支（单调用点）；
+- 所有 [clone] 盒子原样直通，由 pd 原生实例化：相对文件引用按会话画布
+  目录解析（**会话 .session-xxx 就写在补丁同目录**，画布目录 = 补丁
+  目录，天然成立）；`else/superosc.unit` 类库形态走注册的 slib 目录；
+- clone 文件内的 [args] 走 pd 自己的 canvas 环境，**不再需要** app 侧
+  initmess 转换；"clone" 在 pdClasses 兜底表里，通用内联器自动跳过。
+
+**语义差异提示**（升级的实质）：内联 = 平铺进会话（app 的 $0/延迟线
+命名空间）；原生 = pd 正常实例化抽象（自带环境）——对正确书写的补丁
+两者等价，依赖内联副作用的写法行为会变。**验收 = 你用 arp /
+superosc~ 相关补丁 A/B**。
+
+**验收**：aapt = 323/0.18.19；GM800 force-stop + install + dumpsys 复核；
+待你的 arp 实测。
+
 ## 0.18.18 (versionCode 322) — 2026-11-24 【0.57 分支 round 9:elsex 退役（决策 1/7）+ 四项决策文档关闭】
 
 **任务二决策集开始执行。** 你逐一裁决的七项里，四项是纯文档关闭（随本

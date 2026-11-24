@@ -1297,60 +1297,6 @@ object PdEngine {
 
     private var cachedCompiledClasses: Set<String>? = null
 
-    private data class CloneInfo(
-        val file: String,
-        val voiceCount: Int,
-        val startVoice: Int,
-        val suppressVoice: Boolean,
-    )
-
-    /**
-     * Parses `clone` creation args (everything after the class name) into
-     * voice count / abstraction file / start voice / suppress-voice. Returns
-     * null for syntax the native box handles on its own — the caller then
-     * leaves the box untouched. Flag set mirrors pd 0.55's clone: `-s N`,
-     * `-x`, `-d`, `-di`, `-do`; voice count and file name may come in either
-     * order (`clone 1 name` / `clone name 1`).
-     */
-    private fun parseCloneArgs(tokens: List<String>): CloneInfo? {
-        var i = 0
-        var startVoice = 0
-        var suppressVoice = false
-        while (i < tokens.size && tokens[i].startsWith("-")) {
-            when (tokens[i]) {
-                "-s" -> {
-                    if (i + 1 >= tokens.size) return null
-                    startVoice = tokens[i + 1].toFloatOrNull()?.toInt() ?: return null
-                    i += 2
-                }
-                "-x" -> {
-                    suppressVoice = true
-                    i++
-                }
-                "-d", "-di", "-do" -> i++
-                else -> return null
-            }
-        }
-        val rest = tokens.drop(i)
-        if (rest.size < 2) return null
-        // pd's tokenizer splits mid-token commas (f2s~.pd writes its fold
-        // marker glued to the file name: `... else/float2sig.unit, f 52;`),
-        // ours splits on whitespace only — strip the glue or the file name
-        // keeps a trailing comma and resolves to nothing (0.17.150 log:
-        // "file 'else/float2sig.unit,' not found").
-        fun unglue(s: String) = s.trimEnd(',').trimEnd(';')
-        val nFirst = unglue(rest[0]).toFloatOrNull()
-        return if (nFirst != null && nFirst >= 0 &&
-            rest[1].isNotEmpty() && !rest[1].startsWith("-")
-        ) {
-            CloneInfo(unglue(rest[1]), nFirst.toInt(), startVoice, suppressVoice)
-        } else {
-            val n = unglue(rest.getOrNull(1) ?: return null).toFloatOrNull() ?: return null
-            if (n < 0 || rest[0].isEmpty() || rest[0].startsWith("-")) return null
-            CloneInfo(unglue(rest[0]), n.toInt(), startVoice, suppressVoice)
-        }
-    }
-
     /** elapsedRealtime at [init] — the pd boot-race window is measured
      *  from here (slib setups defer until pd's audio thread is up). */
     private var processStartElapsedMs = 0L
@@ -1484,32 +1430,20 @@ object PdEngine {
                         box.meta = PdObjectMeta.resolve(box)
                     }
                 }
-                // [clone] single-voice inlining (0.17.147): the runtime's clone
-                // (pd 0.51.3 core, banner-proven 2026-11-22) predates the
-                // -d/-x/-di/-do flag parsing — `clone -d <name> 1` (ELSE's
-                // superosc~ uses exactly that) hits its usage error and never
-                // creates. With ONE voice a clone is semantically the file
-                // instantiated once with $1 = the start voice (-d distribution
-                // is the identity at n == 1), which is exactly what the
-                // abstraction inliner does. Multi-voice clones and unknown
-                // syntax stay native.
-                if (box.className() == "clone") {
-                    val ci = parseCloneArgs(box.args.drop(1))
-                    if (ci != null && ci.voiceCount == 1) {
-                        val ciInfo = Abstractions.resolve(ci.file)
-                        if (ciInfo != null) {
-                            if (inlineBudget <= 0) continue
-                            inlineBudget--
-                            inlineAbstraction(
-                                session, box, ciInfo,
-                                if (ci.suppressVoice) emptyList()
-                                else listOf(ci.startVoice.toString()),
-                            )
-                            continue
-                        }
-                        log("session: [clone] file '${ci.file}' not found; box kept native")
-                    }
-                }
+                // [clone] UPGRADED TO NATIVE (0.18.19, user-approved decision
+                // 4): the voice==1 inline workaround (0.17.147) existed because
+                // the pd 0.51.3 clone predates -d/-x/-di/-do flag parsing
+                // (`clone -d <name> 1`, ELSE superosc~'s form, hit its usage
+                // error). pd 0.57's clone parses every flag natively, so ALL
+                // clone boxes now pass through untouched and pd instantiates
+                // the file itself: file references resolve against the session
+                // canvas dir (== the patch dir, the session is written as
+                // .session-<name> next to the document) and library forms like
+                // `else/superosc.unit` against the registered slib dirs;
+                // [args] inside the clone file works through pd's own canvas
+                // environment (no app-side initmess conversion needed). "clone"
+                // sits in PdObjectMeta.pdClasses, so the generic inliner below
+                // skips it.
                 // every resolvable abstraction inlines per instance (GOP or
                 // not): pd's delay-line and send/receive namespaces are global
                 // per instance, so two native copies of the same module would

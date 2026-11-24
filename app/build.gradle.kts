@@ -11,8 +11,26 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 322
-    versionName = "0.18.18" // ---- 0.57 BRANCH round 9: elsex retired
+    versionCode = 323
+    versionName = "0.18.19" // ---- 0.57 BRANCH round 10: [clone] upgraded
+    // to the native pd 0.57 clone (user-approved decision 4, clarified by
+    // the user as an UPGRADE - nothing about the [clone] feature is
+    // removed; the pd built-in object stays and gains full capability).
+    // The voice==1 inline workaround (0.17.147) existed only because the
+    // 0.51.3 clone predates -d/-x/-di/-do flag parsing (ELSE superosc~'s
+    // `clone -d <name> 1` hit its usage error); 0.57's clone parses every
+    // flag natively, so ALL clone boxes now pass through untouched and pd
+    // instantiates the file itself: relative file references resolve
+    // against the session canvas dir (== the patch dir - the session is
+    // written as .session-<name> next to the document), library forms like
+    // `else/superosc.unit` resolve against the registered slib dirs, and
+    // [args] inside the clone file works through pd's own canvas
+    // environment (no app-side initmess conversion needed). "clone" sits
+    // in PdObjectMeta.pdClasses so the generic inliner skips it.
+    // parseCloneArgs/CloneInfo deleted (single call site). Acceptance =
+    // user A/B on their arp/superosc~ patches.
+    //
+    // ---- 0.18.18 (0.57 history) round 9: elsex retired
     // (user-approved decision 1/7 of the migration decision set): the 52
     // classes duplicated the full RC15 else core - bare names already
     // resolved to else by PRIORITY, so elsex's only live contribution was
