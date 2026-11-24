@@ -11,8 +11,19 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 342
-    versionName = "0.18.38" // ---- 0.57 BRANCH round 29: slibs search dirs
+    versionCode = 343
+    versionName = "0.18.39" // ---- 0.57 BRANCH round 30: loader-path probe
+    // (diagnostic round): PdBase.setVerbose(true) at init - pd's loader
+    // prints every lookup as "tried <path> and failed/succeeded" at
+    // PD_VERBOSE (gated on sys_verbose, which libpd_set_verbose sets).
+    // verbose(3+) lines now go to LOGCAT ONLY (tag PocketPd.PdVerbose), the
+    // console strip stays clean. Purpose: the else/-prefixed failures inside
+    // pd-loaded clone targets (else/adsr~, else/receiver in
+    // synth.voice.template) happen with files+symbols verified present and
+    // zero loader error lines - the tried-trail names the exact miss.
+    // Remove after the trail is captured.
+    //
+    // ---- 0.18.38 (0.57 history) round 29: slibs search dirs
     // re-armed BEFORE the open. Evidence chain (synth~ log, 19:56): the
     // clone target synth.voice.template.pd LOADED via a libDir entry
     // (<files>/slibs/else), but the else/-prefixed boxes INSIDE it

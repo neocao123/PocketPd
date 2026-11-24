@@ -465,6 +465,14 @@ object PdEngine {
         synchronized(PdBase::class.java) {
             PdBase.setReceiver(receiver)
             PdBase.setMidiReceiver(midiReceiver)
+            // 0.18.39 DIAGNOSTIC (probe round): pd's loader prints every
+            // lookup as "tried <path> and failed/succeeded" at PD_VERBOSE,
+            // which is gated on sys_verbose — the else/-prefixed creation
+            // failures inside pd-loaded clone targets (else/adsr~,
+            // else/receiver in synth.voice.template) need this trail: files
+            // and symbols verified present, yet the load fails with NO
+            // loader error. Remove after the trail is captured.
+            runCatching { PdBase.setVerbose(true) }
         }
         subscribe("pocketpd-vu-l")
         subscribe("pocketpd-vu-r")
@@ -2782,7 +2790,13 @@ object PdEngine {
                     val m = Regex("^verbose\\(([0-9]+)\\):\\s?(.*)$").find(trimmed)
                         ?: return@forEach
                     val level = m.groupValues[1].toIntOrNull() ?: return@forEach
-                    if (level >= 3) return@forEach
+                    if (level >= 3) {
+                        // probe round (0.18.39): pd's loader trail ("tried
+                        // <path> and failed/succeeded", PD_VERBOSE=4) goes
+                        // to LOGCAT ONLY — the console strip would flood
+                        android.util.Log.i("PocketPd.PdVerbose", line)
+                        return@forEach
+                    }
                     val content = m.groupValues[2]
                     if (content.isBlank()) return@forEach
                     log(content)

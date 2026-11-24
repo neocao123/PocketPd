@@ -7,6 +7,18 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.39 (versionCode 343) — 2026-11-24 【0.57 分支 round 30:loader 路径探针轮（诊断）】
+
+v342 重武装后 synth~ 模板内的 `else/adsr~`/`else/receiver` 依旧失败，且
+新判别事实：**无参的 `else/bl.saw~` 创建成功、带参的 `else/adsr~`/
+`else/receiver` 失败**——不是路径缺失能解释的。静态推演到头（路径重武装
+✓、迭代器覆盖全局表 ✓、别名注册 ✓、符号导出 ✓），出诊断探针：
+`PdBase.setVerbose(true)`（libpd 自带 API，设 sys_verbose=1）——pd 加载器
+会把每次查找以 `tried <完整路径> and failed/succeeded` 打到 PD_VERBOSE。
+verbose(3+) 行改走 **logcat 专用 tag `PocketPd.PdVerbose`**（console 不
+洪水），复现一次即可拿到精确查找轨迹。探针定位后拆除。
+**验收**：aapt = 343/0.18.39。
+
 ## 0.18.38 (versionCode 342) — 2026-11-24 【0.57 分支 round 29:slibs 搜索路径 open 前重武装（synth~ 日志驱动）】
 
 用户复测 synth~ 仍报错并令查日志。v336 的原文通道给出完整实名清单：
