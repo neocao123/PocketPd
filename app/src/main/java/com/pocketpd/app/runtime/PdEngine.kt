@@ -990,13 +990,15 @@ object PdEngine {
         // spellings (no alias, no .pd) — every one of them failed creation
         // and broke the module (0.18.21). File-backed names (else/insert,
         // else/norm~) keep the prefix and inline through their .pd.
+        // 0.18.34: resolve(bare)==null guard dropped — same reason as the
+        // box loop (else/default vs iemlib/default.pd; the registered bare
+        // class shadows same-named files, so the strip is exact).
         if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" &&
             toks[4].startsWith("else/")
         ) {
             val bare = toks[4].removePrefix("else/")
             if (bare.isNotEmpty() &&
                 Abstractions.resolve(toks[4]) == null &&
-                Abstractions.resolve(bare) == null &&
                 bare in compiledClasses()
             ) toks[4] = bare
         }
@@ -1494,11 +1496,19 @@ object PdEngine {
                 // abstraction file and <name> is a known compiled class, strip
                 // the prefix so pd finds it (the knob GOP then creates; its
                 // visual operation depends on the canvas widget support).
+                // 0.18.34: the `resolve(bare) == null` guard is GONE — a bare
+                // name that ALSO exists as another lib's abstraction file
+                // (else/default vs iemlib/default.pd) kept the prefix, and
+                // pd's loader resolves `else/NAME` ONLY under an else/
+                // directory, so the box died (... couldn't create, user
+                // report). Stripping is semantically exact whenever bare is
+                // a boot-registered class: pd_objectmaker hits the registered
+                // class before any file loader, so the object created IS the
+                // one `else/NAME` meant.
                 if (box.className().startsWith("else/") && box.gop == null) {
                     val bare = box.className().removePrefix("else/")
                     if (bare.isNotEmpty() &&
                         Abstractions.resolve(box.className()) == null &&
-                        Abstractions.resolve(bare) == null &&
                         bare in compiledClasses()
                     ) {
                         box.args[0] = bare
@@ -1905,6 +1915,45 @@ object PdEngine {
             }
         }
         for (o in session.objects()) relayizeLoadbang(o)
+
+        // 0.18.34: else/-prefix strip + [args] materialization for the
+        // session's remaining [pd] subpatch strings. inlineAbstraction's
+        // substituteLine only processes the guts of INLINED abstractions —
+        // a document that IS itself an upstream module (a unit .pd opened
+        // directly, e.g. iemlib's default.pd) carries RAW upstream lines in
+        // its own [pd] boxes, and nothing ever touched them: else/args -
+        // survived verbatim into a 15:03 session while every bare-args line
+        // converted fine. Same one-line swaps as substituteLine — connect
+        // indices stay untouched. Doc-level [pd] has no creation args, so
+        // [args]/[else/args] materialize to the no-args `initmess list`
+        // bang-equivalent (the documented empty-args form). Idempotent for
+        // the already-processed inlined strings (kept file-backed names
+        // still fail the strip guard the same way).
+        fun stripSubpatchLine(line: String): String {
+            val toks = line.trimEnd(';').trim().split(Regex("\\s+")).toMutableList()
+            if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" &&
+                toks[4].startsWith("else/")
+            ) {
+                val bare = toks[4].removePrefix("else/")
+                if (bare.isNotEmpty() &&
+                    Abstractions.resolve(toks[4]) == null &&
+                    bare in compiledClasses()
+                ) toks[4] = bare
+            }
+            if (toks.size >= 5 && toks[0] == "#X" && toks[1] == "obj" &&
+                (toks[4] == "args" || toks[4] == "else/args")
+            ) {
+                return (toks.take(4) + listOf("initmess", "list")).joinToString(" ") + ";"
+            }
+            return line
+        }
+        fun stripDocSubpatchStrings(obj: PatchObject) {
+            obj.subpatchLines?.let { lines ->
+                for ((i, line) in lines.withIndex()) lines[i] = stripSubpatchLine(line)
+            }
+            for (gw in obj.gop?.widgets ?: emptyList()) stripDocSubpatchStrings(gw)
+        }
+        for (o in session.objects()) stripDocSubpatchStrings(o)
         return session
     }
 

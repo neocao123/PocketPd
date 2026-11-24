@@ -11,8 +11,22 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 337
-    versionName = "0.18.33" // ---- 0.57 BRANCH round 24: superosc~ RETIRED
+    versionCode = 338
+    versionName = "0.18.34" // ---- 0.57 BRANCH round 25: else/-prefix strip
+    // completed (user-approved "你先试试"): the resolve(bare)==null guard on
+    // both strip sites is GONE - else/default survived it because iemlib
+    // ships default.pd (an abstraction of ANOTHER lib), and pd's loader
+    // resolves else/NAME only under an else/ directory, so the prefixed box
+    // died ("_ couldn't create" - the anonymous "... couldn't create").
+    // Stripping is semantically exact whenever bare is a boot-registered
+    // class: pd_objectmaker hits the registered class before any file
+    // loader. NEW: the session's remaining [pd] subpatch strings (doc-level
+    // modules opened directly, whose lines substituteLine never touched)
+    // get the same strip + [args]/[else/args] -> initmess list conversion -
+    // else/args had survived verbatim in the 15:03 session while every
+    // bare-args line converted.
+    //
+    // ---- 0.18.33 (0.57 history) round 24: superosc~ RETIRED
     // (user-approved decision A): the rc14 mc abstraction + superosc.unit +
     // help patch removed from both ABIs, PdObjectMeta port row dropped,
     // Slibs.VERSION 148 forces device re-extraction. Least-used mc

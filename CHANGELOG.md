@@ -7,6 +7,36 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.34 (versionCode 338) — 2026-11-24 【0.57 分支 round 25:else/ 前缀剥离补全（用户实测 else/default 失败驱动）】
+
+用户最小复现定案：`[default]` 裸写通，`[else/default]` 报匿名
+`_ couldn't create`。根因三层解码（本轮全部源码级验证）：
+1. **裸名开机注册**（else_core_setup/iemlib_core_setup 直接调 setup，
+   loadsym 上下文为空 → 无 else/ 别名）→ pd_objectmaker 直命中，永不经
+   文件加载器；
+2. **else/ 前缀只靠运行时 loader 现场解析**（farm 符号链接 → dlsym →
+   别名补注册），纸上每环都在（default.so 链接 ✓、default_setup 导出 ✓、
+   路径注册代码 ✓）但设备实测从未走通—— unresolved 残留：哪一环在设备
+   上断（下个可查点：sys_verbose 抓 tried/failed 路径日志）；
+3. **app 剥离守卫过严**：`resolve(bare)==null` 条件把 `else/default` 拦住
+   （iemlib/default.pd 存在 → bare 有文件解析），原样送 pd → 撞死链。
+   语义上守卫多余：裸名是开机注册类时，pd_objectmaker 先于文件加载器
+   命中，注册类本来就遮蔽同名文件。
+
+**修复（v338，用户批准"你先试试"）**：
+1. 对象路径剥离（buildInteractiveSession 盒循环）删 `resolve(bare)==null`；
+2. substituteLine 字符串路径同步删；
+3. **新增**：会话里剩余 [pd] 子补丁字符串（文档本身就是上游模块、直接
+   打开时的原生行——substituteLine 从未碰过的路径，15:03 会话里
+   else/args - 原样幸存的真路径）做同样的剥离 + `[args]`/`[else/args]`
+   → `initmess list`（无创建参数文档级空参等价形）。单行换单行，连接
+   索引不动；对已处理过的内联字符串幂等。
+f2s~/float2sig~ 的死行（load_object 报错后落回 .pd 抽象加载）不受影响。
+**验收**：aapt = 338/0.18.34。
+**仍挂起**：① 'r -,' 垃圾桩 ② synth~ 缺 synth.voice.template.pd
+③ mov.rms~ 已注册仍间歇失败之谜 ④ loader 设备侧断点定位（sys_verbose
+探针轮待批）。
+
 ## 0.18.33 (versionCode 337) — 2026-11-24 【0.57 分支 round 24:superosc~ 退役（用户决策 A）】
 
 用户拍板退役 superosc~（"退役清单轮"）。依据：全家 7 个 clone -d/-do
