@@ -1121,8 +1121,11 @@ object PdEngine {
                 // re-escape remaining BARE dollars for the pd file encoding
                 // (the parse stored them unescaped — unescapeDollars at
                 // parse, re-escape at write, the 0.17.120 rule); tokens that
-                // kept their upstream backslash ("\$1") are already encoded
-                if (t.contains("$")) t = Regex("(?<!\\\\)\\$").replace(t, "\\\\$")
+                // kept their upstream backslash ("\$1") are already encoded.
+                // Lambda form: the string-replacement overload treats "$" as
+                // a group reference ("Illegal group reference" crashed every
+                // run open on 0.18.22 — the UI-dead report)
+                if (t.contains("$")) t = Regex("(?<!\\\\)\\$").replace(t) { "\\\\$" }
             } else {
                 Regex("\\$(\\d)").findAll(tok0).forEach { m ->
                     val n = m.groupValues[1].toInt()
