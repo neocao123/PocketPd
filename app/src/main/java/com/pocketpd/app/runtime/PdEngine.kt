@@ -593,7 +593,14 @@ object PdEngine {
         // between app start and the first open, so re-assert it here (the
         // post-open re-set below cannot retroactively fire the swallowed
         // loadbangs; first-open loadbangs were dead until now)
-        PdTweaks.setLoadbangEnabled(true)
+        // loadbang delivery is gated by the OPEN MODE (user model, 0.18.27):
+        // patch ENTRY opens into EDIT where "libpd 不应该工作" — the file's
+        // loadbang chains must NOT fire (they would run behind the UI's
+        // back and fight the widget-cache reset at RUN); the RUN reopen is
+        // where the file's loadbang chains deliver, once, into subscribed
+        // widgets. SYNC/START keep delivery (help-less one-shot opens).
+        if (audio == AudioOpen.LOAD) PdTweaks.setLoadbangEnabled(false)
+        else PdTweaks.setLoadbangEnabled(true)
         dumpSessionForLogcat(file)
         patchHandle = synchronized(PdBase::class.java) { PdBase.openPatch(file.absolutePath) }
         patchFile = file

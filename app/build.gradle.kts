@@ -11,8 +11,18 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 330
-    versionName = "0.18.26" // ---- 0.57 BRANCH round 17: RUN-entry order
+    versionCode = 331
+    versionName = "0.18.27" // ---- 0.57 BRANCH round 18: loadbang delivery
+    // gated by the open mode (user model: "打开文件进 edit 模式 libpd 不
+    // 应该工作"): AudioOpen.LOAD (patch ENTRY into EDIT) opens with
+    // sys_noloadbang=1 - the file's loadbang chains do NOT fire, the UI
+    // shows the saved values, no pd-side state sneaks behind the UI's
+    // back. The RUN reopen opens with sys_noloadbang=0 - the loadbang
+    // chains deliver ONCE into the pre-subscribed widgets (the 0.18.25
+    // bind-before-open + the 0.18.26 reset-before-reopen order). Combined
+    // RUN sequence: reset(0) -> open(loadbang -> 100) -> drawn 100.
+    //
+    // ---- 0.18.26 (0.57 history) round 17: RUN-entry order
     // per the user's diagnosis of v329 ("应该先 UI 重置 0，再去跑 dsp，
     // 而不是反过来"): v329 fixed the subscription window (entry showed 100)
     // but RUN still zeroed the numbox — the widget-cache reset

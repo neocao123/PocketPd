@@ -7,6 +7,22 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.27 (versionCode 331) — 2026-11-24 【0.57 分支 round 18:loadbang 按 open 模式门控（EDIT 不跑，RUN 才交付）】
+
+**你的第二条观察成为设计**："打开文件进 edit 模式，libpd 不应该工作"——
+此前入口 open 就触发 loadbang（num 被打到 100），RUN 又依赖第二次触发，
+两次触发两处写入互相打架。收敛为**单次交付**：
+
+- **AudioOpen.LOAD（补丁入口进 EDIT）**：`sys_noloadbang=1`——文件里的
+  loadbang 链**不触发**，UI 显示存储值，pd 不在 UI 背后跑状态；
+- **RUN 入口重开**：`sys_noloadbang=0`——loadbang 链**只在这里交付一次**
+  进已订阅的部件（0.18.25 的先订阅 + 0.18.26 的先重置顺序配合）。
+
+**完整 RUN 序列**：重置(0) → open（loadbang → 100）→ UI 画 100。
+
+**验收**：aapt = 331/0.18.27；复测：打开文件 num 应显示存储值（不再被
+打到 100），点 RUN 应显示 100。
+
 ## 0.18.26 (versionCode 330) — 2026-11-24 【0.57 分支 round 17:RUN 入口顺序（你 v329 复测的诊断落地）】
 
 **你的 v329 复测**：入口 numbox=100 ✓（订阅窗口修复生效），但点 RUN 又
