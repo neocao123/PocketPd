@@ -11,8 +11,20 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 335
-    versionName = "0.18.31" // ---- 0.57 BRANCH round 22: couldn't-create
+    versionCode = 336
+    versionName = "0.18.32" // ---- 0.57 BRANCH round 23: verbose(0-2)
+    // passthrough (the failing-box text lines were being eaten): pd 0.57
+    // routes EVERY logpost through the print hook as "verbose(N): text"
+    // (s_print.c dologpost) - including the CRITICAL(0) failing-box text
+    // that pairs with "... couldn't create". The blanket verbose() drop
+    // (added for banner floods) swallowed those texts, so every create
+    // failure scrolled past unnamed and the 0.18.31 pairing self-paired
+    // garbage ("couldn't create: error: ... couldn't create"). The filter
+    // now keeps levels 0-2 and drops only 3+ (debug/verbose chatter). The
+    // create-failure summary flushes at the START of the next open since
+    // the errors arrive after openPatch returns (DSP-compile wave).
+    //
+    // ---- 0.18.31 (0.57 history) round 22: couldn't-create
     // console pairing (user: "说不清楚谁不能创建,很烂的log"): pd prints the
     // failing BOX TEXT as a separate CRITICAL line right before each bare
     // "... couldn't create" error and the two scroll apart; recordCreateFailure

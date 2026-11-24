@@ -600,14 +600,17 @@ object PdEngine {
         // app-visible depends on the open-time delivery any more
         PdTweaks.setLoadbangEnabled(true)
         dumpSessionForLogcat(file)
+        // create failures can arrive AFTER openPatch returns (the DSP-compile
+        // wave), so the summary flushes at the START of the next open instead
+        // of right after this one - which also keeps this open's late errors
+        // from being wiped before they are ever summarized
+        if (createFailuresThisOpen.isNotEmpty()) {
+            log("create failures, previous open (${createFailuresThisOpen.size}): " +
+                createFailuresThisOpen.joinToString(" | "))
+        }
         createFailuresThisOpen.clear()
         patchHandle = synchronized(PdBase::class.java) { PdBase.openPatch(file.absolutePath) }
         patchFile = file
-        if (createFailuresThisOpen.isNotEmpty()) {
-            // one summary line: the failing BOX TEXTS, not bare errors
-            log("create failures (${createFailuresThisOpen.size}): " +
-                createFailuresThisOpen.joinToString(" | "))
-        }
         when (audio) {
             AudioOpen.START -> startAudio()
             AudioOpen.RUN ->
@@ -2691,9 +2694,27 @@ object PdEngine {
     private val receiver = object : PdReceiver {
         override fun print(s: String) {
             s.split('\n').filter { it.isNotBlank() }.forEach { line ->
-                // pd's verbose chatter (per-class library banners) arrives in
-                // floods and drowns real output; keep it in logcat only
-                if (line.trimStart().startsWith("verbose(")) return@forEach
+                // pd 0.57 routes EVERY logpost through the print hook as
+                // "verbose(N): text" (s_print.c dologpost); the old
+                // unconditional verbose() drop was meant for per-class
+                // banner floods but ALSO ate level 0-2 lines - among them
+                // the CRITICAL(0) failing-box text that pairs with the next
+                // "... couldn't create" error, which is why create failures
+                // scrolled past unnamed. Levels: CRITICAL=0, ERROR=1,
+                // NORMAL=2, DEBUG=3, VERBOSE=4 (m_pd.h) - keep 0-2.
+                val trimmed = line.trimStart()
+                if (trimmed.startsWith("verbose(")) {
+                    val m = Regex("^verbose\\(([0-9]+)\\):\\s?(.*)$").find(trimmed)
+                        ?: return@forEach
+                    val level = m.groupValues[1].toIntOrNull() ?: return@forEach
+                    if (level >= 3) return@forEach
+                    val content = m.groupValues[2]
+                    if (content.isBlank()) return@forEach
+                    log(content)
+                    lastConsoleLine = content
+                    recordCreateFailure(content)
+                    return@forEach
+                }
                 log(line)
                 lastConsoleLine = line
                 recordCreateFailure(line)

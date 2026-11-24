@@ -7,6 +7,28 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.32 (versionCode 336) — 2026-11-24 【0.57 分支 round 23:盒子原文行找回（verbose 0-2 放行）】
+
+用户复测 v335，看到失败"名字"是 `_`——**是假的**：pd 0.57 的
+`s_print.c dologpost` 把**所有** logpost 行（包括 PD_CRITICAL 的失败盒子
+原文）都加 `verbose(N): ` 前缀送进 print hook，而 app 的无条件
+`verbose(` 丢弃（当初为 zexy banner 洪水加的）把原文行吞了 → 0.18.31 的
+配对抓到上一条错误行自己，产出垃圾（`couldn't create: error: ...
+couldn't create`）。本轮：过滤器只丢 level ≥ 3（debug/verbose 噪声），
+放行 0-2（critical/error/normal，含盒子原文）；create-failure 汇总改在
+下一次 open 开始时冲刷（报错实际发生在 openPatch 返回后的 DSP 编译波，
+post-open 汇总会漏）。纯 console 呈现。**验收**：aapt = 336/0.18.32。
+
+**同轮取证（logcat 全量）**：实际失败数不是 3 而是 **~13**（logcat chatty
+折叠了 10 条 identical 行）；其中 2 个已实锤 = 会话里两个
+`[mov.rms~ 1024]`（pd 的 `(receive->mov.rms~) connection failed` 双端
+点名，接收方到 mov.rms~ inlet-1 的连线因对象不存在而失败）——尽管该类
+已注册（else_core_setup master 调用清单含 setup_mov0x2erms_tilde、
+dynsym 394 个 setup 导出、farm 427 个符号链接全在、13/13 cores loaded）。
+其余 ~11 个（superosc.unit 内 else/ 前缀类的疑似名单）等下一轮 console
+实名。app 侧全部静态排查（搜索路径/提取/farm/master/转义/索引）均未发现
+缺口，需真实名单收口。
+
 ## 0.18.31 (versionCode 335) — 2026-11-24 【0.57 分支 round 22:couldn't create 配对日志（烂 log 修复）】
 
 用户复测 superosc~ 仍是三个 couldn't create 且 log 说不清是谁。**pd 的
