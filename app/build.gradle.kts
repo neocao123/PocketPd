@@ -11,8 +11,24 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 326
-    versionName = "0.18.22" // ---- 0.57 BRANCH round 13: subpatch-line
+    versionCode = 327
+    versionName = "0.18.23" // ---- 0.57 BRANCH round 14: msg-dollar escape
+    // layering settled (0.18.22 follow-ups): the user retest CONFIRMED the
+    // loadbang->msg->numbox/display chain working (msg trigger 100 ->
+    // floatatom-1zq + display-259 traces) and the couldn't-create count
+    // dropped ~18 -> 2; two escape defects remained:
+    // (1) substituteTokens' 0.18.22 re-escape double-escaped the object
+    //     msg path (substituteTokens escapes stripped, then the session
+    //     writer escapes again -> "\\$1" -> "bad arguments for message
+    //     'size' to object 'mov.rms~'" x2 from norm~'s size chain) -
+    //     substituteTokens reverted to plain strip; the session writer
+    //     owns object/msg serialization escaping.
+    // (2) substituteLine ([pd] subpatch verbatim writer) has NO writer
+    //     pass, so IT owns the escaping: keep substituteTokens' strip,
+    //     then re-escape bare dollars with the lambda regex form
+    //     (upstream files arrive escaped; bare ones get the pd encoding).
+    //
+    // ---- 0.18.22 (0.57 history) round 13: subpatch-line
     // parity fixes (follow-up to the 0.18.21 [args] fix - the user retest
     // on test_0_57 still errored; fresh session dump forensics):
     // (A) substituteLine (the [pd] subpatch string path) never stripped the

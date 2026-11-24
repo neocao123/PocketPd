@@ -993,7 +993,16 @@ object PdEngine {
         // (superosc~'s `resize $1` fired as `resize <freq>` — found with the
         // recovered real-session text, 0.17.145).
         val literal = toks.getOrNull(0) == "#X" && toks.getOrNull(1) == "msg"
-        return substituteTokens(toks, uid, args, literal).joinToString(" ") + ";"
+        // verbatim writer path: [pd] subpatch lines bypass the session
+        // writer's msg-dollar escaping, so re-escape BARE dollars here —
+        // upstream files encode msg-content dollars ("\$1" = A_DOLLAR atom,
+        // bound at send); bare "$1" in the written file gets load-time
+        // dollar resolution against the env-less session root
+        // ("$1: argument number out of range", 0.18.22). Lambda replace:
+        // the string-overload treats "$" as a group reference.
+        val out = substituteTokens(toks, uid, args, literal).joinToString(" ")
+        val line = if (literal) Regex("(?<!\\\\)\\$").replace(out) { "\\\\$" } else out
+        return line + ";"
     }
 
     /**
@@ -1097,16 +1106,14 @@ object PdEngine {
         var inSend = false
         val out = ArrayList<String>(tokens.size)
         for (tok0 in tokens) {
-            // upstream .pd files escape dollars ("\$0") for pd's file parser.
-            // OBJECT lines: substitutions below produce numbers, so the escape
-            // must go ("pack \1003 symbol" → "bad type"). MSG lines
-            // (literalDollars): the escape IS the encoding of an A_DOLLAR
-            // atom that binds the incoming atom at send time — stripping it
-            // turned the token into a LOAD-time dollar against the env-less
-            // session root ("$1: argument number out of range" while the
-            // initmess chain fired resize/curve during the open; 0.18.22
-            // re-escapes whatever dollars remain unsubstituted).
-            var t = if (literalDollars) tok0 else tok0.replace("\\$", "$")
+            // upstream .pd files escape dollars ("\$0") for pd's file parser;
+            // this path feeds BOTH the object serialization (where the
+            // session writer escapes msg dollars at write time — escaping
+            // here too produced "\\$1" and "bad arguments for message
+            // 'size'" on 0.18.22) AND the [pd] subpatch string path via
+            // substituteLine (which writes verbatim, so ITS escape handling
+            // lives there: keep upstream escapes, re-escape bare dollars).
+            var t = tok0.replace("\\$", "$")
             t = t.replace("$0", uid)
             // a dashed $N ("pd-$1-array-cnv", "$1-set bang") is ELSE's
             // spelling of the abstraction's $0 — bind it to the same uid so
@@ -1118,14 +1125,6 @@ object PdEngine {
                 else if (inSend) {
                     t = Regex("\\$[1-9]").replace(t, uid)
                 }
-                // re-escape remaining BARE dollars for the pd file encoding
-                // (the parse stored them unescaped — unescapeDollars at
-                // parse, re-escape at write, the 0.17.120 rule); tokens that
-                // kept their upstream backslash ("\$1") are already encoded.
-                // Lambda form: the string-replacement overload treats "$" as
-                // a group reference ("Illegal group reference" crashed every
-                // run open on 0.18.22 — the UI-dead report)
-                if (t.contains("$")) t = Regex("(?<!\\\\)\\$").replace(t) { "\\\\$" }
             } else {
                 Regex("\\$(\\d)").findAll(tok0).forEach { m ->
                     val n = m.groupValues[1].toInt()

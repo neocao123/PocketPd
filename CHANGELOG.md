@@ -7,6 +7,28 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.23 (versionCode 327) — 2026-11-24 【0.57 分支 round 14:msg 美元转义分层归位（复测确认主链已通）】
+
+**复测证据（日志）**：①`msg trigger: 100.0 -> pmsg-0` ✓（此前 dropped）；
+②你点击 msg 100 → numbox 与 display 都收到 100（floatatom-1zq /
+display-259 追踪行）✓——**loadbang→msg→设定 num/display 链已通**；
+③couldn't create 从 ~18 降到 2。
+
+**本轮修残余的双转义**（0.18.22 的修复把转义加错了层）：
+- substituteTokens（对象/msg 对象序列化路径）回退为纯剥离——写盘转义
+  由会话 writer 统一负责；0.18.22 在这里再转义一次 = `\\$1` →
+  "bad arguments for message 'size' to object 'mov.rms~'" ×2（norm~ 的
+  size 链）；
+- substituteLine（[pd] 子补丁**逐字写盘**路径，没有 writer 过手）保留
+  转义职责：保留上游 `\$` 编码、对残余裸 `$` 用 lambda 正则补转义。
+
+**分层定论**：substituteTokens = 剥离（writer 负责）；
+substituteLine = 保留+补转义（自己负责）。0.17.120 规则至此在两条路径
+各自成立。
+
+**验收**：aapt = 327/0.18.23；装机后复测（预期 couldn't create ≤2 且
+无 size bad-args；mov.rms~ 连接失败行 = 解码器错配对老毛病）。
+
 ## 0.18.22 (versionCode 326) — 2026-11-24 【0.57 分支 round 13:子补丁行两处 parity 修复（复测续）】
 
 **复测仍报错 → 新 dump 取证**。0.18.21 的首组修复**已生效**（dump 里是
