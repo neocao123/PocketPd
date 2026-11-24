@@ -11,8 +11,24 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 328
-    versionName = "0.18.24" // ---- 0.57 BRANCH round 15: msg lines on the
+    versionCode = 329
+    versionName = "0.18.25" // ---- 0.57 BRANCH round 16: loadbang delivery
+    // vs the widget-subscription window (user-decisive experiment:
+    // loadbang-[msg 100(-[numbox]-[print] — after RUN: numbox shows 0 but
+    // print shows 100, and a manual msg tap sets the numbox = pd-side
+    // chain WORKS, only the app-side value delivery dies). Mechanism:
+    // pd_doloadbang (m_pd.c) fires DURING openPatch; the reopen flow
+    // closed the previous session (unsubscribing every widget send symbol)
+    // and only re-subscribed via bindObjects AFTER openPatch — on a warm
+    // scheduler (every RUN entry after the first) the loadbang-fired value
+    // landed inside that unsubscribe window and never reached the UI.
+    // Patch ENTRY always worked because pd 0.51/57's cold scheduler
+    // deferred the delivery past bindObjects, masking the window. Fix:
+    // bindObjects(doc) now runs BEFORE openPatch in both reopenSessionForRun
+    // and loadPatch (subscriptions are global symbol receivers - safe
+    // pre-open), keeping the post-open call for the boundObjects map.
+    //
+    // ---- 0.18.24 (0.57 history) round 15: msg lines on the
     // verbatim subpatch path leave the pipeline EXACTLY as upstream wrote
     // them (user verdict on the loadbang->msg->set-num regression: fix it,
     // stop experimenting). substituteLine's msg lines now use a dedicated

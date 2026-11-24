@@ -608,6 +608,11 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
                 val sessionDoc = PdEngine.buildInteractiveSession(doc, errors)
                 val session = File(file.parentFile, ".session-${file.name}")
                 session.writeText(sessionDoc.toText())
+                // 0.18.25: subscribe before the open (see reopenSessionForRun
+                // — pd 0.57 delivers loadbang during openPatch; on a warm
+                // scheduler that lands inside the unsubscribe window and the
+                // loadbang-set numbox/display values never reach the UI)
+                PdEngine.bindObjects(doc)
                 // 0.18.11: LOAD = audio thread ticks (slib setup flush) with
                 // the DSP switch off — patch entry is SILENT; the graph
                 // compiles at the RUN entry rebuild.
@@ -1390,6 +1395,16 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
             // rerouting and pd value changes never reach the app-side display
             PdEngine.autoBindGui(doc)
             session.writeText(PdEngine.buildInteractiveSession(doc, errors).toText())
+            // 0.18.25: subscribe BEFORE the open — pd 0.57 delivers the
+            // canvas loadbang DURING openPatch, and a warm scheduler (every
+            // RUN entry after the first) fires it while the closePatch of
+            // the previous session has already unsubscribed the widget
+            // symbols and bindObjects has not re-armed them yet: the
+            // loadbang-set values (loadbang→msg→numbox/display) never
+            // reached the UI. Cold-scheduler first opens delivered late and
+            // masked this. The post-open bindObjects stays (harmless, keeps
+            // the boundObjects map fresh).
+            PdEngine.bindObjects(doc)
             PdEngine.openPatch(
                 session, barTitle.text.toString().trimEnd(' ', '•'),
                 audio = if (keepAudioSilent) PdEngine.AudioOpen.SYNC else PdEngine.AudioOpen.RUN,

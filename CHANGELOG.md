@@ -7,6 +7,26 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.25 (versionCode 329) — 2026-11-24 【0.57 分支 round 16:loadbang 交付与部件订阅窗口（你的决定性实验定位）】
+
+**你的实验**：`[loadbang] → [msg 100( → [numbox] → [print]`——RUN 后
+numbox 显示 0 而 print 打 100；手点 `[msg 100(` numbox 变 100。结论：
+**pd 侧链路完好，死的只是 app 侧的值交付**。
+
+**机制**：`pd_doloadbang`（m_pd.c:353）在 openPatch **期间**向新画布发
+"loadbang"。RUN 入口重开前，上一会话的 closePatch 已退订全部部件发送
+符号，bindObjects 在 openPatch **之后**才补订阅——热调度器（首次之后
+的每次 RUN）让 loadbang 的值恰好落进这个退订空窗 → UI 永远收不到。
+补丁入口一直正常是假象：0.51/0.57 冷调度器把投递推迟到了订阅之后，
+掩盖了空窗的存在。
+
+**修复**：bindObjects(doc) 提前到 openPatch **之前**执行（订阅 = 全局
+符号接收器，open 前挂安全），reopenSessionForRun 与 loadPatch 两处同改；
+open 后的原调用保留（刷新 boundObjects 映射）。
+
+**验收**：aapt = 329/0.18.25；请复测 RUN 后 numbox/display 应显示
+loadbang 设定值。
+
 ## 0.18.24 (versionCode 328) — 2026-11-24 【0.57 分支 round 15:msg 行原文直通（loadbang→msg→set-num 回归收敛）】
 
 **用户判定**：loadbang→msg→设定 num/display 值的回归是我 0.18.22/23 的
