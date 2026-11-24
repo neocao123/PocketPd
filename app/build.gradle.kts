@@ -11,8 +11,19 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 327
-    versionName = "0.18.23" // ---- 0.57 BRANCH round 14: msg-dollar escape
+    versionCode = 328
+    versionName = "0.18.24" // ---- 0.57 BRANCH round 15: msg lines on the
+    // verbatim subpatch path leave the pipeline EXACTLY as upstream wrote
+    // them (user verdict on the loadbang->msg->set-num regression: fix it,
+    // stop experimenting). substituteLine's msg lines now use a dedicated
+    // minimal handler: bind $0 and ELSE's dashed-$0 to the inline uid,
+    // KEEP the upstream backslash escapes verbatim, substitute nothing
+    // else - desktop-pd semantics (A_DOLLAR binds the incoming atom at
+    // send). The 0.18.22/23 escape experiments (re-escape layers, both
+    // wrong) are fully retired; substituteTokens keeps the 0.18.20 plain
+    // strip for object lines (writer owns their escaping).
+    //
+    // ---- 0.18.23 (0.57 history) round 14: msg-dollar escape
     // layering settled (0.18.22 follow-ups): the user retest CONFIRMED the
     // loadbang->msg->numbox/display chain working (msg trigger 100 ->
     // floatatom-1zq + display-259 traces) and the couldn't-create count

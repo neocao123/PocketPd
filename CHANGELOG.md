@@ -7,6 +7,18 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.24 (versionCode 328) — 2026-11-24 【0.57 分支 round 15:msg 行原文直通（loadbang→msg→set-num 回归收敛）】
+
+**用户判定**：loadbang→msg→设定 num/display 值的回归是我 0.18.22/23 的
+转义实验造成的，要求停止实验、收敛修复。落地：substituteLine 的 msg 行
+改用**专用最小处理器**——只绑定 $0 与 ELSE 的 dashed-$0 到内联 uid，
+**上游转义原文保留、其余一字不动**（桌面 pd 语义：msg 内容的 `\$1` =
+A_DOLLAR 原子，发送时绑定入站原子）。0.18.22/23 的两版 re-escape 实验
+全部退役；substituteTokens 维持 0.18.20 的纯剥离（对象行转义归 writer）。
+
+**验收**：aapt = 328/0.18.24；请复测 loadbang→msg→num/display 链与
+superosc~。
+
 ## 0.18.23 (versionCode 327) — 2026-11-24 【0.57 分支 round 14:msg 美元转义分层归位（复测确认主链已通）】
 
 **复测证据（日志）**：①`msg trigger: 100.0 -> pmsg-0` ✓（此前 dropped）；

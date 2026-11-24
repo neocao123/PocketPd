@@ -985,24 +985,28 @@ object PdEngine {
             val head = substituteTokens(toks.take(4), uid, emptyList(), false)
             return (head + listOf("initmess") + body).joinToString(" ") + ";"
         }
-        // message content binds standalone $N to the incoming message, never
-        // to the abstraction's creation args — keep those literal. The check
-        // reads the first TWO tokens ("#X" "msg"): a startsWith("#X msg")
-        // against the whitespace-split token list was always false, so every
-        // inlined msg box's $N silently bound to creation args instead
-        // (superosc~'s `resize $1` fired as `resize <freq>` — found with the
-        // recovered real-session text, 0.17.145).
+        // MSG lines on this verbatim path get a dedicated minimal handler:
+        // upstream text arrives ESCAPED ("\$1" = pd's file encoding of an
+        // A_DOLLAR atom bound at send time) and must leave EXACTLY as it
+        // came — only $0 and ELSE's dashed-$0 spellings are bound to the
+        // inline uid, and the backslash stays so the atom keeps its
+        // send-time semantics. The generic substituteTokens strips the
+        // escape unconditionally, which turned these into load-time dollars
+        // against the env-less session root ("$1: argument number out of
+        // range", 0.18.22/23) and broke every loadbang→msg→set-value chain
+        // riding an inlined subpatch (0.18.24). Object lines keep the
+        // generic path: their dollars resolve against creation args and the
+        // escape must go once substituted.
         val literal = toks.getOrNull(0) == "#X" && toks.getOrNull(1) == "msg"
-        // verbatim writer path: [pd] subpatch lines bypass the session
-        // writer's msg-dollar escaping, so re-escape BARE dollars here —
-        // upstream files encode msg-content dollars ("\$1" = A_DOLLAR atom,
-        // bound at send); bare "$1" in the written file gets load-time
-        // dollar resolution against the env-less session root
-        // ("$1: argument number out of range", 0.18.22). Lambda replace:
-        // the string-overload treats "$" as a group reference.
-        val out = substituteTokens(toks, uid, args, literal).joinToString(" ")
-        val line = if (literal) Regex("(?<!\\\\)\\$").replace(out) { "\\\\$" } else out
-        return line + ";"
+        if (literal) {
+            val out = toks.map { tok ->
+                var t = tok.replace("$0", uid)
+                t = Regex("\\$[1-9](?=-)").replace(t, uid)
+                t
+            }.joinToString(" ")
+            return out + ";"
+        }
+        return substituteTokens(toks, uid, args, literal).joinToString(" ") + ";"
     }
 
     /**
