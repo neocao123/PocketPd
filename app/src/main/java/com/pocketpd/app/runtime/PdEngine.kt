@@ -600,8 +600,14 @@ object PdEngine {
         // app-visible depends on the open-time delivery any more
         PdTweaks.setLoadbangEnabled(true)
         dumpSessionForLogcat(file)
+        createFailuresThisOpen.clear()
         patchHandle = synchronized(PdBase::class.java) { PdBase.openPatch(file.absolutePath) }
         patchFile = file
+        if (createFailuresThisOpen.isNotEmpty()) {
+            // one summary line: the failing BOX TEXTS, not bare errors
+            log("create failures (${createFailuresThisOpen.size}): " +
+                createFailuresThisOpen.joinToString(" | "))
+        }
         when (audio) {
             AudioOpen.START -> startAudio()
             AudioOpen.RUN ->
@@ -706,6 +712,12 @@ object PdEngine {
      *  that pairing yields the real class name. */
     private var lastConsoleLine: String? = null
 
+    /** Box texts pd failed to create during the CURRENT open (reset at every
+     *  openPatch). pd's raw output pairs the box text with the error on two
+     *  separate console lines that scroll apart — this list goes into the
+     *  one summary line after the open finishes. */
+    private val createFailuresThisOpen = ArrayList<String>()
+
     private fun recordCreateFailure(line: String) {
         val idx = line.indexOf("couldn't create")
         if (idx < 0) return
@@ -715,8 +727,19 @@ object PdEngine {
         // line itself is always the literal "..." (never the name), so the
         // old tail-token parse recorded garbage and the retry gate could
         // never tell a missing user abstraction from a not-yet-loaded slib.
-        val name = lastConsoleLine?.trim()
-            ?.split(Regex("\\s+"))?.firstOrNull()
+        // clone's own failure lines DO carry the name in quotes ("clone:
+        // couldn't create 'else/superosc.unit'") - prefer that when present.
+        val cloneQuoted = Regex("couldn't create '([^']+)'").find(line)
+            ?.groupValues?.get(1)
+        val boxText = cloneQuoted?.let { "clone '$it'" }
+            ?: lastConsoleLine?.trim()?.takeIf { it.isNotEmpty() }
+        if (boxText != null && createFailuresThisOpen.lastOrNull() != boxText) {
+            createFailuresThisOpen.add(boxText)
+            // merged console line: pd puts the box text and the error on two
+            // separate lines that scroll apart - repeat the text ON the error
+            log("couldn't create: $boxText")
+        }
+        val name = boxText?.split(Regex("\\s+"))?.firstOrNull()
             ?: line.substring(0, idx)
                 .trim().removePrefix("error:").trim()
                 .trimEnd(';', ':', ',', ' ').split(' ', '\t').lastOrNull()?.trim()

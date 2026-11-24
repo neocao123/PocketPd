@@ -7,6 +7,37 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.31 (versionCode 335) — 2026-11-24 【0.57 分支 round 22:couldn't create 配对日志（烂 log 修复）】
+
+用户复测 superosc~ 仍是三个 couldn't create 且 log 说不清是谁。**pd 的
+报错格式本身就是两条一行**：每条 `... couldn't create` 前，pd 会先打一条
+CRITICAL 行，内容就是失败盒子的**完整原文**（对象名+参数）——信息一直
+都在，只是两条分离、滚动即散。本轮：
+1. recordCreateFailure 把盒子原文与错误合并，console 直接输出
+   `couldn't create: <盒子原文>` 一行；
+2. clone 自己的报错带引号名（`clone: couldn't create 'else/superosc.unit'`）
+   直接解析引号，不再依赖配对；
+3. 每次 openPatch 结束打一行汇总
+   `create failures (N): 原文1 | 原文2 | ...`（open 边界清零）。
+纯 console 呈现，零引擎行为变更。**验收**：aapt = 335/0.18.31。
+
+**同轮静态排查结论（逐环实证，不动代码）**：clone 原生实现链全部健全——
+`-d/-do` 旗标解析（g_clone.c）、new_anything→sys_load_lib 加载链、
+farm 符号链接（dlsym 用 basename 转义：`else/order`→`setup_order`，
+else_core 导出实证）、class_loadsym 别名补注册（m_class.c:470 后缀规则）、
+expr 开机注册（conf_init→expr_setup 反汇编实证）、设备提取树完整
+（735 项，superosc.unit.pd/float2imp~.pd/nmess.pd/insert.pd 全在）。
+writer 转义审计（对象行 `$` 恰一 `\`、msg 原文直通、`\,`/`\;` 保真、
+`$f1` 多一转义但 pd 解析回同名字符串无害）+ 连接索引范围核对（0 越界）
+——**会话文本里没有转义坏盒**。实测会话（15:03 的
+`.session-superosc~.pd`）另暴露两个真实缺陷待用户裁决后修：
+① `[pd args-initialization]` 字符串路径里 `else/args -`（前缀拼写）
+漏过 [args]→initmess 转换（裸 `args` 已正确转换，如 insert 的
+`initmess all`）→ pd 在无 env 子画布上创建 [else/args] 走
+canvas_getargs（0.51 曾 SEGV 的同一接口），初始化值不可靠；
+② 两个 `r -,` 垃圾中继桩（norm~ 内联时父侧控制口 relay 名构造 bug），
+无发送方，父级到 norm~ inlet-1 的消息会死。
+
 ## 0.18.30 (versionCode 334) — 2026-11-24 【0.57 分支 round 21:诊断插桩拆除收尾轮】
 
 用户确认 0.18.29 顺序化 loadbang 修复生效（"之前的问题解决了"）。拆除

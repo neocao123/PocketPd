@@ -11,8 +11,17 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 334
-    versionName = "0.18.30" // ---- 0.57 BRANCH round 21: instrumentation
+    versionCode = 335
+    versionName = "0.18.31" // ---- 0.57 BRANCH round 22: couldn't-create
+    // console pairing (user: "说不清楚谁不能创建,很烂的log"): pd prints the
+    // failing BOX TEXT as a separate CRITICAL line right before each bare
+    // "... couldn't create" error and the two scroll apart; recordCreateFailure
+    // now emits a merged "couldn't create: <box text>" line and openPatch
+    // ends with one "create failures (N): ... | ..." summary. clone's own
+    // error lines carry the name in quotes and are parsed directly. Console
+    // presentation only - zero engine/behavior change.
+    //
+    // ---- 0.18.30 (0.57 history) round 21: instrumentation
     // teardown (user confirmed the 0.18.29 sequenced-loadbang fix works:
     // "之前的问题解决了"). The 0.18.28 diagnostic lines are gone - the
     // poll-tick counter, the unconditional recv-float entry trace, the
