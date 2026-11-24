@@ -7,6 +7,25 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.35 (versionCode 339) — 2026-11-24 【0.57 分支 round 26:failedClasses 加固（用户指出灰显污染链）】
+
+用户指出：`r -,` 垃圾桩在 pd 里解析为 `[r -]`——**`-` 是合法接收名**，
+可被 `[s -]`/`[; - …(` 操作，并非单纯语法垃圾；并质疑灰显（failedClasses
+标记）被污染会引发功能问题。推断成立，三个实锤 + 修复：
+1. **failedClasses 从未重置**：一个名字进过一次，该类所有盒子灰显整个
+   进程生命周期（PatchCanvasView broken 样式 + 命中测试跳过两处消费）；
+   → 每次 openPatch 开始重置（fresh assessment）；
+2. **配对污染**：原文行缺失时配对逻辑把上一条错误行/任意残渣记入
+   failedClasses（实测记过 "error:"）；垃圾名若是真实类名（如 "r"），
+   **所有 [r] 盒子灰显**；→ recordCreateFailure 拒绝与 error/verbose 行
+   配对 + 提取 token 校验（长度 ≥2、无尾冒号、类名字符集），垃圾一律不
+   入表（宁可漏记不可毒表）；
+3. **settle 重开门误触发**：`failedClasses.any { it in knownClasses }`
+   会被垃圾名/非 slib 名误触发 4.5s 重开（上限 3 次）；→ 门改要求失败名
+   属于 slibs 编译类（compiledClasses()），语义归位（settle 等的就是
+   slib 类）。
+**验收**：aapt = 339/0.18.35。
+
 ## 0.18.34 (versionCode 338) — 2026-11-24 【0.57 分支 round 25:else/ 前缀剥离补全（用户实测 else/default 失败驱动）】
 
 用户最小复现定案：`[default]` 裸写通，`[else/default]` 报匿名

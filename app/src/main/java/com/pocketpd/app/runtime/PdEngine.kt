@@ -609,6 +609,11 @@ object PdEngine {
                 createFailuresThisOpen.joinToString(" | "))
         }
         createFailuresThisOpen.clear()
+        // fresh assessment per open: a stale name would grey every box of
+        // that class for the whole process life and could false-fire the
+        // slibs-settle reopen gate (0.18.35)
+        failedClasses = emptySet()
+        lastConsoleLine = null
         patchHandle = synchronized(PdBase::class.java) { PdBase.openPatch(file.absolutePath) }
         patchFile = file
         when (audio) {
@@ -696,9 +701,9 @@ object PdEngine {
                         openPatch(file, displayName, 1, audio)
                     }
                 }, 4500)
-            } else if (retry < 3 && failedClasses.any { it in PdObjectMeta.knownClasses }) {
+            } else if (retry < 3 && failedClasses.any { it in compiledClasses() }) {
                 pollHandler.postDelayed({
-                    if (patchFile == file && failedClasses.any { it in PdObjectMeta.knownClasses }) {
+                    if (patchFile == file && failedClasses.any { it in compiledClasses() }) {
                         log("slibs settle: reopening $displayName (classes missing)")
                         openPatch(file, displayName, retry + 1, audio)
                     }
@@ -724,29 +729,34 @@ object PdEngine {
     private fun recordCreateFailure(line: String) {
         val idx = line.indexOf("couldn't create")
         if (idx < 0) return
-        // pd 0.51 canvas_objtext prints the failing box text (binbuf_print,
-        // e.g. " c_hurdy_eufon" / " gate~ 2") IMMEDIATELY before this error
-        // line — pair with it for the real class name. The tail of the error
-        // line itself is always the literal "..." (never the name), so the
-        // old tail-token parse recorded garbage and the retry gate could
-        // never tell a missing user abstraction from a not-yet-loaded slib.
         // clone's own failure lines DO carry the name in quotes ("clone:
-        // couldn't create 'else/superosc.unit'") - prefer that when present.
+        // couldn't create 'else/superosc.unit'") - use that when present.
         val cloneQuoted = Regex("couldn't create '([^']+)'").find(line)
             ?.groupValues?.get(1)
-        val boxText = cloneQuoted?.let { "clone '$it'" }
-            ?: lastConsoleLine?.trim()?.takeIf { it.isNotEmpty() }
-        if (boxText != null && createFailuresThisOpen.lastOrNull() != boxText) {
-            createFailuresThisOpen.add(boxText)
-            // merged console line: pd puts the box text and the error on two
-            // separate lines that scroll apart - repeat the text ON the error
-            log("couldn't create: $boxText")
+        // Pair the failing box text with the error ONLY when the previous
+        // console line is plausible box text. A missed text line used to
+        // make this pair the error with the PREVIOUS ERROR (or any stray
+        // line) and record garbage into failedClasses - which greys every
+        // box of that class (PatchCanvasView broken style + hit-test skip)
+        // and false-fires the slibs-settle reopen gate (0.18.35).
+        val prev = lastConsoleLine?.trim()
+        val boxText = cloneQuoted?.let { "clone '$it'" } ?: run {
+            if (prev.isNullOrEmpty() || prev.startsWith("error:") ||
+                prev.startsWith("verbose(") || prev.contains("couldn't create")
+            ) return
+            prev
         }
-        val name = boxText?.split(Regex("\\s+"))?.firstOrNull()
-            ?: line.substring(0, idx)
-                .trim().removePrefix("error:").trim()
-                .trimEnd(';', ':', ',', ' ').split(' ', '\t').lastOrNull()?.trim()
-        if (!name.isNullOrEmpty() && name !in failedClasses) {
+        log("couldn't create: $boxText")
+        if (boxText != createFailuresThisOpen.lastOrNull()) {
+            createFailuresThisOpen.add(boxText)
+        }
+        val name = boxText.split(Regex("\\s+")).firstOrNull() ?: return
+        // plausible pd class token only - garbage names poison the canvas
+        // marking (an "r" or "-" here greys EVERY such box)
+        if (name.length >= 2 && !name.endsWith(":") && name != "error" &&
+            name.all { it.isLetterOrDigit() || it in "~._-!/" } &&
+            name !in failedClasses
+        ) {
             failedClasses = failedClasses + name
             onFailedClassesChanged?.invoke()
         }

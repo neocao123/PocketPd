@@ -11,8 +11,20 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 338
-    versionName = "0.18.34" // ---- 0.57 BRANCH round 25: else/-prefix strip
+    versionCode = 339
+    versionName = "0.18.35" // ---- 0.57 BRANCH round 26: failedClasses
+    // hardening (user's sharp catch: the 'r -' receivers parsed from the
+    // 'r -,' relay-naming garbage are LEGAL pd receivers, and the grey
+    // broken-style marking keyed on failedClasses could poison whole
+    // classes). Three fixes: failedClasses + lastConsoleLine reset at every
+    // openPatch (stale names greyed boxes for the whole process life);
+    // recordCreateFailure never pairs against an error/verbose line and
+    // validates the extracted token (length >= 2, no trailing ':', plausible
+    // class charset) so garbage can't enter; the slibs-settle reopen gate
+    // now requires the failed name to be a slibs compiled class
+    // (compiledClasses()), not any known class.
+    //
+    // ---- 0.18.34 (0.57 history) round 25: else/-prefix strip
     // completed (user-approved "你先试试"): the resolve(bare)==null guard on
     // both strip sites is GONE - else/default survived it because iemlib
     // ships default.pd (an abstraction of ANOTHER lib), and pd's loader
