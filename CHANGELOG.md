@@ -7,6 +7,28 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.38 (versionCode 342) — 2026-11-24 【0.57 分支 round 29:slibs 搜索路径 open 前重武装（synth~ 日志驱动）】
+
+用户复测 synth~ 仍报错并令查日志。v336 的原文通道给出完整实名清单：
+模板 `synth.voice.template.pd` **本身加载成功**（其内部盒子逐一求值），
+但内部的 `else/adsr~`×3、`else/receiver`×3 全部失败——它们的解析需要
+slibs **根目录**（`else/NAME` 只会作为 `<root>/else/NAME.*` 被查找），
+而模板自己是从 libDir 条目（`<files>/slibs/else/`）加载的。且 console
+无任何 dlopen/dlerror/load_object 行 → **根目录在 open 时刻不在
+st_searchpath 上**（开机注册代码存在，中途丢失的机制未定——sys_verbose
+探针可定位）。修复：openPatch 在 `PdBase.openPatch` **之前**重武装
+libDirs + slibs 根（`addedSearchPaths` 去重的一次性补注册），顺带使
+open 自身的盒创建也能用上这些路径。
+
+**同日志的非代码结论（用户测试补丁内容）**：
+1. `voices 10 1 -list -retrig 1` → voices.c 只接受
+   `-retrig/-rel/-n/-offset/-steal`，无 `-list`；第二个位置参数 `1` 是
+   **steal** 不是 retrig。正确写法如 `voices 10 -retrig 1`；
+2. `monophonic` 上游根本不存在（只有同名教程补丁）；单音对象是已 ship
+   的 `else/mono`；
+3. `lb -init` 命中已知死类（52 死行清理待批后修复）。
+**验收**：aapt = 342/0.18.38。
+
 ## 0.18.37 (versionCode 341) — 2026-11-24 【0.57 分支 round 28:synth~ 修复——补发缺失的 clone 目标】
 
 synth~.pd 引用 `clone -do synth.voice.template 1`，但

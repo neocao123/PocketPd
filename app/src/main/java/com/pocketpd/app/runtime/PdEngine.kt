@@ -614,6 +614,22 @@ object PdEngine {
         // slibs-settle reopen gate (0.18.35)
         failedClasses = emptySet()
         lastConsoleLine = null
+        // 0.18.37: re-arm the slibs search dirs BEFORE the open. Subdir-form
+        // loader lookups (else/NAME resolves only against <files>/slibs/NAME*)
+        // failed inside pd-loaded clone targets (synth.voice.template's
+        // else/adsr~/else/receiver) while same-dir file loads (the template
+        // itself, via a libDir entry) succeeded — i.e. the slibs-root entry
+        // was not effective on the path at open time. addToSearchPath
+        // appends; addedSearchPaths dedups the one-time re-registration.
+        appContext?.let { ctx ->
+            for (dir in com.pocketpd.app.util.Slibs.libDirs(ctx) +
+                listOf(com.pocketpd.app.util.Slibs.dir(ctx))
+            ) {
+                if (addedSearchPaths.add(dir.absolutePath)) {
+                    runCatching { PdBase.addToSearchPath(dir.absolutePath) }
+                }
+            }
+        }
         patchHandle = synchronized(PdBase::class.java) { PdBase.openPatch(file.absolutePath) }
         patchFile = file
         when (audio) {

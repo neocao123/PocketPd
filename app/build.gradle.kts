@@ -11,8 +11,28 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 341
-    versionName = "0.18.37" // ---- 0.57 BRANCH round 28: synth~ fixed by
+    versionCode = 342
+    versionName = "0.18.38" // ---- 0.57 BRANCH round 29: slibs search dirs
+    // re-armed BEFORE the open. Evidence chain (synth~ log, 19:56): the
+    // clone target synth.voice.template.pd LOADED via a libDir entry
+    // (<files>/slibs/else), but the else/-prefixed boxes INSIDE it
+    // (else/adsr~ x3, else/receiver x3) all failed - their lookup needs the
+    // slibs ROOT (<files>/slibs) on the path (else/NAME resolves only as
+    // <root>/else/NAME.*), and no loader error lines appeared at all, so the
+    // root dir was never iterated. addToSearchPath appends and the boot
+    // registration code exists, so the root entry is being lost somewhere
+    // between boot and open; the same dirs are now re-asserted (deduped via
+    // addedSearchPaths) before PdBase.openPatch, which also makes them
+    // available to the open's own box creation. Non-slib findings from the
+    // same log (user patch content, no code change): voices has no -list
+    // flag (voices.c: only -retrig/-rel/-n/-offset/-steal; '1' as the
+    // second positional is STEAL not retrig - correct spelling is e.g.
+    // voices 10 -retrig 1); monophonic does not exist upstream at all
+    // (only a tutorial patch carries that name - else/mono is the shipped
+    // monophony object); lb -init hits the known dead class (pending 52
+    // -ghost-row cleanup approval).
+    //
+    // ---- 0.18.37 (0.57 history) round 28: synth~ fixed by
     // shipping its missing clone target: synth.voice.template.pd extracted
     // verbatim from the pinned 082af31 snapshot tarball (Abstractions/Extra/,
     // the generation every shipped else abstraction came from) into both
