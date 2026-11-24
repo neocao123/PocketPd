@@ -7,6 +7,29 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.20 (versionCode 324) — 2026-11-24 【0.57 分支 round 11:superosc~/f2s~ 升级 rc14 mc 抽象（决策 5）】
+
+**考古改写了任务本身**：旧版 ELSE 的 mc "编译类"早已不存在——**rc14 起
+这三个对象就是纯 .pd 抽象**（clone -d superosc.unit / clone -do
+float2sig.unit 链），零 C 移植；"按 0.57 mc API 调整"落地为：0.57
+vanilla mc 原生跑通这些链（加上 0.18.19 的原生 clone 会话直通正是前提）。
+
+**换装五件**（tag `v.1.0-rc14`，同一世代成套）：superosc~.pd（3 信号进
+/2 信号出，clone -d）、superosc.unit.pd（123 行世代，替换船上 322 行
+死文件）、f2s~.pd（2 控制进 /1 mc 信号出，clone -do -x）、float2sig~.pd
+、float2sig.unit.pd。**保留世代**：norm~/insert/nmess/float2imp~ 不动
+（它们的消费方是 0.17.134 世代）。supersaw~ 保持自研（上游无对应）。
+
+**实为行为恢复**：船上消费方（bl.osc~、compress~、duck~、mix2~、
+grain.* 等一批）用 `else/f2s~ 10`、`else/float2sig~ 20` 的**通道数参数**
+写就——mc 语义原生设计；0.17.152 的单声道替代一直忽略这些参数（降级）。
+0.57 上换回 mc 版 = **恢复它们本来的设计行为**。PdObjectMeta 加 f2s~
+（2 控制进/1 mc 出）与 superosc~（3 信号进/2 信号出）行；lint 5/5 干净。
+
+**验收**：aapt = 324/0.18.20；GM800 force-stop + install + dumpsys 复核；
+**声音 A/B 待你**（superosc~ 现在是真 mc 超采样振荡器组，声音特性与
+vsaw~ 替代版不同——这正是你选 B 时确认过的）。
+
 ## 0.18.19 (versionCode 323) — 2026-11-24 【0.57 分支 round 10:[clone] 升级到原版（决策 4）】
 
 **命名澄清（你指出的）**：这不是删功能——[clone] 是 vanilla 内置对象，

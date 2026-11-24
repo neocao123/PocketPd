@@ -11,8 +11,27 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 323
-    versionName = "0.18.19" // ---- 0.57 BRANCH round 10: [clone] upgraded
+    versionCode = 324
+    versionName = "0.18.20" // ---- 0.57 BRANCH round 11: superosc~/f2s~
+    // upgraded to the rc14 mc abstractions (user-approved decision 5).
+    // Archaeology finding: upstream rc14 ships these as pure pd
+    // ABSTRACTIONS (the old compiled mc classes were long gone) - zero C
+    // porting needed; the "0.57 mc API adaptation" resolved to running
+    // their clone -d superosc.unit / clone -do float2sig.unit chains
+    // natively (0.57 vanilla mc + the 0.18.19 native-clone session
+    // pass-through). The 0.17.152 mono substitutes (vsaw~ array /
+    // fixed-ramp f2s~) are retired: the shipped consumers (bl.osc~,
+    // compress~, duck~, mix2~, grain.*, ...) were WRITTEN for the mc
+    // semantics (`else/f2s~ 10` = channel-count arg the substitute
+    // ignored) - this round RESTORES their intended behavior. Swapped set:
+    // superosc~.pd, superosc.unit.pd, f2s~.pd, float2sig~.pd,
+    // float2sig.unit.pd (all from tag v.1.0-rc14, one coherent
+    // generation); norm~/insert/nmess/float2imp~ stay at the shipped
+    // generation (their consumers expect them); supersaw~ stays self-made
+    // (no upstream counterpart). PdObjectMeta: f2s~ 2-ctl/1-mc-out row,
+    // superosc~ 3-sig-in/2-sig-out row added. Sound A/B pending user.
+    //
+    // ---- 0.18.19 (0.57 history) round 10: [clone] upgraded
     // to the native pd 0.57 clone (user-approved decision 4, clarified by
     // the user as an UPGRADE - nothing about the [clone] feature is
     // removed; the pd built-in object stays and gains full capability).

@@ -543,6 +543,13 @@ object PdObjectMeta {
         put("ffdelay~", Def(2, 1, setOf(0, 1), setOf(0)))
         put("float2bits", Def(2, 1, emptySet(), emptySet()))
         put("float2sig~", Def(2, 1, emptySet(), setOf(0)))
+        // superosc~/f2s~ 0.18.20: rc14 mc abstractions replaced the 0.17.152
+        // mono substitutes (0.57 runs their clone -d/-do natively; the
+        // consumers were written for these mc semantics). f2s~ = 2 control
+        // inlets (list + channel count) / 1 mc signal out; superosc~ = 3
+        // signal inlets / 2 signal outlets
+        put("f2s~", Def(2, 1, emptySet(), setOf(0)))
+        put("superosc~", Def(3, 2, setOf(0, 1, 2), setOf(0, 1)))
         put("floor", Def(1, 1, emptySet(), emptySet()))
         put("floor~", Def(1, 1, setOf(0), setOf(0)))
         put("fold", Def(3, 1, emptySet(), emptySet()))

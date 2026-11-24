@@ -25,7 +25,16 @@ import java.io.File
  */
 object Slibs {
 
-    /** Bump to re-extract after an assets/slibs update. 146: 0.57 branch
+    /** Bump to re-extract after an assets/slibs update. 147: 0.57 branch
+     *  (0.18.20) - superosc~/f2s~ upgraded to the rc14 mc abstractions
+     *  (user-approved decision 5): the 0.17.152 mono substitutes (vsaw~
+     *  array / fixed ramp) replaced by upstream's real mc versions - clone
+     *  -d superosc.unit / clone -do float2sig.unit chains that run natively
+     *  on 0.57 (and through the 0.18.19 native-clone session pass-through).
+     *  superosc.unit/float2sig.unit/float2sig~ swapped to the matching
+     *  rc14 generation; norm~/insert/nmess/float2imp~ kept at the shipped
+     *  generation (their consumers expect them). supersaw~ stays self-made.
+     *  146: 0.57 branch
      *  (0.18.18) - ELSEX RETIRED (user-approved decision 1/7): the 52
      *  classes duplicated the full RC15 else core (bare names already
      *  resolved to else by PRIORITY); knob moved into the else build
@@ -73,7 +82,7 @@ object Slibs {
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
      *  289 setups (was ~150). */
-    private const val VERSION = 146
+    private const val VERSION = 147
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2
