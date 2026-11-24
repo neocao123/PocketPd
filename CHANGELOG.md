@@ -30,6 +30,12 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 couldn't create 与 $1 报错清零；mov.rms~ 连接失败行 = 解码器错配对的
 老毛病，若盒子上无红条即无实害）。
 
+**自抓错误（如实记录）**：0.18.22 首个构建的美元再转义用了正则替换的
+字符串重载——`$` 在替换串里是组引用语法 → "Illegal group reference:
+group index is missing" → **每次 run open 直接抛异常，会话不开，UI 全
+死**（用户报告"ui都不正常更新了"）。热修 = lambda 字面替换（commit
+`1fe73e0`），版本号维持 326/0.18.22（坏构建未达验收即替换）。
+
 ## 0.18.21 (versionCode 325) — 2026-11-24 【0.57 分支 round 12:[args] 首组 initmess 头修复（v324 用户报告的真因）】
 
 **你的报告**："clone 有很大问题，io 都不是 dsp 的，io 口注册都没完成。"
