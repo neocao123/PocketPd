@@ -1483,8 +1483,16 @@ object PdObjectMeta {
         // args: [<kind>, width, min, max, labelpos, label, rcv, snd]
         // "0" in the rcv/snd slots is the LLM-typo form of "unbound" (pd uses
         // "-" or "empty"); binding it literally would send cords to a [r 0]
-        // relay pd cannot create
-        fun bound(tok: String?) = tok?.takeIf { it != "empty" && it != "-" && it != "0" } ?: ""
+        // relay pd cannot create. A glued delimiter ("-," — pd's own writer
+        // puts the font message comma right after the snd field with no
+        // space: "- - -, f 5") is the SAME unbound convention: pd's tokenizer
+        // splits it into "-" + a comma atom, but our whitespace split reads
+        // it as one symbol, and binding it created [r -,] receivers
+        // (0.18.35: two dead stubs per norm~-carrying session).
+        fun bound(tok: String?) = tok?.takeIf {
+            it != "empty" && it != "-" && it != "0" &&
+                !it.contains(',') && !it.contains(';')
+        } ?: ""
         val snd = bound(args.getOrNull(7))
         val rcv = bound(args.getOrNull(6))
         val label = args.getOrNull(5)?.takeIf { it != "empty" && it != "-" } ?: ""
@@ -1502,8 +1510,14 @@ object PdObjectMeta {
 
     private fun guiSymbols(send: String?, rcv: String?): Pair<String, String> =
         Pair(
-            send?.takeIf { it != "empty" && it != "-" && it != "0" } ?: "",
-            rcv?.takeIf { it != "empty" && it != "-" && it != "0" } ?: "",
+            send?.takeIf {
+                it != "empty" && it != "-" && it != "0" &&
+                    !it.contains(',') && !it.contains(';')
+            } ?: "",
+            rcv?.takeIf {
+                it != "empty" && it != "-" && it != "0" &&
+                    !it.contains(',') && !it.contains(';')
+            } ?: "",
         )
 
     private fun resolveObject(name: String, args: List<String>): ObjectMeta {
@@ -1743,8 +1757,13 @@ object PdObjectMeta {
     private fun resolveIemGui(name: String, a: List<String>): ObjectMeta {
         // "0" in a snd/rcv slot is pd's legacy spelling of "unbound" (and the
         // LLM-typo form); binding it literally sends cords to a [r 0] relay
-        // pd cannot create
-        val empty = { s: String? -> if (s == null || s == "empty" || s == "-" || s == "0") "" else s }
+        // pd cannot create. Glued delimiters ("-," — the font-message comma
+        // right after the field) are the same convention, see atomMeta.
+        val empty = { s: String? ->
+            if (s == null || s == "empty" || s == "-" || s == "0" ||
+                s.contains(',') || s.contains(';')
+            ) "" else s
+        }
         var w = a.getOrNull(1)?.toIntOrNull() ?: 15
         var h = w
         var send = ""

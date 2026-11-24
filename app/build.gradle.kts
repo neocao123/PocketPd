@@ -11,9 +11,20 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 339
-    versionName = "0.18.35" // ---- 0.57 BRANCH round 26: failedClasses
-    // hardening (user's sharp catch: the 'r -' receivers parsed from the
+    versionCode = 340
+    versionName = "0.18.36" // ---- 0.57 BRANCH round 27: the 'r -,' relay
+    // root cause fixed (user's call): pd's own writer glues the font-message
+    // comma right after a gatom's snd field ("... - - -, f 5") with no
+    // space - pd's tokenizer splits '-,' into '-' + a comma atom, but our
+    // whitespace split reads it as ONE symbol, atomMeta's bound() passed it
+    // as a REAL send name, and the touch-echo relay leg created [r -,]
+    // receivers (two per norm~-carrying session; pd makes them legal [r -]
+    // boxes). bound()/guiSymbols()/resolveIemGui's empty() now treat any
+    // glued ','/';' token as unbound. The echo cords return to their
+    // upstream direct topology when the symbol is unbound.
+    //
+    // ---- 0.18.35 (0.57 history) round 26: failedClasses hardening
+    // (user's sharp catch: the 'r -' receivers parsed from the
     // 'r -,' relay-naming garbage are LEGAL pd receivers, and the grey
     // broken-style marking keyed on failedClasses could poison whole
     // classes). Three fixes: failedClasses + lastConsoleLine reset at every

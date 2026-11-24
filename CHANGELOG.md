@@ -7,6 +7,20 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.36 (versionCode 340) — 2026-11-24 【0.57 分支 round 27:`r -,` 中继根因修复（用户下令"好好修"）】
+
+用户对 `r -` 的定性追问挖出真正根因：pd 自己的写盘器把 gatom 的字体
+创建消息逗号**紧贴** snd 字段（`... - - -, f 5`，无空格）。pd 的分词器
+把 `-,` 拆成 `-` + COMMA 原子（pd 侧无恙），但 app 按空白分词把它读成
+**一个符号 `"-,"`**——atomMeta 的 `bound()` 只排除 empty/-/0 三种，`"-,"`
+蒙混成真 send 名 → 控件回显中继腿创建 `[r -,]` → pd 建成合法的
+`[r -]` 接收器（每个含 norm~ 的会话两个；数量与 15:03 会话吻合）。
+修复：`bound()`/`guiSymbols()`/`resolveIemGui().empty()` 三处同型检查
+统一把**粘住 `,`/`;` 的 token 视为 unbound**。send 名为空后，回显连线
+回到上游本来的直连拓扑（floatatom 出口 → 目标 inlet，无需中继）。
+**验收**：aapt = 340/0.18.36。连带确认：v339 的 failedClasses 加固
+（每 open 重置 + token 校验）保证此类污染不再灰显任何类。
+
 ## 0.18.35 (versionCode 339) — 2026-11-24 【0.57 分支 round 26:failedClasses 加固（用户指出灰显污染链）】
 
 用户指出：`r -,` 垃圾桩在 pd 里解析为 `[r -]`——**`-` 是合法接收名**，
