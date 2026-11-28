@@ -29,3 +29,6 @@ dev12.txt
 
 # scratch session test artifacts
 slibs/session-pctest.txt
+
+# ZCode session tooling (plans, agents)
+.zcode/
