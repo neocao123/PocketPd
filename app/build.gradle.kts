@@ -11,8 +11,19 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 346
-    versionName = "0.18.42" // ---- 0.57 BRANCH round 33: box widths aligned
+    versionCode = 347
+    versionName = "0.18.43" // ---- 0.57 BRANCH round 34: ellipsis truncation
+    // removed EVERYWHERE (user re-affirmed the standing prohibition - "不可以
+    // 使用之前被严格禁用的省略号操作"). All five TextUtils.ellipsize sites
+    // in PatchCanvasView now draw the full text: object/atom labels
+    // (drawTextInBox), msg lines (also drops the old pan-dependent
+    // ellipsis-budget comment), broken-GOP diagnostic box, graph array-name
+    // label, popmenu item. Growable boxes keep growing past glyphs: object
+    // glyph leg +6 -> +12, msg +6 -> +18 (fold depth 6 + margin 12).
+    // Fixed-size containers (broken GOP diag rect, graph corner, popmenu
+    // widget) draw in full pd-faithfully, spilling if need be - never "...".
+    //
+    // ---- 0.18.42 (0.57 history) round 33: box widths aligned
     // to desktop pd proportions (user-reported help-patch overlap). The app
     // was already on pd's font-12 column for heights (BOX_H 22 ~
     // fontheight 16 + 3 + 2, atom guiHeight 20 = 16 + ATOM_BMARGIN 4,

@@ -245,8 +245,11 @@ class PatchCanvasView @JvmOverloads constructor(
             // one line per top-level comma, like desktop pd
             textPaint.textSize = FS_BOX
             val lines = o.msgDisplayLines()
+            // glyph leg covers the widest measured line plus the fold
+            // reserve (depth 6 + margin 12); lines draw in full - ellipsis
+            // is forbidden
             val w = max(lines.maxOf { max(it.length * 7f + 4f,
-                textPaint.measureText(it) + 6f) }, 34f)
+                textPaint.measureText(it) + 18f) }, 34f)
             val h = BOX_H + (lines.size - 1) * 20f
             return RectF(o.x.toFloat(), o.y.toFloat(), o.x + w, o.y + h)
         }
@@ -282,10 +285,11 @@ class PatchCanvasView @JvmOverloads constructor(
         // >= 3 columns. Our canvas units ARE pd's font-12 column (CHAR_UNIT
         // 7 = fi_width; BOX_H 22 ~ fontheight 16 + TMARGIN 3 + BMARGIN 2),
         // so nchars*7+4 puts the box exactly where desktop pd's help patches
-        // assume it; the glyph-measured leg only widens wide-glyph runs past
+        // assume it; the glyph-measured leg (+12 margin, text is drawn
+        // in full - ellipsis is forbidden) only widens wide-glyph runs past
         // the mono allotment, 34 keeps the tested minimum footprint
         val w = max(max(shown.length * 7f + 4f,
-            textPaint.measureText(shown) + 6f), 34f)
+            textPaint.measureText(shown) + 12f), 34f)
         // a crowded inlet row must not overlap itself (adsr has 6 inlets on a
         // 4-letter box): keep the even port spread, just widen the box so the
         // spread has room. 12 units per port keeps the 10-unit port rects apart.
@@ -2277,11 +2281,10 @@ class PatchCanvasView @JvmOverloads constructor(
             textPaint.textSize = units(FS_BOX)
             val keep = textPaint.color
             textPaint.color = COL_GOP_RANGE
+            // ellipsis truncation is forbidden (standing user rule): the
+            // name draws in full even if it spills past the fixed GOP rect
             canvas.drawText(
-                android.text.TextUtils.ellipsize(
-                    o.displayName(), textPaint, rr - l - units(10f),
-                    android.text.TextUtils.TruncateAt.END
-                ).toString(),
+                o.displayName(),
                 l + units(5f), t + units(BOX_H) * 0.72f, textPaint,
             )
             textPaint.color = keep
@@ -2577,10 +2580,9 @@ class PatchCanvasView @JvmOverloads constructor(
         // array names, small in the top-left corner
         textPaint.textSize = units(FS_COMMENT)
         val label = g.arrays.joinToString(",") { it.name }
+        // full array-name list, never truncated (ellipsis forbidden)
         canvas.drawText(
-            android.text.TextUtils.ellipsize(label, textPaint, w - units(8f),
-                android.text.TextUtils.TruncateAt.END).toString(),
-            l + units(4f), t + units(FS_COMMENT) + units(2f), textPaint,
+            label, l + units(4f), t + units(FS_COMMENT) + units(2f), textPaint,
         )
     }
 
@@ -2688,11 +2690,10 @@ class PatchCanvasView @JvmOverloads constructor(
     }
 
     private fun drawTextInBox(canvas: Canvas, o: PatchObject, l: Float, t: Float, r: Float) {
+        // ellipsis truncation is forbidden (standing user rule); objRect
+        // guarantees the box grows past the measured glyphs
         textPaint.textSize = units(FS_BOX)
-        val text = android.text.TextUtils.ellipsize(
-            o.displayName(), textPaint, r - l - units(10f), android.text.TextUtils.TruncateAt.END
-        )
-        canvas.drawText(text.toString(), l + units(5f), t + units(BOX_H) * 0.72f, textPaint)
+        canvas.drawText(o.displayName(), l + units(5f), t + units(BOX_H) * 0.72f, textPaint)
     }
 
     private fun drawAtom(canvas: Canvas, o: PatchObject, l: Float, t: Float, r: Float, b: Float) {
@@ -2727,18 +2728,13 @@ class PatchCanvasView @JvmOverloads constructor(
         canvas.drawPath(path, boxStroke)
         textPaint.textSize = units(FS_BOX)
         if (flashing) textPaint.color = COL_BG
-        // available WIDTH inside the fold — ellipsize takes a width, never
-        // an absolute x: passing the right edge alone shrank the budget by
-        // the box's left offset, so a box panned toward the left edge grew
-        // an ellipsis while still fully on screen
-        val maxW = r - l - depth - units(10f)
+        // ellipsis truncation is forbidden (standing user rule): each line
+        // draws in full; objRect sizes the box past the fold for the widest
+        // measured line
         val lineH = units(20f)
         o.msgDisplayLines().forEachIndexed { i, line ->
-            val text = android.text.TextUtils.ellipsize(
-                line, textPaint, maxW, android.text.TextUtils.TruncateAt.END
-            )
             canvas.drawText(
-                text.toString(),
+                line,
                 l + units(5f),
                 t + units(BOX_H) * 0.72f + i * lineH,
                 textPaint,
@@ -2799,11 +2795,9 @@ class PatchCanvasView @JvmOverloads constructor(
         val oldColor = textPaint.color
         textPaint.color = fg
         val text = popmenuCurrentItem(o) ?: ""
+        // full item text, never truncated (ellipsis forbidden)
         canvas.drawText(
-            android.text.TextUtils.ellipsize(
-                text, textPaint, r - l - dp(26f), android.text.TextUtils.TruncateAt.END
-            ).toString(),
-            l + dp(6f), (t + b) / 2f + textPaint.textSize / 3f, textPaint,
+            text, l + dp(6f), (t + b) / 2f + textPaint.textSize / 3f, textPaint,
         )
         // the dropdown arrow
         val cy = (t + b) / 2f

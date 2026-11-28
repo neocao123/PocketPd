@@ -7,6 +7,18 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.43 (versionCode 347) — 2026-11-28 【0.57 分支 round 34:省略号截断全清除（用户重申永久禁令）】
+
+用户重申："不可以使用之前被严格禁用的省略号操作"。**全部五处
+`TextUtils.ellipsize` 移除**（PatchCanvasView 内，全 app 零残留）：
+对象/atom 标签（drawTextInBox）、msg 逐行文本（顺带删除了依赖
+ellipsize 宽度预算的旧注释）、broken GOP 诊断框、graph 左上角数组名、
+popmenu 当前项。配套：可生长盒子的字形腿抬高（对象 +6→+12、
+msg +6→+18 覆盖折角深度 6+余量 12），字形永不越界也永不截断；
+固定尺寸容器（broken GOP 诊断矩形、graph 角标、popmenu 部件）按 pd
+习惯完整绘制、宁溢出不截断。v346 的 pd 比例宽度公式不变。
+**验收**：aapt = 347/0.18.43；GM800 装机。
+
 ## 0.18.42 (versionCode 346) — 2026-11-28 【0.57 分支 round 33:盒子宽度对齐桌面 pd 比例（help 重叠修复）】
 
 用户报：patch 盒子大小与其他设备的版本不一致，help 补丁大量重叠；
