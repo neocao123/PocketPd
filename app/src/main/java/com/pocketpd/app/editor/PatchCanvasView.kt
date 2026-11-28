@@ -234,16 +234,19 @@ class PatchCanvasView @JvmOverloads constructor(
         val m = o.meta
         if (o.kind == ObjKind.FLOATATOM || o.kind == ObjKind.SYMBOLATOM || o.kind == ObjKind.LISTBOX) {
             // number boxes grow with their displayed value, like desktop pd:
-            // at least the configured character width, more when needed
+            // at least the configured character width, more when needed.
+            // guiWidth is already chars * CHAR_UNIT(7); desktop adds its
+            // ATOM_RMARGIN (g_text.c) on top, we do the same
             textPaint.textSize = FS_BOX
-            val w = max(m.guiWidth.toFloat(), textPaint.measureText(o.displayName()) + 14f)
+            val w = max(m.guiWidth + 2f, textPaint.measureText(o.displayName()) + 14f)
             return RectF(o.x.toFloat(), o.y.toFloat(), o.x + w, o.y + m.guiHeight.toFloat())
         }
         if (o.kind == ObjKind.MSG) {
             // one line per top-level comma, like desktop pd
             textPaint.textSize = FS_BOX
             val lines = o.msgDisplayLines()
-            val w = lines.maxOf { textPaint.measureText(it) } + 34f
+            val w = max(lines.maxOf { max(it.length * 7f + 4f,
+                textPaint.measureText(it) + 6f) }, 34f)
             val h = BOX_H + (lines.size - 1) * 20f
             return RectF(o.x.toFloat(), o.y.toFloat(), o.x + w, o.y + h)
         }
@@ -253,9 +256,12 @@ class PatchCanvasView @JvmOverloads constructor(
         }
         if (o.kind == ObjKind.COMMENT) {
             textPaint.textSize = FS_COMMENT
-            // cap the measured width: pd comments are single long lines, and
-            // one 200-character remark would otherwise blow up zoom-to-fit
-            val w = (max(textPaint.measureText(o.displayName()) + 6f, 24f)).coerceAtMost(400f)
+            // pd comments run at natural width (T_TEXT: ncolumns*fontwidth
+            // + LMARGIN+RMARGIN, no cap) - a capped rect lets the drawn
+            // glyphs spill into the neighbouring column; zoomToFit clamps
+            // its own bounds instead
+            val s = o.displayName()
+            val w = max(max(s.length * 7f + 4f, textPaint.measureText(s) + 6f), 16f)
             return RectF(o.x.toFloat(), o.y.toFloat(), o.x + w, o.y + 16f)
         }
         textPaint.textSize = FS_BOX
@@ -271,7 +277,15 @@ class PatchCanvasView @JvmOverloads constructor(
             isDisplay -> o.className().substringAfterLast('/')
             else -> o.displayName()
         }
-        val w = max(textPaint.measureText(shown) + 24f, 34f)
+        // desktop pd proportions (0.57 g_rtext.c rtext_formattext): width =
+        // ncolumns*fontwidth + LMARGIN(2)+RMARGIN(2), objects padded to
+        // >= 3 columns. Our canvas units ARE pd's font-12 column (CHAR_UNIT
+        // 7 = fi_width; BOX_H 22 ~ fontheight 16 + TMARGIN 3 + BMARGIN 2),
+        // so nchars*7+4 puts the box exactly where desktop pd's help patches
+        // assume it; the glyph-measured leg only widens wide-glyph runs past
+        // the mono allotment, 34 keeps the tested minimum footprint
+        val w = max(max(shown.length * 7f + 4f,
+            textPaint.measureText(shown) + 6f), 34f)
         // a crowded inlet row must not overlap itself (adsr has 6 inlets on a
         // 4-letter box): keep the even port spread, just widen the box so the
         // spread has room. 12 units per port keeps the 10-unit port rects apart.
@@ -854,8 +868,12 @@ class PatchCanvasView @JvmOverloads constructor(
         var l = Float.MAX_VALUE; var t = Float.MAX_VALUE; var r = -Float.MAX_VALUE; var b = -Float.MAX_VALUE
         for (o in objs) {
             val rect = objRect(o)
+            // comments keep pd's natural full width for drawing and hit
+            // testing, but one 200-char remark must not blow up the fit
+            val right = if (o.kind == ObjKind.COMMENT)
+                min(rect.right, rect.left + 400f) else rect.right
             l = min(l, rect.left); t = min(t, rect.top)
-            r = max(r, rect.right); b = max(b, rect.bottom)
+            r = max(r, right); b = max(b, rect.bottom)
         }
         // frame the GOP visible range too, so it is always in view
         doc.gop?.takeIf { it.enabled }?.let { g ->

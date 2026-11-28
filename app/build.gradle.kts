@@ -11,16 +11,31 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 345
-    versionName = "0.18.41" // ---- 0.57 BRANCH round 32: clean slibs
-    // re-extraction (user-requested reinstall): Slibs.VERSION 149 -> 150
-    // with ZERO asset change - copyAssetDir only runs when the
-    // .slibs-v<VERSION> marker differs, so a plain reinstall would have
-    // left the on-device synth~.pd / synth.voice.template.pd untouched.
-    // The bump makes the next app start rewrite the whole slibs tree from
-    // assets, ruling out on-device drift of the extracted synth~ files
-    // (user does not believe the file was hand-edited; pre/post md5
-    // comparison recorded in CHANGELOG 0.18.41).
+    versionCode = 346
+    versionName = "0.18.42" // ---- 0.57 BRANCH round 33: box widths aligned
+    // to desktop pd proportions (user-reported help-patch overlap). The app
+    // was already on pd's font-12 column for heights (BOX_H 22 ~
+    // fontheight 16 + 3 + 2, atom guiHeight 20 = 16 + ATOM_BMARGIN 4,
+    // CHAR_UNIT 7 = fi_width) but box WIDTHS used huge glyph-measured
+    // paddings (object +24, msg +34) and comments were capped at 400 units -
+    // pd 0.57 (g_rtext.c rtext_formattext) sizes boxes at
+    // ncolumns*fontwidth + LMARGIN(2)+RMARGIN(2), so a string now occupies
+    // nchars*7+4 units exactly where desktop pd's help patches assume it.
+    // Objects/msg: max(pd formula, glyphs+6, 34 floor, port-spread floor).
+    // Comments: natural pd width, cap removed from the rect (zoomToFit
+    // clamps its bounds instead - long remarks no longer spill glyphs into
+    // the next column). Atoms: +2 ATOM_RMARGIN added, growth kept. Inner
+    // text drawing (ellipsize, offsets, baselines) and port rects untouched.
+    //
+    // ---- 0.18.41 (0.57 history) round 32: clean slibs re-extraction
+    // (user-requested reinstall): Slibs.VERSION 149 -> 150 with ZERO asset
+    // change - copyAssetDir only runs when the .slibs-v<VERSION> marker
+    // differs, so a plain reinstall would have left the on-device
+    // synth~.pd / synth.voice.template.pd untouched. The bump makes the
+    // next app start rewrite the whole slibs tree from assets, ruling out
+    // on-device drift of the extracted synth~ files (user does not believe
+    // the file was hand-edited; pre/post md5 comparison recorded in
+    // CHANGELOG 0.18.41/0.18.42).
     //
     // ---- 0.18.40 (0.57 history) round 31: send-form message
     // materialization (synth~ silence fix): messages with a "\;" statement

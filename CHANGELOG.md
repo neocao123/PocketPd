@@ -7,6 +7,26 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.42 (versionCode 346) — 2026-11-28 【0.57 分支 round 33:盒子宽度对齐桌面 pd 比例（help 重叠修复）】
+
+用户报：patch 盒子大小与其他设备的版本不一致，help 补丁大量重叠；
+要求对齐比例，**不许动盒子内部排版（文字与 io 小矩形口，反复测试成果）**。
+考古结论：app 的纵向几何**早已是 pd font-12 列**（BOX_H 22 ≈ fontheight
+16+TMARGIN 3+BMARGIN 2；atom guiHeight 20 = 16+ATOM_BMARGIN 4；
+CHAR_UNIT 7 = fi_width），只有**宽度**跑偏：对象 +24、msg +34 的
+glyph 量测大 padding（pd 只加 LMARGIN 2+RMARGIN 2），注释矩形还被
+钳在 400 单位（pd 是自然宽度）——钳短导致画出的字形溢进右邻列。
+**修复**（0.57 g_rtext.c rtext_formattext 公式，单位制对齐后）：
+- 对象/msg：`宽 = max(字符数×7+4, 字形量测+6, 34 下限, 端口展开下限)`；
+  34 与端口下限保留原tested值，字形腿只兜宽字簇（比例字体超 pd 等宽配额）。
+- 注释：自然宽度（字符数×7+4，无钳），zoomToFit 自己钳 400——长注释
+  不再把字形洒进邻列，缩放适配也不再被一条 200 字注释撑爆。
+- atom：+2（ATOM_RMARGIN），"随值增长"的 tested 行为原样保留。
+- **未动**：BOX_H、FS_BOX/FS_COMMENT、文字绘制（ellipsize/偏移/基线）、
+  portRectPatch 全部逻辑、GOP/graph 尺寸、iemgui 尺寸。
+**验收**：aapt = 346/0.18.42；装机后由用户目检 help 重叠是否消失。
+另：0.18.41 的设备端 md5 前后对比随本轮装机一并录档（设备当晚才连接）。
+
 ## 0.18.41 (versionCode 345) — 2026-11-28 【0.57 分支 round 32:干净重提取（用户要求重装，无资产变更）】
 
 用户对"手机上 synth~.pd 被改坏"持怀疑，要求重装排除该变量。机制事实：
