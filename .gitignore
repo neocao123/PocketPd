@@ -26,3 +26,6 @@ app/eufon.keystore
 *.keystore
 *.jks
 dev12.txt
+
+# scratch session test artifacts
+slibs/session-pctest.txt
