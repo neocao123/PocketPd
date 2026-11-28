@@ -441,6 +441,81 @@
                 </FrameLayout>
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/remote_enable" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_remote_ctl"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/remote_code" />
+
+                <FrameLayout
+                    android:layout_width="150dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/value_box_bg">
+
+                    <EditText
+                        android:id="@+id/edit_remote_code"
+                        style="@style/Text.PocketPd.Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:inputType="text"
+                        android:paddingHorizontal="10dp"
+                        android:text="" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Text.PocketPd.Row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/console_osc_enable" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/switch_console_osc"
+                    style="@style/Widget.PocketPd.ValueChip"
+                    android:layout_width="88dp"
+                    android:layout_height="32dp"
+                    android:text="OFF" />
+            </LinearLayout>
+
             <TextView
                 style="@style/Text.PocketPd.Hint"
                 android:layout_width="match_parent"

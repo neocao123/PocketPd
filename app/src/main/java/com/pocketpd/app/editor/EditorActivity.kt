@@ -36,6 +36,7 @@ import com.pocketpd.app.patch.PatchDocument
 import com.pocketpd.app.patch.PatchObject
 import com.pocketpd.app.patch.PdObjectMeta
 import com.pocketpd.app.runtime.PdEngine
+import com.pocketpd.app.runtime.RemoteControl
 import com.pocketpd.app.ui.MouseBack
 import com.pocketpd.app.ui.SettingsActivity
 import com.pocketpd.app.util.Examples
@@ -463,6 +464,37 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
                 else VhsOsdView.Mode.LOCK,
             )
             true
+        }
+        // /pocketpd/ remote control: this activity answers mode queries via
+        // the SAME applyOsdMode path the OSD badge uses (identical rebuild,
+        // DSP and LOCK semantics); registered here, cleared in onDestroy
+        PdEngine.remotePatchController = object : RemoteControl.PatchController {
+            override fun modeState(): String = when {
+                osdMode.mode == VhsOsdView.Mode.LOCK -> "lock"
+                inRunMode -> "run"
+                else -> "edit"
+            }
+
+            override fun setMode(request: String): String? {
+                val req = request.lowercase()
+                if (req == "unlock") {
+                    // leave LOCK → EDIT, the long-press exit behavior; already
+                    // unlocked is a no-op success
+                    if (osdMode.mode != VhsOsdView.Mode.LOCK) return null
+                    applyOsdMode(VhsOsdView.Mode.EDIT)
+                    return null
+                }
+                val target = when (req) {
+                    "edit" -> VhsOsdView.Mode.EDIT
+                    "run" -> VhsOsdView.Mode.RUN
+                    "lock" -> VhsOsdView.Mode.LOCK
+                    else -> return "unknown mode '$request' (edit|run|lock|unlock)"
+                }
+                applyOsdMode(target)
+                return null
+            }
+
+            override fun patchName(): String = patchFile?.name ?: "unsaved"
         }
         vuStrip = findViewById(R.id.vu_strip)
         PdEngine.vuListener = { l, r -> vuStrip.setLevels(l, r) }
@@ -2418,6 +2450,7 @@ class EditorActivity : AppCompatActivity(), PatchCanvasView.Callbacks {
         PdEngine.stopAudio()
         PdEngine.closePatch()
         PdEngine.vuListener = null
+        PdEngine.remotePatchController = null
         super.onDestroy()
     }
 

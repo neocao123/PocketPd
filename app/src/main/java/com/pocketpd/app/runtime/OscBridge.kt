@@ -27,9 +27,12 @@ class OscBridge {
         fun onOscMessage(msg: OscCodec.OscMessage)
     }
 
-    /** Called on the main thread for every OSC message received. */
+    /** Called on the main thread for every OSC message received, with the
+     *  packet's source address (replies go back to the requester, not to
+     *  the configured out target). Null when the platform declines to
+     *  report it. */
     fun interface OscInListener {
-        fun onOscIn(msg: OscCodec.OscMessage)
+        fun onOscIn(msg: OscCodec.OscMessage, sender: InetSocketAddress?)
     }
 
     private val running = AtomicBoolean(false)
@@ -80,10 +83,11 @@ class OscBridge {
                         PdEngine.log("osc: malformed packet (${e.message})")
                         emptyList()
                     }
+                    val sender = packet.socketAddress as InetSocketAddress?
                     for (m in messages) {
                         main.post {
-                            inListener?.onOscIn(m)
-                            PdEngine.handleOscIn(m)
+                            inListener?.onOscIn(m, sender)
+                            PdEngine.handleOscIn(m, sender)
                         }
                     }
                 }

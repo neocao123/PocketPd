@@ -203,6 +203,10 @@
     <string name="osc_enable_out">Send OSC replies</string>
     <string name="osc_host_out">Target host</string>
     <string name="osc_port_out">Target port</string>
+    <string name="remote_enable">Remote control (/pocketpd/)</string>
+    <string name="remote_code">Pairing code</string>
+    <string name="console_osc_enable">Console to OSC out</string>
+    <string name="remote_code_required">Set a pairing code before enabling remote control</string>
 
     <!-- Abstractions (externals) -->
     <string name="section_externals">Abstractions (externals)</string>

@@ -4,6 +4,7 @@ import android.app.Application
 import com.pocketpd.app.runtime.MidiBridge
 import com.pocketpd.app.runtime.OscBridge
 import com.pocketpd.app.runtime.PdEngine
+import com.pocketpd.app.runtime.RemoteControl
 import com.pocketpd.app.runtime.SerialBridge
 import com.pocketpd.app.util.BuiltinExts
 import com.pocketpd.app.util.Externals
@@ -45,7 +46,19 @@ class App : Application() {
         val settings = Settings.get(this)
         com.pocketpd.app.ui.Bloom.strength = settings.bloomStrength / 100f
         PdEngine.midiOutListener = midiBridge
+        // Remote control assembly: the dispatcher borrows the bridge and the
+        // settings; the console auto-push rides the same log() hook. The
+        // reserved /pocketpd/ namespace loops back through [r OSC] into the
+        // local dispatcher (same pairing-code gate) and NEVER leaves the
+        // device over the network.
+        RemoteControl.bridge = oscBridge
+        RemoteControl.settings = settings
+        PdEngine.remoteConsoleListener = { line -> RemoteControl.onConsoleLine(line) }
         PdEngine.oscOutListener = OscBridge.OscFromPdListener { msg ->
+            if (msg.address.startsWith(RemoteControl.PREFIX)) {
+                RemoteControl.handle(msg, sender = null)
+                return@OscFromPdListener
+            }
             if (settings.oscOutEnabled) {
                 oscBridge.send(msg, settings.oscOutHost, settings.oscOutPort)
             }

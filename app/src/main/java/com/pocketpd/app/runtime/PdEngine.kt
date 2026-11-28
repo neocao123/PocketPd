@@ -18,6 +18,7 @@ import org.puredata.core.PdBase
 import org.puredata.core.PdMidiReceiver
 import org.puredata.core.PdReceiver
 import java.io.File
+import java.net.InetSocketAddress
 import java.io.IOException
 import java.util.ArrayDeque
 
@@ -69,6 +70,16 @@ object PdEngine {
 
     @Volatile
     var oscOutListener: OscBridge.OscFromPdListener? = null
+
+    /** Remote console push hook ([RemoteControl.onConsoleLine]); set by App.
+     *  Invoked from [log] for every console line (settings-gated there). */
+    @Volatile
+    var remoteConsoleListener: ((String) -> Unit)? = null
+
+    /** The patch host answering `/pocketpd/` mode+patch queries
+     *  (EditorActivity registers itself; null = "no editor open"). */
+    @Volatile
+    var remotePatchController: RemoteControl.PatchController? = null
 
     /** Serial-out hook: bytes patches send to the receiver `TTY` (SerialBridge). */
     @Volatile
@@ -2754,6 +2765,7 @@ object PdEngine {
         console.addLast(ConsoleLine(stored, error))
         while (console.size > 500) console.removeFirst()
         consoleListener?.onConsoleLine(console.last())
+        remoteConsoleListener?.invoke(stored)
         android.util.Log.i("PocketPd.Pd", line)
     }
 
@@ -2769,8 +2781,12 @@ object PdEngine {
      * OSC -> Pd convention: address "/foo/bar" with arguments becomes a message
      * to the receiver "foo/bar" (so patches use `[r foo/bar]`). No arguments
      * sends a bang. A diagnostic copy of every message goes to the console.
+     * The reserved /pocketpd/ namespace is dispatched app-side first
+     * ([RemoteControl]); it consumes the message when the remote-control
+     * feature is armed, otherwise it falls through to pd untouched.
      */
-    fun handleOscIn(msg: OscCodec.OscMessage) {
+    fun handleOscIn(msg: OscCodec.OscMessage, sender: InetSocketAddress? = null) {
+        if (sender != null && RemoteControl.handle(msg, sender)) return
         val symbol = msg.address.removePrefix("/")
         if (symbol.isNotEmpty()) {
             if (msg.args.isEmpty()) {

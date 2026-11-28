@@ -77,6 +77,26 @@ class Settings(context: Context) {
         get() = prefs.getInt(KEY_OSC_OUT_PORT, 9000)
         set(v) = prefs.edit().putInt(KEY_OSC_OUT_PORT, v).apply()
 
+    // OSC remote control: the reserved /pocketpd/ namespace over the shared
+    // bridge (mode switch, patch read/write, console push). Master switch
+    // defaults OFF; commands carry the pairing code as first argument.
+    var remoteCtlEnabled: Boolean
+        get() = prefs.getBoolean(KEY_REMOTE_CTL_ON, false)
+        set(v) = prefs.edit().putBoolean(KEY_REMOTE_CTL_ON, v).apply()
+
+    /** Pairing code every /pocketpd/ command must carry as its first
+     *  argument. Empty = the dispatcher refuses to arm. */
+    var remoteCtlCode: String
+        get() = prefs.getString(KEY_REMOTE_CTL_CODE, "")!!
+        set(v) = prefs.edit().putString(KEY_REMOTE_CTL_CODE, v.trim()).apply()
+
+    /** Console auto-push: every console line goes out as /pocketpd/console
+     *  to the OSC out target (oscOutHost/oscOutPort) — one-way telemetry,
+     *  no pairing code involved. */
+    var consoleOscEnabled: Boolean
+        get() = prefs.getBoolean(KEY_CONSOLE_OSC_ON, false)
+        set(v) = prefs.edit().putBoolean(KEY_CONSOLE_OSC_ON, v).apply()
+
     // Console
     var consoleLines: Int
         get() = prefs.getInt(KEY_CONSOLE_LINES, 5)
@@ -129,6 +149,9 @@ class Settings(context: Context) {
         private const val KEY_OSC_OUT_ON = "osc.out.enabled"
         private const val KEY_OSC_OUT_HOST = "osc.out.host"
         private const val KEY_OSC_OUT_PORT = "osc.out.port"
+        private const val KEY_REMOTE_CTL_ON = "remote.enabled"
+        private const val KEY_REMOTE_CTL_CODE = "remote.code"
+        private const val KEY_CONSOLE_OSC_ON = "console.osc.enabled"
         private const val KEY_LLM_FORMAT = "llm.format"
         private const val KEY_LLM_ENDPOINT = "llm.endpoint"
         private const val KEY_LLM_KEY = "llm.key"

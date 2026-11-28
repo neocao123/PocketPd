@@ -59,6 +59,9 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var oscOutSwitch: MaterialButton
     private lateinit var oscHost: EditText
     private lateinit var oscOutPort: EditText
+    private lateinit var remoteCtlSwitch: MaterialButton
+    private lateinit var remoteCode: EditText
+    private lateinit var consoleOscSwitch: MaterialButton
     private lateinit var consoleLinesEdit: EditText
     private lateinit var bloomSlider: com.pocketpd.app.ui.Pc98Slider
     private lateinit var bloomValue: TextView
@@ -149,6 +152,9 @@ class SettingsActivity : AppCompatActivity() {
         oscOutSwitch = findViewById(R.id.switch_osc_out)
         oscHost = findViewById(R.id.edit_osc_host)
         oscOutPort = findViewById(R.id.edit_osc_out_port)
+        remoteCtlSwitch = findViewById(R.id.switch_remote_ctl)
+        remoteCode = findViewById(R.id.edit_remote_code)
+        consoleOscSwitch = findViewById(R.id.switch_console_osc)
         consoleLinesEdit = findViewById(R.id.edit_console_lines)
         consoleLinesEdit.setText(settings.consoleLines.toString())
         bloomSlider = findViewById(R.id.slider_bloom)
@@ -325,6 +331,9 @@ class SettingsActivity : AppCompatActivity() {
         bindChip(oscOutSwitch, settings.oscOutEnabled) { }
         oscHost.setText(settings.oscOutHost)
         oscOutPort.setText(settings.oscOutPort.toString())
+        bindChip(remoteCtlSwitch, settings.remoteCtlEnabled) { }
+        remoteCode.setText(settings.remoteCtlCode)
+        bindChip(consoleOscSwitch, settings.consoleOscEnabled) { }
         findViewById<android.widget.Button>(R.id.btn_osc_apply).setOnClickListener { saveOscAndApply() }
 
         refreshDevices()
@@ -380,6 +389,17 @@ class SettingsActivity : AppCompatActivity() {
         settings.oscOutEnabled = oscOutSwitch.isChecked
         settings.oscOutHost = oscHost.text.toString().trim().ifEmpty { "127.0.0.1" }
         settings.oscOutPort = oscOutPort.text.toString().toIntOrNull() ?: 9000
+        // a remote-control switch without a code would arm an unauthenticated
+        // control surface: refuse and flip the chip back off
+        val wantRemote = remoteCtlSwitch.isChecked
+        val code = remoteCode.text.toString().trim()
+        if (wantRemote && code.isEmpty()) {
+            toast(R.string.remote_code_required)
+            bindChip(remoteCtlSwitch, false) { }
+        }
+        settings.remoteCtlEnabled = remoteCtlSwitch.isChecked
+        settings.remoteCtlCode = code
+        settings.consoleOscEnabled = consoleOscSwitch.isChecked
         application.pocketPd.applyConnections()
     }
 

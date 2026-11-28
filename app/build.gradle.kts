@@ -11,8 +11,20 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 348
-    versionName = "0.18.44" // ---- 0.57 BRANCH round 35: REVERT round -
+    versionCode = 349
+    versionName = "0.18.45" // ---- 0.57 BRANCH round 36: OSC remote control
+    // round 1 of 2 (user-approved plan): reserved /pocketpd/ namespace over
+    // the existing UDP bridge - hello/info + mode (edit|run|lock|unlock via
+    // the SAME applyOsdMode path as the OSD badge), pairing code (timing-
+    // safe compare) as first arg of every command, master switch default
+    // OFF (namespace falls through to pd untouched when off), console
+    // auto-push (settings-gated, one-way telemetry to the OSC out target,
+    // no code involved), outbound reserved addresses loop back into the
+    // local dispatcher (never networked) - master-slave ready. OscBridge
+    // now passes the packet source address so replies go to the requester.
+    // Round 2 adds patch get/set (1400B chunks) + console/get.
+    //
+    // ---- 0.18.44 (0.57 history) round 35: REVERT round -
     // user ruled v346/v347 violated the standing "box INTERNAL layout is
     // frozen" instruction (text drawing + iolet rects): width changes move
     // iolets on multi-port boxes (portRectPatch spreads by width) and the

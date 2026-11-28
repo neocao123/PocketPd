@@ -7,6 +7,27 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.45 (versionCode 349) — 2026-11-28 【0.57 分支 round 36:OSC 远程控制 round 1/2（用户批准方案）】
+
+在现有 UDP OSC 桥上加 **保留命名空间 `/pocketpd/`** 的 app 级遥控层（为
+将来主从机遥控打基础，非单纯测试功能）。**安全模型**：总开关
+`remote.enabled`（默认 **关**，关时命名空间原样透传 pd，零回归）；每条
+命令首参 = 配对码（`MessageDigest.isEqual` 时序安全比对；未过码静默
+丢弃，无应答 oracle）；码为空拒绝武装（设置页校验 + 调度器双保险）；
+需 `osc.in.enabled` 共用同一监听 socket。**round 1 命令面**：
+`/pocketpd/hello <code>` → `/pocketpd/info <mode> <patchName>`；
+`/pocketpd/mode <code> edit|run|lock|unlock` → 走 OSD 徽章**同一条
+applyOsdMode 路径**（重建/DSP/LOCK 语义完全一致），应答发回**包源地址**
+（OscBridge 入站监听器签名增加发送方 InetSocketAddress，非出站目标）。
+**console 自动推送**（用户修正设计）：`console.osc.enabled` 开启后
+`log()` 每行自动推 `/pocketpd/console <line>` 到 osc.out 目标——单向
+遥测不涉码，电脑端一个 UDP 监听即持续收到。**环回**：本机补丁 `[r OSC]`
+发 `/pocketpd/*` 拦截本地分发（同一套过码），永不发往网络。
+设置页 OSC 区新增三行（英文 UI）：Remote control / Pairing code /
+Console to OSC out；开遥控但码为空 → 拒绝保存并弹提示。
+**验收**：aapt = 349/0.18.45；GM800 装机；端到端 Python OSC 客户端
+实测（hello/mode/错码/关态/console 推送）。
+
 ## 0.18.44 (versionCode 348) — 2026-11-28 【0.57 分支 round 35:回退轮——盒子几何恢复 v345 已验收状态；冻结令入档；0.18.42/0.18.43 宣称作废】
 
 **用户判定 v346/v347 违反特别指令："注意不要改盒子内部的排版，尤其是
