@@ -95,8 +95,14 @@ object Slibs {
      *  (rand.f/rand.i/rand.u/rand.seq etc - dots hexmangle) use
      *  setup_-PREFIXED symbols (setup_rand0x2ef) that the old
      *  _setup-suffix filter silently dropped from the call list; else wrap
-     *  289 setups (was ~150). */
-    private const val VERSION = 149
+     *  289 setups (was ~150).
+     *  150: 0.57 branch (0.18.41) - clean re-extraction, zero asset change:
+     *  user-requested reinstall to rule out on-device drift of the
+     *  extracted synth~.pd / synth.voice.template.pd (a plain reinstall
+     *  would not touch them - copyAssetDir runs only when the VERSION
+     *  marker differs); the bump makes the next app start rewrite the
+     *  whole slibs tree from assets. */
+    private const val VERSION = 150
 
     /** Bump to re-extract after an assets/ymbanks update. */
     private const val YMB_VERSION = 2

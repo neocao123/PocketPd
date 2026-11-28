@@ -7,6 +7,19 @@ Android 可视化 Pure Data 编辑器,基于 libpd。**0.57 分支（本条目�
 (`app/eufon.keystore`,alias `eufon`)。版本考古详见 `PD_VERSIONS.md`,
 迁移计划与验收清单详见 `MIGRATION_057.md`。
 
+## 0.18.41 (versionCode 345) — 2026-11-28 【0.57 分支 round 32:干净重提取（用户要求重装，无资产变更）】
+
+用户对"手机上 synth~.pd 被改坏"持怀疑，要求重装排除该变量。机制事实：
+`ensureExtracted` 只在 `.slibs-v<VERSION>` 标记不一致时才跑 `copyAssetDir`，
+单纯重装 APK（install -r 保数据）不会重写设备上的
+`files/slibs/arm64-v8a/else/synth~.pd` / `synth.voice.template.pd`。
+**修复**：Slibs.VERSION 149→150，**零资产变更**——下次 app 启动整树
+从 assets 重写，恢复与 APK 内逐字节一致的 synth~ 抽象；用户自己的补丁
+不在 slibs 提取树内，不受影响。重装前后设备文件 md5 对比结果随验收录档；
+未解决问题正式移入 TODO.md 看板（synth~ 静音悬置、mov.rms~ 悬置、
+探针拆除轮、52 死行清理轮）。
+**验收**：aapt = 345/0.18.41。
+
 ## 0.18.40 (versionCode 344) — 2026-11-24 【0.57 分支 round 31:发送型消息物化（synth~ 静音根因修复）】
 
 用户实测确认静音（keyboard 直发 `list[2]` 格式无误，非输入侧问题）。
