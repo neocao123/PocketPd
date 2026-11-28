@@ -11,8 +11,21 @@ android {
         applicationId = "com.pocketpd.app"
         minSdk = 26
         targetSdk = 34
-    versionCode = 347
-    versionName = "0.18.43" // ---- 0.57 BRANCH round 34: ellipsis truncation
+    versionCode = 348
+    versionName = "0.18.44" // ---- 0.57 BRANCH round 35: REVERT round -
+    // user ruled v346/v347 violated the standing "box INTERNAL layout is
+    // frozen" instruction (text drawing + iolet rects): width changes move
+    // iolets on multi-port boxes (portRectPatch spreads by width) and the
+    // narrow pd-proportion boxes changed text truncation behavior. objRect
+    // (all four branches) + zoomToFit restored BYTE-IDENTICAL to v345
+    // (0.18.41) verified by function hash. The ellipsis removal (0.18.43,
+    // explicit user order) is KEPT - v345's +24/+34 paddings always fit the
+    // glyphs, so no-truncation and no-overflow hold together. Box-size
+    // alignment is UNSOLVED and shelved per user (TODO.md item 7, incl. the
+    // width-vs-iolet structural conflict). 0.18.42/0.18.43 "fix" claims
+    // retracted - this entry ends that arc. Rule codified in AGENTS.md.
+    //
+    // ---- 0.18.43 (0.57 history) round 34: ellipsis truncation
     // removed EVERYWHERE (user re-affirmed the standing prohibition - "不可以
     // 使用之前被严格禁用的省略号操作"). All five TextUtils.ellipsize sites
     // in PatchCanvasView now draw the full text: object/atom labels
